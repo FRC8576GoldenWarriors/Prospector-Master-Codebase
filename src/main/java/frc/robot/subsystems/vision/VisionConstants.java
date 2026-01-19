@@ -20,7 +20,7 @@ import edu.wpi.first.math.geometry.Transform3d;
 
 public class VisionConstants {
     // AprilTag layout
-    public static AprilTagFieldLayout aprilTagLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
+    public static AprilTagFieldLayout aprilTagLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark);
 
     // Camera names, must match names configured on coprocessor
     public static String camera0Name = "limelight-barge";
@@ -48,6 +48,6 @@ public class VisionConstants {
     };
 
     // Multipliers to apply for MegaTag 2 observations
-    public static double linearStdDevMegatag2Factor = 100; // More stable than full 3D solve
+    public static double linearStdDevMegatag2Factor = 0.2; // More stable than full 3D solve
     public static double angularStdDevMegatag2Factor = Double.POSITIVE_INFINITY; // No rotation data available
 }

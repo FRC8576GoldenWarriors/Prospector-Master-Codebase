@@ -21,6 +21,7 @@ import edu.wpi.first.networktables.DoubleArrayPublisher;
 import edu.wpi.first.networktables.DoubleArraySubscriber;
 import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.TimestampedDoubleArray;
 import edu.wpi.first.wpilibj.RobotController;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -38,6 +39,7 @@ public class VisionIOLimelight implements VisionIO {
     private final DoubleSubscriber tySubscriber;
     private final DoubleArraySubscriber megatag1Subscriber;
     private final DoubleArraySubscriber megatag2Subscriber;
+    private final DoubleArraySubscriber standardDeviationSubscriber;
 
     /**
      * Creates a new VisionIOLimelight.
@@ -55,6 +57,7 @@ public class VisionIOLimelight implements VisionIO {
         tySubscriber = table.getDoubleTopic("ty").subscribe(0.0);
         megatag1Subscriber = table.getDoubleArrayTopic("botpose_wpiblue").subscribe(new double[] {});
         megatag2Subscriber = table.getDoubleArrayTopic("botpose_orb_wpiblue").subscribe(new double[] {});
+        standardDeviationSubscriber = table.getDoubleArrayTopic("stddevs").subscribe(new double[] {});
     }
 
     @Override
@@ -73,11 +76,13 @@ public class VisionIOLimelight implements VisionIO {
         // Read new pose observations from NetworkTables
         Set<Integer> tagIds = new HashSet<>();
         List<PoseObservation> poseObservations = new LinkedList<>();
+        TimestampedDoubleArray[] standardDeviations = standardDeviationSubscriber.readQueue();
         for (var rawSample : megatag1Subscriber.readQueue()) {
             if (rawSample.value.length == 0) continue;
             for (int i = 11; i < rawSample.value.length; i += 7) {
                 tagIds.add((int) rawSample.value[i]);
             }
+            double[] stdArray = findTimestampedValue(standardDeviations, rawSample.timestamp);
             poseObservations.add(new PoseObservation(
                     // Timestamp, based on server timestamp of publish and latency
                     rawSample.timestamp * 1.0e-6 - rawSample.value[6] * 1.0e-3,
@@ -94,6 +99,9 @@ public class VisionIOLimelight implements VisionIO {
                     // Average tag distance
                     rawSample.value[9],
 
+                    // Standard Deviations
+                    //new double[]{stdArray[0], stdArray[1], stdArray[2]},
+
                     // Observation type
                     PoseObservationType.MEGATAG_1));
         }
@@ -102,6 +110,7 @@ public class VisionIOLimelight implements VisionIO {
             for (int i = 11; i < rawSample.value.length; i += 7) {
                 tagIds.add((int) rawSample.value[i]);
             }
+            double[] stdArray = findTimestampedValue(standardDeviations, rawSample.timestamp);
             poseObservations.add(new PoseObservation(
                     // Timestamp, based on server timestamp of publish and latency
                     rawSample.timestamp * 1.0e-6 - rawSample.value[6] * 1.0e-3,
@@ -117,6 +126,9 @@ public class VisionIOLimelight implements VisionIO {
 
                     // Average tag distance
                     rawSample.value[9],
+
+                    // Standard Deviations
+                    //new double[]{stdArray[6], stdArray[7], stdArray[8]},
 
                     // Observation type
                     PoseObservationType.MEGATAG_2));
@@ -134,6 +146,17 @@ public class VisionIOLimelight implements VisionIO {
         for (int id : tagIds) {
             inputs.tagIds[i++] = id;
         }
+    }
+
+    public static double[] findTimestampedValue(TimestampedDoubleArray[] arr, long timestamp) {
+        double[] values = new double[12];
+        for(var unit : arr) {
+            if(timestamp == unit.timestamp) {
+                values = unit.value;
+                break;
+            }
+        }
+        return values;
     }
 
     /** Parses the 3D pose from a Limelight botpose array. */

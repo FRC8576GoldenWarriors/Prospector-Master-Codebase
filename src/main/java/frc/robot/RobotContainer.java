@@ -30,7 +30,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.DriveCommands;
-import frc.robot.commands.DriveX;
+import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.vision.*;
 import org.ironmaple.simulation.SimulatedArena;
@@ -46,7 +46,8 @@ import org.littletonrobotics.junction.Logger;
 public class RobotContainer {
     // Subsystems
     private final Drive drive;
-    // private final Vision vision;
+    private final Vision vision;
+    private final Shooter shooter;
     private SwerveDriveSimulation driveSimulation = null;
 
     // Controller
@@ -69,11 +70,11 @@ public class RobotContainer {
                         new ModuleIOSpark(3),
                         (pose) -> {});
 
-                /*this.vision = new Vision(
+                this.vision = new Vision(
                 drive,
                 new VisionIOLimelight(VisionConstants.camera0Name, drive::getRotation),
-                new VisionIOLimelight(VisionConstants.camera1Name, drive::getRotation));*/
-
+                new VisionIOLimelight(VisionConstants.camera1Name, drive::getRotation));
+                shooter = new Shooter(0);
                 break;
             case SIM:
                 // create a maple-sim swerve drive simulation instance
@@ -90,13 +91,13 @@ public class RobotContainer {
                         new ModuleIOSim(driveSimulation.getModules()[3]),
                         driveSimulation::setSimulationWorldPose);
 
-                /*vision = new Vision(
+                vision = new Vision(
                 drive,
                 new VisionIOPhotonVisionSim(
                         camera0Name, robotToCamera0, driveSimulation::getSimulatedDriveTrainPose),
                 new VisionIOPhotonVisionSim(
-                        camera1Name, robotToCamera1, driveSimulation::getSimulatedDriveTrainPose));*/
-
+                        camera1Name, robotToCamera1, driveSimulation::getSimulatedDriveTrainPose));
+                shooter = null;
                 break;
             default:
                 // Replayed robot, disable IO implementations
@@ -107,8 +108,8 @@ public class RobotContainer {
                         new ModuleIO() {},
                         new ModuleIO() {},
                         (pose) -> {});
-                // vision = new Vision(drive, new VisionIO() {}, new VisionIO() {});
-
+                vision = new Vision(drive, new VisionIO() {}, new VisionIO() {});
+                shooter = null;
                 break;
         }
 
@@ -125,8 +126,8 @@ public class RobotContainer {
      */
     private void configureButtonBindings() {
         // Default command, normal field-relative drive
-        drive.setDefaultCommand(DriveCommands.joystickDrive(
-                drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> -controller.getRightX()));
+        // drive.setDefaultCommand(DriveCommands.joystickDrive(
+        //        drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> -controller.getRightX()));
 
         // Lock to 0° when A button is held
         controller
@@ -180,12 +181,14 @@ public class RobotContainer {
         controller.povUp().onTrue(new InstantCommand(() -> {
             Pose2d resetPose = new Pose2d(
                     new Translation2d(
-                            0 + Units.inchesToMeters(29 / 2) + Units.inchesToMeters(13 / 4),
-                            Units.inchesToMeters(49.674) + Units.inchesToMeters(29 / 2) + Units.inchesToMeters(13 / 4)),
+                            Units.inchesToMeters(29 / 2) + Units.inchesToMeters(13 / 4),
+                            Units.inchesToMeters(158.32)),
                     (DriverStation.getAlliance().get() == Alliance.Red) ? Rotation2d.k180deg : Rotation2d.kZero);
             drive.resetGyro(resetPose);
         }));
-        controller.povDown().onTrue(new DriveX(drive, .5).withTimeout(8));
+        //controller.povDown().onTrue(new DriveX(drive, .5).withTimeout(4));
+        controller.leftBumper().onTrue(new InstantCommand(() -> {shooter.setRPS(40);}));
+        controller.rightBumper().onTrue(new InstantCommand(() -> {shooter.setRPS(0);}));
     }
 
     /**

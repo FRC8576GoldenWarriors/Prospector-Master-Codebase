@@ -27,7 +27,6 @@ import edu.wpi.first.hal.FRCNetComm.tResourceType;
 import edu.wpi.first.hal.HAL;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
@@ -47,11 +46,14 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 import frc.robot.Constants.Mode;
 import frc.robot.subsystems.vision.Vision;
+import frc.robot.util.GoldenSwervePoseEstimator;
 import frc.robot.util.LocalADStarAK;
 import java.util.Arrays;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
+import java.util.stream.DoubleStream;
+
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -65,6 +67,9 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
             new Alert("Disconnected gyro, using kinematics as fallback.", AlertType.kError);
     private RobotConfig pathConfig;
 
+    private final double[] skidAmountX = new double[4];
+    private final double[] skidAmountY = new double[4];
+
 
     private final SwerveDriveKinematics kinematics = new SwerveDriveKinematics(moduleTranslations);
     private Rotation2d rawGyroRotation = new Rotation2d();
@@ -75,13 +80,13 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
                 new SwerveModulePosition(),
                 new SwerveModulePosition()
             };
-    private final SwerveDrivePoseEstimator poseEstimator = new SwerveDrivePoseEstimator(
+    private final GoldenSwervePoseEstimator poseEstimator = new GoldenSwervePoseEstimator(
             kinematics,
             rawGyroRotation,
             lastModulePositions,
             new Pose2d(),
             VecBuilder.fill(0.1, 0.1, 0.1),
-            VecBuilder.fill(1000, 1000, 1000));
+            VecBuilder.fill(0.25, 0.25, 99999999));
     private final Consumer<Pose2d> resetSimulationPoseCallBack;
 
     public Drive(
@@ -175,6 +180,34 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
                 } else {
                     modulePositions[moduleIndex] = lastModulePositions[moduleIndex];
                 }
+            }
+
+            boolean[] isModulesSkidding = this.calculateSkidding();
+            boolean anySkidding = false;
+
+            for (boolean bool : isModulesSkidding) {
+                if (bool) {
+                    anySkidding = true;
+                    break;
+                }
+            }
+
+            if (anySkidding) {
+                // If any of the modules are skidding calculate the mean value of their skid velocity
+                double averageXSkid =
+                        DoubleStream.of(this.skidAmountX).average().getAsDouble();
+                double averageYSkid =
+                        DoubleStream.of(this.skidAmountY).average().getAsDouble();
+
+                Logger.recordOutput("averageXSkid", averageXSkid);
+                Logger.recordOutput("averageYSkid", averageYSkid);
+
+                // Increase the state deviations to reflect the amount of skid thats occuring
+                poseEstimator.setStateStdDevs(VecBuilder.fill(
+                       baseXDriveSTDEV + averageXSkid, baseYDriveSTDEV + averageYSkid, baseThetaDriveSTDEV));
+            } else {
+                poseEstimator.setStateStdDevs(VecBuilder.fill(baseXDriveSTDEV, baseYDriveSTDEV,
+                    baseThetaDriveSTDEV));
             }
 
             // Update gyro angle
@@ -365,13 +398,12 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
         double deltaMedianX = (xComponentList[1] + xComponentList[2] + xComponentList[3] + xComponentList[0]) / 4;
         double deltaMedianY = (yComponentList[1] + yComponentList[2] + yComponentList[3] + yComponentList[0]) / 4;
         boolean[] areModulesSkidding = new boolean[4];
-        double[] skidAmountX = new double[4];
-        double[] skidAmountY = new double[4];
+
         for (int i = 0; i < 4; i++) {
             double deltaX = xComponentList[i];
             double deltaY = yComponentList[i];
-            if (Math.abs(deltaX - deltaMedianX) > 0.03
-                    || Math.abs(deltaY - deltaMedianY) > 0.029) { // 0.5 is the skid threshold in m/s
+            if (Math.abs(deltaX - deltaMedianX) > skidThresholdX
+                    || Math.abs(deltaY - deltaMedianY) > skidThresholdY) { // 0.5 is the skid threshold in m/s
                 areModulesSkidding[i] = true;
             } else {
                 areModulesSkidding[i] = false;
