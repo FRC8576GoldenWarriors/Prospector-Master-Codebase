@@ -147,10 +147,10 @@ public class DriveConstants {
                     KilogramSquareMeters.of(0.02),
                     wheelCOF));
 
-    public static final double skidThresholdX = 0.03;
-    public static final double skidThresholdY = 0.029;
+    public static final double skidThresholdX = 0.04;
+    public static final double skidThresholdY = 0.02;//0.029
 
-    public static final double baseXDriveSTDEV = 0.04;
+    public static final double baseXDriveSTDEV = 0.09;//0.09
     public static final double baseYDriveSTDEV = 0.025;
     public static final double baseThetaDriveSTDEV = Units.degreesToRadians(0.001);
 

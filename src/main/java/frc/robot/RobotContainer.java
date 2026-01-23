@@ -30,7 +30,8 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.DriveCommands;
-import frc.robot.subsystems.Shooter;
+import frc.robot.commands.DriveX;
+//import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.vision.*;
 import org.ironmaple.simulation.SimulatedArena;
@@ -47,7 +48,7 @@ public class RobotContainer {
     // Subsystems
     private final Drive drive;
     private final Vision vision;
-    private final Shooter shooter;
+    //private final Shooter shooter;
     private SwerveDriveSimulation driveSimulation = null;
 
     // Controller
@@ -74,7 +75,8 @@ public class RobotContainer {
                 drive,
                 new VisionIOLimelight(VisionConstants.camera0Name, drive::getRotation),
                 new VisionIOLimelight(VisionConstants.camera1Name, drive::getRotation));
-                shooter = new Shooter(0);
+                //shooter = new Shooter(0);
+                autos = new Autos(drive);
                 break;
             case SIM:
                 // create a maple-sim swerve drive simulation instance
@@ -97,7 +99,8 @@ public class RobotContainer {
                         camera0Name, robotToCamera0, driveSimulation::getSimulatedDriveTrainPose),
                 new VisionIOPhotonVisionSim(
                         camera1Name, robotToCamera1, driveSimulation::getSimulatedDriveTrainPose));
-                shooter = null;
+                //shooter = null;
+                autos = new Autos(drive);
                 break;
             default:
                 // Replayed robot, disable IO implementations
@@ -109,12 +112,13 @@ public class RobotContainer {
                         new ModuleIO() {},
                         (pose) -> {});
                 vision = new Vision(drive, new VisionIO() {}, new VisionIO() {});
-                shooter = null;
+                autos = null;
+               // shooter = null;
                 break;
         }
 
         // Set up auto routines
-        autos = new Autos(drive);
+        // autos = new Autos(drive);
         // Configure the button bindings
         configureButtonBindings();
     }
@@ -126,8 +130,8 @@ public class RobotContainer {
      */
     private void configureButtonBindings() {
         // Default command, normal field-relative drive
-        // drive.setDefaultCommand(DriveCommands.joystickDrive(
-        //        drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> -controller.getRightX()));
+        drive.setDefaultCommand(DriveCommands.joystickDrive(
+               drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> -controller.getRightX()));
 
         // Lock to 0° when A button is held
         controller
@@ -186,9 +190,9 @@ public class RobotContainer {
                     (DriverStation.getAlliance().get() == Alliance.Red) ? Rotation2d.k180deg : Rotation2d.kZero);
             drive.resetGyro(resetPose);
         }));
-        //controller.povDown().onTrue(new DriveX(drive, .5).withTimeout(4));
-        controller.leftBumper().onTrue(new InstantCommand(() -> {shooter.setRPS(40);}));
-        controller.rightBumper().onTrue(new InstantCommand(() -> {shooter.setRPS(0);}));
+        controller.povDown().onTrue(new DriveX(drive, .5).withTimeout(4));
+        // controller.leftBumper().onTrue(new InstantCommand(() -> {shooter.setRPS(40);}));
+        // controller.rightBumper().onTrue(new InstantCommand(() -> {shooter.setRPS(0);}));
     }
 
     /**
