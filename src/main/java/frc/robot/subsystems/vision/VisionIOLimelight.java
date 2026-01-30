@@ -40,7 +40,7 @@ public class VisionIOLimelight implements VisionIO {
     private final DoubleArraySubscriber megatag1Subscriber;
     private final DoubleArraySubscriber megatag2Subscriber;
     private final DoubleArraySubscriber standardDeviationSubscriber;
-
+    private final String name;
     /**
      * Creates a new VisionIOLimelight.
      *
@@ -58,6 +58,7 @@ public class VisionIOLimelight implements VisionIO {
         megatag1Subscriber = table.getDoubleArrayTopic("botpose_wpiblue").subscribe(new double[] {});
         megatag2Subscriber = table.getDoubleArrayTopic("botpose_orb_wpiblue").subscribe(new double[] {});
         standardDeviationSubscriber = table.getDoubleArrayTopic("stddevs").subscribe(new double[] {});
+        this.name = name;
     }
 
     @Override
@@ -146,6 +147,7 @@ public class VisionIOLimelight implements VisionIO {
         for (int id : tagIds) {
             inputs.tagIds[i++] = id;
         }
+        inputs.name = name;
     }
 
     public static double[] findTimestampedValue(TimestampedDoubleArray[] arr, long timestamp) {
@@ -170,4 +172,5 @@ public class VisionIOLimelight implements VisionIO {
                         Units.degreesToRadians(rawLLArray[4]),
                         Units.degreesToRadians(rawLLArray[5])));
     }
+
 }

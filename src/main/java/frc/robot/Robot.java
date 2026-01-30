@@ -15,13 +15,16 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Threads;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeCoralOnFly;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
@@ -36,7 +39,9 @@ import org.littletonrobotics.urcl.URCL;
 public class Robot extends LoggedRobot {
     private Command autonomousCommand;
     private RobotContainer robotContainer;
-
+    LoggedNetworkBoolean wonAuton = new LoggedNetworkBoolean("Won Autonomous Mode",false);
+    boolean wonAutonBool = wonAuton.getAsBoolean();
+    boolean hubActive = false;
     public Robot() {
         // Record metadata
         Logger.recordMetadata("ProjectName", BuildConstants.MAVEN_NAME);
@@ -55,7 +60,6 @@ public class Robot extends LoggedRobot {
                 Logger.recordMetadata("GitDirty", "Unknown");
                 break;
         }
-
         // Set up data receivers & replay source
         switch (Constants.currentMode) {
             case REAL:
@@ -105,6 +109,22 @@ public class Robot extends LoggedRobot {
 
         // Return to normal thread priority
         Threads.setCurrentThreadPriority(false, 10);
+        wonAutonBool = wonAuton.getAsBoolean();
+        SmartDashboard.putBoolean("Won Auton", wonAutonBool);
+        if(DriverStation.isEnabled()){
+            if(DriverStation.isAutonomous()){
+                hubActive = true;
+            }else{
+            if(wonAutonBool){
+                hubActive = (DriverStation.getMatchTime()>130)||(DriverStation.getMatchTime()>80&&DriverStation.getMatchTime()<105)||(DriverStation.getMatchTime()<55&&DriverStation.getMatchTime()>30)||(DriverStation.getMatchTime()<30);
+            }else{
+                hubActive = (DriverStation.getMatchTime()>130)||(DriverStation.getMatchTime()>105&&DriverStation.getMatchTime()<130)||(DriverStation.getMatchTime()<80&&DriverStation.getMatchTime()>55)||(DriverStation.getMatchTime()<30);
+            }
+        }
+        }else{
+            hubActive = false;
+        }
+        SmartDashboard.putBoolean("Is Hub Active", hubActive);
     }
 
     /** This function is called once when the robot is disabled. */

@@ -46,7 +46,7 @@ import org.littletonrobotics.junction.Logger;
  */
 public class RobotContainer {
     // Subsystems
-    private final Drive drive;
+    public static Drive drive;
     private final Vision vision;
     //private final Shooter shooter;
     private SwerveDriveSimulation driveSimulation = null;
@@ -74,7 +74,9 @@ public class RobotContainer {
                 this.vision = new Vision(
                 drive,
                 new VisionIOLimelight(VisionConstants.camera0Name, drive::getRotation),
-                new VisionIOLimelight(VisionConstants.camera1Name, drive::getRotation));
+                new VisionIOLimelight(VisionConstants.camera1Name, drive::getRotation),
+                new VisionIOLimelight(VisionConstants.camera2Name,drive::getRotation),
+                new VisionIOLimelight(VisionConstants.camera3Name,drive::getRotation));
                 //shooter = new Shooter(0);
                 autos = new Autos(drive);
                 break;
@@ -134,13 +136,15 @@ public class RobotContainer {
                drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> -controller.getRightX()));
 
         // Lock to 0° when A button is held
-        controller
-                .a()
-                .whileTrue(DriveCommands.joystickDriveAtAngle(
-                        drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> new Rotation2d()));
+        // controller
+        //         .a()
+        //         .whileTrue(DriveCommands.joystickDriveAtAngle(
+        //                 drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> new Rotation2d()));
+        controller.a().onTrue(new DriveX(drive, -0.5).until(()->drive.getDetected()));
 
         // Switch to X pattern when X button is pressed
-        controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
+        // controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
+        controller.x().whileTrue(DriveCommands.joystickDriveAtAngle(drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> Rotation2d.fromDegrees(45)));
 
         // Reset gyro / odometry
         final Runnable resetGyro = Constants.currentMode == Constants.Mode.SIM
@@ -185,12 +189,12 @@ public class RobotContainer {
         controller.povUp().onTrue(new InstantCommand(() -> {
             Pose2d resetPose = new Pose2d(
                     new Translation2d(
-                            Units.inchesToMeters(29 / 2) + Units.inchesToMeters(13 / 4),
-                            Units.inchesToMeters(158.32)),
+                        Units.inchesToMeters(29 / 2) + Units.inchesToMeters(13 / 4),
+                            Units.inchesToMeters(29/2)),//158.32
                     (DriverStation.getAlliance().get() == Alliance.Red) ? Rotation2d.k180deg : Rotation2d.kZero);
             drive.resetGyro(resetPose);
         }));
-        controller.povDown().onTrue(new DriveX(drive, .5).withTimeout(4));
+        controller.povDown().onTrue(new DriveX(drive, 2).withTimeout(1));
         // controller.leftBumper().onTrue(new InstantCommand(() -> {shooter.setRPS(40);}));
         // controller.rightBumper().onTrue(new InstantCommand(() -> {shooter.setRPS(0);}));
     }
