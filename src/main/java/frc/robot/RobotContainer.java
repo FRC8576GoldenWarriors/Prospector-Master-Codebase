@@ -33,6 +33,8 @@ import frc.robot.commands.DriveCommands;
 import frc.robot.commands.DriveX;
 //import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.drive.*;
+import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.intake.IntakeKrakenIO;
 import frc.robot.subsystems.vision.*;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
@@ -48,11 +50,12 @@ public class RobotContainer {
     // Subsystems
     public static Drive drive;
     private final Vision vision;
+    public static Intake intake;
     //private final Shooter shooter;
     private SwerveDriveSimulation driveSimulation = null;
 
     // Controller
-    private final CommandXboxController controller = new CommandXboxController(0);
+    public static final CommandXboxController controller = new CommandXboxController(0);
 
     public Trigger resetHeadingTrigger = new Trigger(() -> controller.start().getAsBoolean());
     // Dashboard inputs
@@ -79,6 +82,7 @@ public class RobotContainer {
                 new VisionIOLimelight(VisionConstants.camera3Name,drive::getRotation));
                 //shooter = new Shooter(0);
                 autos = new Autos(drive);
+                intake = new Intake(new IntakeKrakenIO());
                 break;
             case SIM:
                 // create a maple-sim swerve drive simulation instance
