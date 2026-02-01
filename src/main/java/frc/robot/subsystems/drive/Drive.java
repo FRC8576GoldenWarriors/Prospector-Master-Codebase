@@ -68,6 +68,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
             new Alert("Disconnected gyro, using kinematics as fallback.", AlertType.kError);
     private RobotConfig pathConfig;
     private CANrange range;
+    private CANrange range2;
 
     private final double[] skidAmountX = new double[4];
     private final double[] skidAmountY = new double[4];
@@ -140,6 +141,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
                         null, null, null, (state) -> Logger.recordOutput("Drive/SysIdState", state.toString())),
                 new SysIdRoutine.Mechanism((voltage) -> runCharacterization(voltage.in(Volts)), null, this));
                 range = new CANrange(1);
+                range2 = new CANrange(2);
     }
 
     @Override
@@ -207,9 +209,9 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
 
                 // Increase the state deviations to reflect the amount of skid thats occuring
                 poseEstimator.setStateStdDevs(VecBuilder.fill(
-                       baseXDriveSTDEV + averageXSkid, baseYDriveSTDEV + averageYSkid, baseThetaDriveSTDEV));
+                       baseXDriveSTDEV + averageXSkid*(getVelocity()+1), baseYDriveSTDEV + averageYSkid*(getVelocity()+1), baseThetaDriveSTDEV));
             } else {
-                poseEstimator.setStateStdDevs(VecBuilder.fill(baseXDriveSTDEV, baseYDriveSTDEV,
+                poseEstimator.setStateStdDevs(VecBuilder.fill(baseXDriveSTDEV*(getVelocity()+1), baseYDriveSTDEV*(getVelocity()+1),
                     baseThetaDriveSTDEV));
             }
 
@@ -358,7 +360,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
     }
 
     public boolean getDetected(){
-        return range.getIsDetected().getValue();
+        return range.getIsDetected().getValue()&&range2.getIsDetected().getValue();
     }
 
     /** Adds a new timestamped vision measurement. */
@@ -378,7 +380,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
     }
 
     public double getVelocity(){
-        return gyroInputs.xVelocityRadPerSec+gyroInputs.yVelocityRadPerSec+gyroInputs.yawVelocityRadPerSec;
+        return gyroInputs.xVelocityRadPerSec+gyroInputs.yVelocityRadPerSec+(gyroInputs.yawVelocityRadPerSec);//(gyroInputs.zVelocityRadPerSec/1.5);
     }
 
     public boolean[] calculateSkidding() {

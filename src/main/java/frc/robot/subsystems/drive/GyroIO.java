@@ -24,6 +24,7 @@ public interface GyroIO {
         public double yawVelocityRadPerSec = 1;
         public double xVelocityRadPerSec = 1;
         public double yVelocityRadPerSec = 1;
+        public double zVelocityRadPerSec = 1;
         public double[] odometryYawTimestamps = new double[] {};
         public Rotation2d[] odometryYawPositions = new Rotation2d[] {};
     }

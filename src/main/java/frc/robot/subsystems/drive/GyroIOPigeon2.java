@@ -55,6 +55,7 @@ public class GyroIOPigeon2 implements GyroIO {
         inputs.yawVelocityRadPerSec = Units.degreesToRadians(yawVelocity.getValueAsDouble());
         inputs.xVelocityRadPerSec = Units.degreesToRadians(pigeon.getAngularVelocityXWorld().getValueAsDouble());
         inputs.yVelocityRadPerSec = Units.degreesToRadians(pigeon.getAngularVelocityYWorld().getValueAsDouble());
+        inputs.zVelocityRadPerSec = Units.degreesToRadians(pigeon.getAngularVelocityZWorld().getValueAsDouble());
         inputs.odometryYawTimestamps =
                 yawTimestampQueue.stream().mapToDouble((Double value) -> value).toArray();
         inputs.odometryYawPositions =
