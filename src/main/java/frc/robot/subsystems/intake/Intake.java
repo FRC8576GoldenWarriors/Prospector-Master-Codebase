@@ -58,6 +58,9 @@ public class Intake extends SubsystemBase {
           FFVoltage = 0;
           inputVoltage = 0;
           wantedSpeed = 0;
+
+          io.setPivotVoltage(inputVoltage);
+          io.setRollerSpeed(wantedSpeed);
           break;
 
         case Rest:
@@ -65,6 +68,9 @@ public class Intake extends SubsystemBase {
           FFVoltage = FF.calculate(IntakeConstants.Software.intakeUp, 2.0);
           inputVoltage = PIDVoltage + FFVoltage;
           wantedSpeed = 0;
+
+          io.setPivotVoltage(inputVoltage);
+          io.setRollerSpeed(wantedSpeed);
           break;
 
         case Intake:
@@ -73,6 +79,8 @@ public class Intake extends SubsystemBase {
           inputVoltage = PIDVoltage + FFVoltage;
           wantedSpeed = IntakeConstants.Software.rollerSpeed;
 
+          io.setPivotVoltage(inputVoltage);
+          io.setRollerSpeed(wantedSpeed);
           break;
 
         case PivotVC:
