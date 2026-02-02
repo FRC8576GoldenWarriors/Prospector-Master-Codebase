@@ -1,6 +1,14 @@
 package frc.robot.subsystems.intake;
 
+import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Volts;
+
 import org.littletonrobotics.junction.AutoLog;
+
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Voltage;
 
 
 public interface IntakeIO {
@@ -8,16 +16,15 @@ public interface IntakeIO {
 
   @AutoLog
  public class IntakeIOInputs {
-    public double pivotVoltage = 0.0;
-    public double pivotCurrent = 0.0;
-        public double pivotSupplyCurrent = 0.0;
-        public double rollerSupplyCurrent = 0.0;
-
-    public double pivotRPS = 0.0;
+    public Voltage pivotVoltage = Volts.of(0.0);
+    public Current pivotCurrent = Amps.of(0);
+     public Current pivotSupplyCurrent = Amps.of(0);
+    public Current rollerSupplyCurrent = Amps.of(0);
+    public AngularVelocity pivotRPS = RotationsPerSecond.of(0);
     public boolean pivotConnected = false;
-    public double rollerVoltage = 0.0;
-    public double rollerCurrent = 0.0;
-    public double rollerRPS = 0.0;
+    public Voltage rollerVoltage = Volts.of(0.0);
+    public Current rollerCurrent = Amps.of(0);
+    public AngularVelocity rollerRPS = RotationsPerSecond.of(0);
     public boolean rollerConnected = false;
 
     public boolean leftEncoderConnected = false;

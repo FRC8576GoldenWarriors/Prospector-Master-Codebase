@@ -7,8 +7,10 @@ package frc.robot.subsystems.intake;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.controller.ArmFeedforward;
-import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
 
@@ -27,7 +29,7 @@ public class Intake extends SubsystemBase {
   private IntakeIOInputsAutoLogged inputs = new IntakeIOInputsAutoLogged();
 
   private IntakeStates wantedState = IntakeStates.Idle;
-  private PIDController PID;
+  private ProfiledPIDController PID;
   private ArmFeedforward FF;
   private double currentPosition;
   private double wantedSpeed;
@@ -36,7 +38,7 @@ public class Intake extends SubsystemBase {
   private double inputVoltage;
 
   public Intake(IntakeIO io) {
-    PID = new PIDController(IntakeConstants.Software.kP, IntakeConstants.Software.kI, IntakeConstants.Software.kD);
+    PID = new ProfiledPIDController(IntakeConstants.Software.kP, IntakeConstants.Software.kI, IntakeConstants.Software.kD, IntakeConstants.Software.profile);
     FF = new ArmFeedforward(IntakeConstants.Software.kS, IntakeConstants.Software.kG, IntakeConstants.Software.kV, IntakeConstants.Software.kA);
     this.io = io;
   }
@@ -47,12 +49,18 @@ public class Intake extends SubsystemBase {
     Logger.processInputs("Intake", inputs);
     currentPosition = inputs.leftEncoderRotations;
      if (DriverStation.isEnabled()) {
+      if(currentPosition>IntakeConstants.Software.intakeSoftStop){
+            wantedState = IntakeStates.Idle;
+          }
       switch (wantedState) {
         case Idle:
           PIDVoltage = 0;
           FFVoltage = 0;
           inputVoltage = 0;
           wantedSpeed = 0;
+
+          io.setPivotVoltage(inputVoltage);
+          io.setRollerSpeed(wantedSpeed);
           break;
 
         case Rest:
@@ -60,6 +68,9 @@ public class Intake extends SubsystemBase {
           FFVoltage = FF.calculate(IntakeConstants.Software.intakeUp, 2.0);
           inputVoltage = PIDVoltage + FFVoltage;
           wantedSpeed = 0;
+
+          io.setPivotVoltage(inputVoltage);
+          io.setRollerSpeed(wantedSpeed);
           break;
 
         case Intake:
@@ -67,6 +78,9 @@ public class Intake extends SubsystemBase {
           FFVoltage = FF.calculate(IntakeConstants.Software.intakeUp, 2.0);
           inputVoltage = PIDVoltage + FFVoltage;
           wantedSpeed = IntakeConstants.Software.rollerSpeed;
+
+          io.setPivotVoltage(inputVoltage);
+          io.setRollerSpeed(wantedSpeed);
           break;
 
         case PivotVC:
@@ -100,13 +114,21 @@ public class Intake extends SubsystemBase {
     Logger.recordOutput("Intake/Wanted Pivot Position", PID.getSetpoint());
 
 
-    io.setPivotVoltage(inputVoltage);
-    io.setRollerSpeed(wantedSpeed);
+
 }
 
-public void setWantedState(IntakeStates wantedState) {
+public void setWantedPosition(IntakeStates wantedState) {
     this.wantedState = wantedState;
 }
 
+public void resetPID() {
+    PID.reset(currentPosition, inputs.pivotRPS.magnitude());
+}
 
+// TO-DO : MAKE THIS IN MACROS CLASS
+public SequentialCommandGroup setWantedState(IntakeStates state){
+    return new SequentialCommandGroup(new InstantCommand(()->this.resetPID(), RobotContainer.intake), new InstantCommand(()->this.setWantedPosition(state), RobotContainer.intake) );
+}
+
+//
 }

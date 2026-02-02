@@ -2,6 +2,8 @@ package frc.robot.subsystems.intake;
 
 import com.ctre.phoenix6.signals.InvertedValue;
 
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+
 public class IntakeConstants {
 
 
@@ -35,7 +37,7 @@ public class IntakeConstants {
         public static double intakeSoftStop = 0.0;
 
 
-
+        public static Constraints profile = new Constraints(0.5, 0.75);
 
     }
 
