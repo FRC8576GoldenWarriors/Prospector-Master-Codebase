@@ -14,6 +14,8 @@
 package frc.robot.subsystems.drive;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation3d;
+
 import org.littletonrobotics.junction.AutoLog;
 
 public interface GyroIO {
@@ -27,6 +29,14 @@ public interface GyroIO {
         public double zVelocityRadPerSec = 1;
         public double[] odometryYawTimestamps = new double[] {};
         public Rotation2d[] odometryYawPositions = new Rotation2d[] {};
+    }
+
+    public default Translation3d getForceVector() {
+        return new Translation3d();
+    }
+
+    public default Translation3d getForceVectorDerivative() {
+        return new Translation3d();
     }
 
     public default void updateInputs(GyroIOInputs inputs) {}

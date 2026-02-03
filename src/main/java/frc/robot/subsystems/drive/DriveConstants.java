@@ -158,6 +158,8 @@ public class DriveConstants {
     public static final double baseYVisionSTDEV = 0.1;
     public static final double baseThetaVisionSTDEV = 999999;
 
+    public static final double forceThreshold = 1.5;
+
     // Module 1 Drive kA = 0.016577;
     // Module 2 Drive kA = 0.019138;
     // Module 3 Drive kA = 0.012256;

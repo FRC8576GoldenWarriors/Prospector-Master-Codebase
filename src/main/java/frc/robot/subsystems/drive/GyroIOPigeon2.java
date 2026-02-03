@@ -20,10 +20,16 @@ import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
+
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.interpolation.TimeInterpolatableBuffer;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.wpilibj.Timer;
+
 import java.util.Queue;
 
 /** IO implementation for Pigeon 2. */
@@ -33,6 +39,7 @@ public class GyroIOPigeon2 implements GyroIO {
     private final Queue<Double> yawPositionQueue;
     private final Queue<Double> yawTimestampQueue;
     private final StatusSignal<AngularVelocity> yawVelocity = pigeon.getAngularVelocityZWorld();
+    private final TimeInterpolatableBuffer<Translation3d> collisonVector = TimeInterpolatableBuffer.createBuffer(2);
 
     public GyroIOPigeon2() {
         pigeon.getConfigurator().apply(new Pigeon2Configuration());
@@ -48,6 +55,24 @@ public class GyroIOPigeon2 implements GyroIO {
         pigeon.setYaw(headingDegrees);
     }
 
+    public Translation3d getForceVector() {
+        return new Translation3d(VecBuilder.fill(
+            pigeon.getAccelerationX().getValueAsDouble(),
+            pigeon.getAccelerationY().getValueAsDouble(),
+            pigeon.getAccelerationZ().getValueAsDouble()));
+    }
+
+    public Translation3d getForceVectorDerivative() {
+        var firstSample = collisonVector.getSample(Timer.getFPGATimestamp() - 0.1);
+        var secondSample = collisonVector.getSample(Timer.getFPGATimestamp() - 0.05);
+
+        if(firstSample.isPresent() & secondSample.isPresent()) {
+            return new Translation3d();
+        }
+
+        return secondSample.get().minus(firstSample.get());
+    }
+
     @Override
     public void updateInputs(GyroIOInputs inputs) {
         inputs.connected = BaseStatusSignal.refreshAll(yaw, yawVelocity).equals(StatusCode.OK);
@@ -60,6 +85,7 @@ public class GyroIOPigeon2 implements GyroIO {
                 yawTimestampQueue.stream().mapToDouble((Double value) -> value).toArray();
         inputs.odometryYawPositions =
                 yawPositionQueue.stream().map(Rotation2d::fromDegrees).toArray(Rotation2d[]::new);
+        collisonVector.addSample(Timer.getFPGATimestamp(), this.getForceVector());
         yawTimestampQueue.clear();
         yawPositionQueue.clear();
     }

@@ -27,10 +27,13 @@ import edu.wpi.first.hal.FRCNetComm.tInstances;
 import edu.wpi.first.hal.FRCNetComm.tResourceType;
 import edu.wpi.first.hal.HAL;
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.geometry.Twist2d;
+import edu.wpi.first.math.interpolation.TimeInterpolatableBuffer;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -73,6 +76,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
     private final double[] skidAmountX = new double[4];
     private final double[] skidAmountY = new double[4];
 
+    private final TimeInterpolatableBuffer<Translation3d> collosionBuffer = TimeInterpolatableBuffer.createBuffer(2);
 
     private final SwerveDriveKinematics kinematics = new SwerveDriveKinematics(moduleTranslations);
     private Rotation2d rawGyroRotation = new Rotation2d();
@@ -207,11 +211,18 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
                 Logger.recordOutput("averageXSkid", averageXSkid);
                 Logger.recordOutput("averageYSkid", averageYSkid);
 
+                Pair<Boolean, Translation3d> forcePair = this.isColliding();
+
+                if(forcePair.getFirst()){
+                    averageXSkid += Math.pow(forcePair.getSecond().getX(), 2);
+                    averageYSkid += Math.pow(forcePair.getSecond().getY(), 2);
+                }
+
                 // Increase the state deviations to reflect the amount of skid thats occuring
                 poseEstimator.setStateStdDevs(VecBuilder.fill(
-                       baseXDriveSTDEV + averageXSkid*(getVelocity()+1), baseYDriveSTDEV + averageYSkid*(getVelocity()+1), baseThetaDriveSTDEV));
+                    baseXDriveSTDEV + averageXSkid, baseYDriveSTDEV + averageYSkid, baseThetaDriveSTDEV));
             } else {
-                poseEstimator.setStateStdDevs(VecBuilder.fill(baseXDriveSTDEV*(getVelocity()+1), baseYDriveSTDEV*(getVelocity()+1),
+                poseEstimator.setStateStdDevs(VecBuilder.fill(baseXDriveSTDEV, baseYDriveSTDEV,
                     baseThetaDriveSTDEV));
             }
 
@@ -429,5 +440,16 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
         Logger.recordOutput("Drive/skidAmountY", skidAmountY);
         Logger.recordOutput("Drive/Skids", areModulesSkidding);
         return areModulesSkidding;
+    }
+
+    public Pair<Boolean, Translation3d> isColliding() {
+        Translation3d forceVectorDerivative = gyroIO.getForceVectorDerivative();
+        Translation3d forceVector = gyroIO.getForceVector();
+
+        if(forceVectorDerivative.getNorm() > forceThreshold) {
+            return Pair.of(true, forceVector);
+        }
+
+        return Pair.of(false, new Translation3d());
     }
 }
