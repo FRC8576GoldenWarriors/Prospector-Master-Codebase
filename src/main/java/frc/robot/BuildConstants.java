@@ -7,12 +7,12 @@ public final class BuildConstants {
   public static final String MAVEN_GROUP = "";
   public static final String MAVEN_NAME = "Prospector-Master-Codebase";
   public static final String VERSION = "unspecified";
-  public static final int GIT_REVISION = 10;
-  public static final String GIT_SHA = "928ac187f03a10176020d47e398df47ee0c6fe20";
-  public static final String GIT_DATE = "2026-01-30 01:36:21 EST";
+  public static final int GIT_REVISION = 18;
+  public static final String GIT_SHA = "af5729eeb1e0645639e91f3502c326de4a9a2438";
+  public static final String GIT_DATE = "2026-02-01 19:26:20 EST";
   public static final String GIT_BRANCH = "main";
-  public static final String BUILD_DATE = "2026-01-30 19:46:38 EST";
-  public static final long BUILD_UNIX_TIME = 1769820398792L;
+  public static final String BUILD_DATE = "2026-02-03 22:12:58 EST";
+  public static final long BUILD_UNIX_TIME = 1770174778167L;
   public static final int DIRTY = 1;
 
   private BuildConstants(){}

@@ -21,10 +21,12 @@ public interface IntakeIO {
      public Current pivotSupplyCurrent = Amps.of(0);
     public Current rollerSupplyCurrent = Amps.of(0);
     public AngularVelocity pivotRPS = RotationsPerSecond.of(0);
+   // public Temperature pivotMotorTemperature = Celsius.of(0);
     public boolean pivotConnected = false;
     public Voltage rollerVoltage = Volts.of(0.0);
     public Current rollerCurrent = Amps.of(0);
     public AngularVelocity rollerRPS = RotationsPerSecond.of(0);
+    //public Temperature rollerMotorTemperature = Celsius.of(0);
     public boolean rollerConnected = false;
 
     public boolean leftEncoderConnected = false;
@@ -33,6 +35,8 @@ public interface IntakeIO {
     public double leftEncoderRotations = 0.0;
 
     public double rightEncoderRotations = 0.0;
+
+
 }
 
     default void setPivotVoltage(double voltage) {}

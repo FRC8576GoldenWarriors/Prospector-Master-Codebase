@@ -4,8 +4,6 @@ import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.DutyCycleOut;
-import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.StrictFollower;
 import com.ctre.phoenix6.controls.VelocityVoltage;
@@ -14,7 +12,6 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.Preferences;
 
 
@@ -26,15 +23,15 @@ public class WarriorTalonFX extends TalonFX{
     private StrictFollower follow;
     private TrapezoidProfile motionProfile = null;
     Slot0Configs pid = new Slot0Configs();
-    private CurrentLimitsConfigs currentConfig = new CurrentLimitsConfigs().withSupplyCurrentLimit(40).withStatorCurrentLimit(40); 
+    private CurrentLimitsConfigs currentConfig = new CurrentLimitsConfigs().withSupplyCurrentLimit(40).withStatorCurrentLimit(40);
 
     public WarriorTalonFX(int id, InvertedValue invert, NeutralModeValue brakeMode ){
         super(id);
 
         motorConfig = new MotorOutputConfigs().withNeutralMode(brakeMode).withInverted(invert);
-        
+
         config = new TalonFXConfiguration().withMotorOutput(motorConfig).withCurrentLimits(currentConfig);
-        
+
         this.getConfigurator().apply(config);
 
         String key = "Kraken " + this.getDeviceID() + " Flashes";
@@ -45,25 +42,25 @@ public class WarriorTalonFX extends TalonFX{
 
         motorConfig = new MotorOutputConfigs().withNeutralMode(brakeMode).withInverted(invert);
 
-        currentConfig = new CurrentLimitsConfigs().withSupplyCurrentLimit(currentLimit).withStatorCurrentLimit(currentLimit); 
+        currentConfig = new CurrentLimitsConfigs().withSupplyCurrentLimit(currentLimit).withStatorCurrentLimit(currentLimit);
 
         config = new TalonFXConfiguration().withMotorOutput(motorConfig).withCurrentLimits(currentConfig);
-        
+
         this.getConfigurator().apply(config);
 
         String key = "Kraken " + this.getDeviceID() + " Flashes";
         Preferences.setDouble(key, Preferences.getDouble(key, 0) + 1);
     }
-    
+
     public WarriorTalonFX(int id, InvertedValue invert, NeutralModeValue brakeMode, int currentLimit, TalonFX motorToFollow){
         super(id);
 
         motorConfig = new MotorOutputConfigs().withNeutralMode(brakeMode).withInverted(invert);
 
-        currentConfig = new CurrentLimitsConfigs().withSupplyCurrentLimit(currentLimit).withStatorCurrentLimit(currentLimit); 
+        currentConfig = new CurrentLimitsConfigs().withSupplyCurrentLimit(currentLimit).withStatorCurrentLimit(currentLimit);
 
         config = new TalonFXConfiguration().withMotorOutput(motorConfig).withCurrentLimits(currentConfig);
-        
+
         follow = new StrictFollower(motorToFollow.getDeviceID());
 
         this.getConfigurator().apply(config);
@@ -71,7 +68,7 @@ public class WarriorTalonFX extends TalonFX{
         String key = "Kraken " + this.getDeviceID() + " Flashes";
         Preferences.setDouble(key, Preferences.getDouble(key, 0) + 1);
     }
-    
+
 
 
     //Following methods are UN-TESTED
@@ -108,10 +105,10 @@ public class WarriorTalonFX extends TalonFX{
     public void setTrapezoidMotionProfile(double maxVel, double maxAccel){
          motionProfile = new TrapezoidProfile(new TrapezoidProfile.Constraints(maxVel, maxAccel));
     }
-    
+
     public TrapezoidProfile getTrapezoidProfile(){
         return motionProfile;
-    }    
+    }
 
     //Uses Trap Profile if it is initalized, otherwise use PIDF
     public void goToPosition(double pos){

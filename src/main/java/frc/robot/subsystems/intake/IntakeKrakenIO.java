@@ -2,10 +2,10 @@ package frc.robot.subsystems.intake;
 
 import static edu.wpi.first.units.Units.Amps;
 
+
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
@@ -27,8 +27,9 @@ public class IntakeKrakenIO implements IntakeIO{
         rollerMotor = new TalonFX(IntakeConstants.Hardware.rollerID);
 
         leftEncoder = new DutyCycleEncoder(IntakeConstants.Hardware.leftEncoderID,1.0, IntakeConstants.Software.leftZero);
+        leftEncoder.setInverted(IntakeConstants.Software.leftInverted);
         rightEncoder = new DutyCycleEncoder(IntakeConstants.Hardware.rightEncoderID,1.0, IntakeConstants.Software.rightZero);
-
+        rightEncoder.setInverted(IntakeConstants.Software.rightInverted);
 
         leadConfig = new TalonFXConfiguration().withMotorOutput(
             new MotorOutputConfigs()
@@ -44,11 +45,12 @@ public class IntakeKrakenIO implements IntakeIO{
         rollerConfig = leadConfig.clone().withMotorOutput(
             leadConfig.MotorOutput.clone()
             .withInverted(IntakeConstants.Hardware.rollerInvertedValue)
-            );
+            ).withCurrentLimits(new CurrentLimitsConfigs().withStatorCurrentLimit(60).withStatorCurrentLimitEnable(true));
 
         pivotConfig = leadConfig.clone().withMotorOutput(
             leadConfig.MotorOutput.clone()
             .withInverted(IntakeConstants.Hardware.pivotInvert)
+
             );
 
 
@@ -62,10 +64,12 @@ public class IntakeKrakenIO implements IntakeIO{
      inputs.pivotVoltage = pivotMotor.getMotorVoltage().getValue();
      inputs.pivotCurrent = pivotMotor.getStatorCurrent().getValue();
      inputs.pivotRPS = pivotMotor.getVelocity().getValue();
+     //inputs.pivotMotorTemperature = pivotMotor.getDeviceTemp().getValue();
      inputs.pivotConnected = pivotMotor.isConnected();
      inputs.rollerVoltage = rollerMotor.getMotorVoltage().getValue();
      inputs.rollerCurrent = rollerMotor.getStatorCurrent().getValue();
      inputs.rollerRPS = rollerMotor.getVelocity().getValue();
+     //inputs.rollerMotorTemperature = rollerMotor.getDeviceTemp().getValue();
      inputs.rollerConnected = rollerMotor.isConnected();
      inputs.leftEncoderConnected = leftEncoder.isConnected();
      inputs.rightEncoderConnected = rightEncoder.isConnected();
@@ -82,18 +86,18 @@ public class IntakeKrakenIO implements IntakeIO{
 
     @Override
     public void setPivotSpeed(double speed) {
-        pivotMotor.setControl(new DutyCycleOut(speed));
+        pivotMotor.set(speed);
     }
 
     @Override
     public void setRollerVoltage(double voltage) {
-        rollerMotor.setVoltage(voltage);
+        rollerMotor.setVoltage(voltage);//voltage
     }
 
 
     @Override
     public void setRollerSpeed(double speed) {
-        rollerMotor.setControl(new DutyCycleOut(speed));
+        rollerMotor.set(speed);//speed
     }
 
 }

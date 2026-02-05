@@ -5,6 +5,7 @@
 package frc.robot.subsystems.intake;
 
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -36,6 +37,10 @@ public class Intake extends SubsystemBase {
   private double PIDVoltage;
   private double FFVoltage;
   private double inputVoltage;
+  private LoggedNetworkNumber kP = new LoggedNetworkNumber("Tuning/kP",0.0);
+  private double kPDouble = kP.get();
+  private LoggedNetworkNumber kV = new LoggedNetworkNumber("Tuning/kV",0.0);
+  private double kVDouble = kV.get();
 
   public Intake(IntakeIO io) {
     PID = new ProfiledPIDController(IntakeConstants.Software.kP, IntakeConstants.Software.kI, IntakeConstants.Software.kD, IntakeConstants.Software.profile);
@@ -48,6 +53,11 @@ public class Intake extends SubsystemBase {
     io.updateInputs(inputs);
     Logger.processInputs("Intake", inputs);
     currentPosition = inputs.leftEncoderRotations;
+    kPDouble = kP.getAsDouble();
+
+    kVDouble = kV.getAsDouble();
+    PID.setP(kPDouble);
+    FF.setKv(kVDouble);
      if (DriverStation.isEnabled()) {
       if(currentPosition>IntakeConstants.Software.intakeSoftStop){
             wantedState = IntakeStates.Idle;
@@ -65,7 +75,7 @@ public class Intake extends SubsystemBase {
 
         case Rest:
           PIDVoltage  = PID.calculate(currentPosition, IntakeConstants.Software.intakeUp);
-          FFVoltage = FF.calculate(IntakeConstants.Software.intakeUp, 2.0);
+          FFVoltage = FF.calculate(IntakeConstants.Software.intakeUp, 0.5);
           inputVoltage = PIDVoltage + FFVoltage;
           wantedSpeed = 0;
 
@@ -74,8 +84,8 @@ public class Intake extends SubsystemBase {
           break;
 
         case Intake:
-          PIDVoltage  = PID.calculate(currentPosition, IntakeConstants.Software.intakeUp);
-          FFVoltage = FF.calculate(IntakeConstants.Software.intakeUp, 2.0);
+          PIDVoltage  = PID.calculate(currentPosition, IntakeConstants.Software.intakeDown);
+          FFVoltage = FF.calculate(IntakeConstants.Software.intakeDown, 0.5);
           inputVoltage = PIDVoltage + FFVoltage;
           wantedSpeed = IntakeConstants.Software.rollerSpeed;
 
@@ -85,21 +95,21 @@ public class Intake extends SubsystemBase {
 
         case PivotVC:
           if (RobotContainer.controller.povUp().getAsBoolean()) {
-            io.setPivotSpeed(0.2);
+            io.setPivotSpeed(0.05);
             } else if (RobotContainer.controller.povDown().getAsBoolean()) {
-              io.setPivotSpeed(-0.2);
+              io.setPivotSpeed(-0.05);
             } else {
-                io.setPivotSpeed(0);
+                wantedState = IntakeStates.Idle;
             }
         break;
 
         case RollerVC:
           if (RobotContainer.controller.rightBumper().getAsBoolean()) {
-            io.setRollerSpeed(0.2);
+            io.setRollerSpeed(0.1);
             } else if (RobotContainer.controller.leftBumper().getAsBoolean()) {
-              io.setRollerSpeed(-0.2);
+              io.setRollerSpeed(-0.1);
             } else {
-                io.setRollerSpeed(0);
+                wantedState = IntakeStates.Idle;
             }
           break;
 
@@ -112,6 +122,11 @@ public class Intake extends SubsystemBase {
     Logger.recordOutput("Intake/Wanted State", wantedState);
     Logger.recordOutput("Intake/Wanted Roller Speed", wantedSpeed);
     Logger.recordOutput("Intake/Wanted Pivot Position", PID.getSetpoint());
+    Logger.recordOutput("Intake/PID Voltage", PIDVoltage);
+    Logger.recordOutput("Intake/FF Voltage", FFVoltage);
+    Logger.recordOutput("Intake/Input Voltage", inputVoltage);
+
+
 
 
 

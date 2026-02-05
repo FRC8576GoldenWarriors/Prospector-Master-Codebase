@@ -19,7 +19,6 @@ import static frc.robot.subsystems.vision.VisionConstants.*;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -30,11 +29,11 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.DriveCommands;
-import frc.robot.commands.DriveX;
 //import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeKrakenIO;
+import frc.robot.subsystems.intake.Intake.IntakeStates;
 import frc.robot.subsystems.vision.*;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
@@ -144,11 +143,12 @@ public class RobotContainer {
         //         .a()
         //         .whileTrue(DriveCommands.joystickDriveAtAngle(
         //                 drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> new Rotation2d()));
-        controller.a().onTrue(new DriveX(drive, -0.5).until(()->drive.getDetected()));
-
-        // Switch to X pattern when X button is pressed
+        //controller.a().onTrue(new DriveX(drive, -0.5).until(()->drive.getDetected()));
+        controller.a().onTrue(intake.setWantedState(IntakeStates.Rest));
+        // Switch to X pattern       when X button is pressed
         // controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
-        controller.x().whileTrue(DriveCommands.joystickDriveAtAngle(drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> Rotation2d.fromDegrees(45)));
+        controller.x().onTrue(intake.setWantedState(IntakeStates.Intake));
+        //controller.x().whileTrue(DriveCommands.joystickDriveAtAngle(drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> Rotation2d.fromDegrees(45)));
 
         // Reset gyro / odometry
         final Runnable resetGyro = Constants.currentMode == Constants.Mode.SIM
@@ -190,15 +190,19 @@ public class RobotContainer {
                     (DriverStation.getAlliance().get() == Alliance.Red) ? Rotation2d.k180deg : Rotation2d.kZero);
             drive.resetGyro(resetPose);
         }));
-        controller.povUp().onTrue(new InstantCommand(() -> {
-            Pose2d resetPose = new Pose2d(
-                    new Translation2d(
-                        Units.inchesToMeters(29 / 2) + Units.inchesToMeters(13 / 4),
-                            Units.inchesToMeters(29/2)),//158.32
-                    (DriverStation.getAlliance().get() == Alliance.Red) ? Rotation2d.k180deg : Rotation2d.kZero);
-            drive.resetGyro(resetPose);
-        }));
-        controller.povDown().onTrue(new DriveX(drive, 2).withTimeout(1));
+        // controller.povUp().onTrue(new InstantCommand(() -> {
+        //     Pose2d resetPose = new Pose2d(
+        //             new Translation2d(
+        //                 Units.inchesToMeters(29 / 2) + Units.inchesToMeters(13 / 4),
+        //                     Units.inchesToMeters(29/2)),//158.32
+        //             (DriverStation.getAlliance().get() == Alliance.Red) ? Rotation2d.k180deg : Rotation2d.kZero);
+        //     drive.resetGyro(resetPose);
+        // }));
+        // controller.povDown().onTrue(new DriveX(drive, 2).withTimeout(1));
+        controller.povUp().onTrue(intake.setWantedState(IntakeStates.PivotVC));
+        controller.povDown().onTrue(intake.setWantedState(IntakeStates.PivotVC));
+        controller.rightBumper().whileTrue(intake.setWantedState(IntakeStates.RollerVC));
+        controller.leftBumper().whileTrue(intake.setWantedState(IntakeStates.RollerVC));
         // controller.leftBumper().onTrue(new InstantCommand(() -> {shooter.setRPS(40);}));
         // controller.rightBumper().onTrue(new InstantCommand(() -> {shooter.setRPS(0);}));
     }
