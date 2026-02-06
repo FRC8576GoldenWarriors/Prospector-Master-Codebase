@@ -7,6 +7,7 @@ package frc.robot.subsystems.intake;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
+
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -37,7 +38,7 @@ public class Intake extends SubsystemBase {
   private double PIDVoltage;
   private double FFVoltage;
   private double inputVoltage;
-  private LoggedNetworkNumber kP = new LoggedNetworkNumber("Tuning/kP",0.0);
+  private LoggedNetworkNumber kP = new LoggedNetworkNumber("Tuning/kP",IntakeConstants.Software.kP);
   private double kPDouble = kP.get();
   private LoggedNetworkNumber kV = new LoggedNetworkNumber("Tuning/kV",0.0);
   private double kVDouble = kV.get();

@@ -16,7 +16,6 @@ package frc.robot.subsystems.drive;
 import static edu.wpi.first.units.Units.*;
 import static frc.robot.subsystems.drive.DriveConstants.*;
 
-import com.ctre.phoenix6.hardware.CANrange;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
@@ -67,7 +66,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
     private final Alert gyroDisconnectedAlert =
             new Alert("Disconnected gyro, using kinematics as fallback.", AlertType.kError);
     private RobotConfig pathConfig;
-    private CANrange range;
+    //private CANrange range;
 
     private final double[] skidAmountX = new double[4];
     private final double[] skidAmountY = new double[4];
@@ -139,7 +138,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
                 new SysIdRoutine.Config(
                         null, null, null, (state) -> Logger.recordOutput("Drive/SysIdState", state.toString())),
                 new SysIdRoutine.Mechanism((voltage) -> runCharacterization(voltage.in(Volts)), null, this));
-                range = new CANrange(1);
+                //range = new CANrange(1);
     }
 
     @Override
@@ -358,7 +357,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
     }
 
     public boolean getDetected(){
-        return range.getIsDetected().getValue();
+        return false;//range.getIsDetected().getValue();
     }
 
     /** Adds a new timestamped vision measurement. */
