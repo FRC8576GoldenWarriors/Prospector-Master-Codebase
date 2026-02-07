@@ -27,13 +27,10 @@ import edu.wpi.first.hal.FRCNetComm.tInstances;
 import edu.wpi.first.hal.FRCNetComm.tResourceType;
 import edu.wpi.first.hal.HAL;
 import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.geometry.Twist2d;
-import edu.wpi.first.math.interpolation.TimeInterpolatableBuffer;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -50,7 +47,8 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 import frc.robot.Constants.Mode;
 import frc.robot.subsystems.vision.Vision;
-import frc.robot.util.GoldenSwervePoseEstimator;
+import frc.robot.util.poseEstimation.CollisionDetector;
+import frc.robot.util.poseEstimation.EnhancedSwervePoseEstimator;
 import frc.robot.util.LocalADStarAK;
 import java.util.Arrays;
 import java.util.concurrent.locks.Lock;
@@ -65,6 +63,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
     static final Lock odometryLock = new ReentrantLock();
     private final GyroIO gyroIO;
     private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
+    private final CollisionDetector collisionDetector;
     private final Module[] modules = new Module[4]; // FL, FR, BL, BR
     private final SysIdRoutine sysId;
     private final Alert gyroDisconnectedAlert =
@@ -76,8 +75,6 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
     private final double[] skidAmountX = new double[4];
     private final double[] skidAmountY = new double[4];
 
-    private final TimeInterpolatableBuffer<Translation3d> collosionBuffer = TimeInterpolatableBuffer.createBuffer(2);
-
     private final SwerveDriveKinematics kinematics = new SwerveDriveKinematics(moduleTranslations);
     private Rotation2d rawGyroRotation = new Rotation2d();
     private final SwerveModulePosition[] lastModulePositions = // For delta tracking
@@ -87,7 +84,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
                 new SwerveModulePosition(),
                 new SwerveModulePosition()
             };
-    private final GoldenSwervePoseEstimator poseEstimator = new GoldenSwervePoseEstimator(
+    private final EnhancedSwervePoseEstimator poseEstimator = new EnhancedSwervePoseEstimator(
             kinematics,
             rawGyroRotation,
             lastModulePositions,
@@ -109,6 +106,8 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
         modules[1] = new Module(frModuleIO, 1);
         modules[2] = new Module(blModuleIO, 2);
         modules[3] = new Module(brModuleIO, 3);
+
+        collisionDetector = new CollisionDetector(gyroInputs);
 
         try{
             pathConfig = RobotConfig.fromGUISettings();
@@ -211,11 +210,11 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
                 Logger.recordOutput("averageXSkid", averageXSkid);
                 Logger.recordOutput("averageYSkid", averageYSkid);
 
-                Pair<Boolean, Translation3d> forcePair = this.isColliding();
+                boolean isColliding = collisionDetector.isColliding();
 
-                if(forcePair.getFirst()){
-                    averageXSkid += Math.pow(forcePair.getSecond().getX(), 2);
-                    averageYSkid += Math.pow(forcePair.getSecond().getY(), 2);
+                if(isColliding){
+                    averageXSkid += collisionXDeviation;
+                    averageYSkid += collisionYDeviation;
                 }
 
                 // Increase the state deviations to reflect the amount of skid thats occuring
@@ -440,16 +439,5 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
         Logger.recordOutput("Drive/skidAmountY", skidAmountY);
         Logger.recordOutput("Drive/Skids", areModulesSkidding);
         return areModulesSkidding;
-    }
-
-    public Pair<Boolean, Translation3d> isColliding() {
-        Translation3d forceVectorDerivative = gyroIO.getForceVectorDerivative();
-        Translation3d forceVector = gyroIO.getForceVector();
-
-        if(forceVectorDerivative.getNorm() > forceThreshold) {
-            return Pair.of(true, forceVector);
-        }
-
-        return Pair.of(false, new Translation3d());
     }
 }

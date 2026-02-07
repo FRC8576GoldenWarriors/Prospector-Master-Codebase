@@ -19,6 +19,7 @@ import static frc.robot.subsystems.drive.DriveConstants.module_average_kA_Turn;
 
 import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.RobotConfig;
+
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -158,7 +159,10 @@ public class DriveConstants {
     public static final double baseYVisionSTDEV = 0.1;
     public static final double baseThetaVisionSTDEV = 999999;
 
-    public static final double forceThreshold = 1.5;
+    //public static final AprilTagFieldLayout layout = AprilTagFieldLayout.loadField(AprilTagFields.)
+
+    public static final double collisionXDeviation = 100;
+    public static final double collisionYDeviation = 100;
 
     // Module 1 Drive kA = 0.016577;
     // Module 2 Drive kA = 0.019138;

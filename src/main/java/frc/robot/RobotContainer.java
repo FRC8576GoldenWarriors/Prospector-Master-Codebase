@@ -48,6 +48,7 @@ public class RobotContainer {
     // Subsystems
     public static Drive drive;
     private final Vision vision;
+    private final GyroIO gyro;
     //private final Shooter shooter;
     private SwerveDriveSimulation driveSimulation = null;
 
@@ -63,8 +64,9 @@ public class RobotContainer {
         switch (Constants.currentMode) {
             case REAL:
                 // Real robot, instantiate hardware IO implementations
+                gyro = new GyroIOPigeon2();
                 drive = new Drive(
-                        new GyroIOPigeon2(),
+                        gyro,
                         new ModuleIOSpark(0),
                         new ModuleIOSpark(1),
                         new ModuleIOSpark(2),
@@ -75,8 +77,8 @@ public class RobotContainer {
                 drive,
                 new VisionIOLimelight(VisionConstants.camera0Name, drive::getRotation),
                 new VisionIOLimelight(VisionConstants.camera1Name, drive::getRotation),
-                new VisionIOLimelight(VisionConstants.camera2Name,drive::getRotation),
-                new VisionIOLimelight(VisionConstants.camera3Name,drive::getRotation));
+                new VisionIOLimelight(VisionConstants.camera2Name, drive::getRotation),
+                new VisionIOLimelight(VisionConstants.camera3Name, drive::getRotation));
                 //shooter = new Shooter(0);
                 autos = new Autos(drive);
                 break;
@@ -87,8 +89,9 @@ public class RobotContainer {
                 // add the simulated drivetrain to the simulation field
                 SimulatedArena.getInstance().addDriveTrainSimulation(driveSimulation);
                 // Sim robot, instantiate physics sim IO implementations
+                gyro = new GyroIOSim(driveSimulation.getGyroSimulation());
                 drive = new Drive(
-                        new GyroIOSim(driveSimulation.getGyroSimulation()),
+                        gyro,
                         new ModuleIOSim(driveSimulation.getModules()[0]),
                         new ModuleIOSim(driveSimulation.getModules()[1]),
                         new ModuleIOSim(driveSimulation.getModules()[2]),
@@ -106,8 +109,9 @@ public class RobotContainer {
                 break;
             default:
                 // Replayed robot, disable IO implementations
+                gyro = new GyroIO() {};
                 drive = new Drive(
-                        new GyroIO() {},
+                        gyro,
                         new ModuleIO() {},
                         new ModuleIO() {},
                         new ModuleIO() {},
@@ -182,7 +186,7 @@ public class RobotContainer {
         resetHeadingTrigger.onTrue(new InstantCommand(() -> {
             Pose2d currentPose = drive.getPose();
             Pose2d resetPose = new Pose2d(
-                    new Translation2d(currentPose.getX(), currentPose.getY()),
+                    new Translation2d(Inches.of(651.22).in(Meters), Inches.of(317.69).in(Meters)),//new Translation2d(currentPose.getX(), currentPose.getY()),
                     (DriverStation.getAlliance().get() == Alliance.Red) ? Rotation2d.k180deg : Rotation2d.kZero);
             drive.resetGyro(resetPose);
         }));
