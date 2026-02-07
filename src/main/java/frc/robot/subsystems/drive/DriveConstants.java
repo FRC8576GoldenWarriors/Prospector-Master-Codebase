@@ -11,11 +11,11 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 
-package frc.robot.subsystems.drive;
+package frc.robot.subsystems.Drive;
 
 import static edu.wpi.first.units.Units.*;
-import static frc.robot.subsystems.drive.DriveConstants.module_average_kA_Drive;
-import static frc.robot.subsystems.drive.DriveConstants.module_average_kA_Turn;
+import static frc.robot.subsystems.Drive.DriveConstants.module_average_kA_Drive;
+import static frc.robot.subsystems.Drive.DriveConstants.module_average_kA_Turn;
 
 import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.RobotConfig;
