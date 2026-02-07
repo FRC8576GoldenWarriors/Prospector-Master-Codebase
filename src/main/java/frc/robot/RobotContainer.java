@@ -52,7 +52,7 @@ public class RobotContainer {
     private SwerveDriveSimulation driveSimulation = null;
 
     // Controller
-    private final CommandXboxController controller = new CommandXboxController(0);
+    public static final CommandXboxController controller = new CommandXboxController(0);
 
     public Trigger resetHeadingTrigger = new Trigger(() -> controller.start().getAsBoolean());
     // Dashboard inputs
