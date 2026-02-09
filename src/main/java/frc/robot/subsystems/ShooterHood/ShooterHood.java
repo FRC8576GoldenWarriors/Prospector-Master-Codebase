@@ -1,5 +1,7 @@
 package frc.robot.subsystems.ShooterHood;
 
+import static edu.wpi.first.units.Units.Rotations;
+
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -33,10 +35,7 @@ public class ShooterHood extends SubsystemBase {
 
     private double currentAnglePosition = 0.0;
     private double wantedAnglePosition = 0.0;
-    private double manualVoltage = 0.0;
-    private double shootDistanceMeters = 0.0;
-
-    //@AutoLogOutput (key = "ShooterHood/")
+    
 
     public ShooterHood(ShooterHoodIO io) {
         this.io = io;
@@ -57,7 +56,7 @@ public class ShooterHood extends SubsystemBase {
 
   @Override
   public void periodic() {
-    currentAnglePosition = inputs.encoderValue;
+    currentAnglePosition = inputs.encoderValue.in(Rotations);
 
     io.updateInputs(inputs);
 
@@ -94,7 +93,7 @@ public class ShooterHood extends SubsystemBase {
                 } else if (RobotContainer.controller.povDown().getAsBoolean()) {
                     io.setSpeed(-0.05);
                 } else {
-                    setWantedState(ShooterHoodStates.Idle);;
+                    setWantedState(ShooterHoodStates.Idle);
                 }
                 break;
     }
