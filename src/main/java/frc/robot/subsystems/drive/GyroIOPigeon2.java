@@ -23,14 +23,12 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
 
-import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearAcceleration;
 
-import java.util.List;
 import java.util.Queue;
 
 
@@ -61,12 +59,20 @@ public class GyroIOPigeon2 implements GyroIO {
         pigeon.setYaw(headingDegrees);
     }
 
-    public List<StatusSignal<LinearAcceleration>> getAccelerationsSignals() {
-        return List.of(accelerationX, accelerationY, accelerationZ);
+    public StatusSignal<LinearAcceleration> getXAccelerationStatusSignal() {
+        return accelerationX;
     }
 
-    public Pair<StatusSignal<Angle>, StatusSignal<Angle>> getPitchAndRollSignals() {
-        return Pair.of(pitch, roll);
+    public StatusSignal<LinearAcceleration> getYAccelerationStatusSignal() {
+        return accelerationY;
+    }
+
+    public StatusSignal<Angle> getPitchStatusSignal() {
+        return pitch;
+    }
+
+    public StatusSignal<Angle> getRollStatusSignal() {
+        return roll;
     }
 
     @Override

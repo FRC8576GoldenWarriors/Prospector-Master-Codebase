@@ -161,9 +161,6 @@ public class DriveConstants {
 
     //public static final AprilTagFieldLayout layout = AprilTagFieldLayout.loadField(AprilTagFields.)
 
-    public static final double bumpXDeviation = 5;
-    public static final double bumpYDeviation = 5;
-
     // Module 1 Drive kA = 0.016577;
     // Module 2 Drive kA = 0.019138;
     // Module 3 Drive kA = 0.012256;

@@ -15,7 +15,6 @@ import edu.wpi.first.units.measure.Frequency;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.Timer;
-import frc.robot.subsystems.drive.DriveConstants;
 
 public class BumpDetector {
 
@@ -27,25 +26,38 @@ public class BumpDetector {
     private final StatusSignal<Angle> pitchSignal;
     private final StatusSignal<Angle> rollSignal;
 
-    private final Notifier signalUpdater = new Notifier(() -> updateInputs());
-    private final Debouncer signal = new Debouncer(debouncerTimeThreshold.in(Seconds), DebounceType.kFalling);
+    private final Notifier signalUpdater;
+
+    private final Debouncer yawSignalDebouncer;
+    private final Debouncer pitchSignalDebouncer;
+
+    private final Timer timeSinceBump;
 
     @AutoLogOutput
-    public boolean isBumping = false;
+    private boolean isBumping = false;
 
-    @AutoLogOutput
-    public Time timeOfBump = Seconds.of(-1);
+    public BumpDetector(StatusSignal<Angle> pitchStatusSignal, StatusSignal<Angle> rollStatusSignal, Frequency period) {
+        this.pitchSignal = pitchStatusSignal;
+        this.rollSignal = rollStatusSignal;
 
-    public BumpDetector(Pair<StatusSignal<Angle>, StatusSignal<Angle>> pitchAndRollSignalPair, Frequency period) {
-        this.pitchSignal = pitchAndRollSignalPair.getFirst();
-        this.rollSignal = pitchAndRollSignalPair.getSecond();
+        signalUpdater = new Notifier(this::updateInputs);
+
+        yawSignalDebouncer = new Debouncer(debouncerTimeThreshold.in(Seconds), DebounceType.kFalling);
+        pitchSignalDebouncer = new Debouncer(debouncerTimeThreshold.in(Seconds), DebounceType.kFalling);
+
+        timeSinceBump = new Timer();
+
         signalUpdater.startPeriodic(period);
     }
 
     public void updateInputs() {
-        isBumping = signal.calculate(Math.abs(pitchSignal.getValue().minus(pitchOffset).in(Degrees)) > pitchThreshold.in(Degrees) || Math.abs(rollSignal.getValue().in(Degrees)) > rollThreshold.in(Degrees));
+        isBumping = pitchSignalDebouncer.calculate(Math.abs(pitchSignal.getValue().minus(pitchOffset).in(Degrees)) > pitchThreshold.in(Degrees)) || yawSignalDebouncer.calculate(Math.abs(rollSignal.getValue().in(Degrees)) > rollThreshold.in(Degrees));
         if(isBumping) {
-            timeOfBump = Seconds.of(Timer.getFPGATimestamp());
+            if(!timeSinceBump.isRunning())
+                timeSinceBump.start();
+            else
+                timeSinceBump.reset();
+
         }
     }
 
@@ -53,15 +65,11 @@ public class BumpDetector {
         return isBumping;
     }
 
-    public Time getTimeSincBump(){
-        return Seconds.of(Timer.getFPGATimestamp()).minus(timeOfBump);
-    }
+    public Pair<Double, Double> getBumpSTDDevs(){
+        double timeSinceBumpSeconds = timeSinceBump.get();
 
-    public Pair<Double, Double> getBaseSTDDevs(){
-        double timeSinceBump = this.getTimeSincBump().in(Seconds);
-
-        double xStdDev = (timeSinceBump < 0) ? DriveConstants.baseXDriveSTDEV : Math.pow(Math.E, -(timeSinceBump-1) + DriveConstants.baseXDriveSTDEV);
-        double yStdDev = (timeSinceBump < 0) ? DriveConstants.baseYDriveSTDEV : Math.pow(Math.E, -(timeSinceBump-1) + DriveConstants.baseYDriveSTDEV);
+        double xStdDev = (!timeSinceBump.isRunning()) ? 0.0 : Math.pow(Math.E, -(timeSinceBumpSeconds - 1));
+        double yStdDev = (!timeSinceBump.isRunning()) ? 0.0 : Math.pow(Math.E, -(timeSinceBumpSeconds - 1));
 
         return Pair.of(xStdDev, yStdDev);
     }

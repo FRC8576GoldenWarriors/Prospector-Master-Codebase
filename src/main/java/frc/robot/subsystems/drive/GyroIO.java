@@ -13,13 +13,10 @@
 
 package frc.robot.subsystems.drive;
 
-import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.LinearAcceleration;
 
-import java.util.List;
 
 import org.littletonrobotics.junction.AutoLog;
 
@@ -43,22 +40,22 @@ public interface GyroIO {
         public Rotation2d[] odometryYawPositions = new Rotation2d[] {};
     }
 
-    public default Translation3d getForceVector() {
-        return new Translation3d();
-    }
-
-    public default Translation3d getForceVectorDerivative() {
-        return new Translation3d();
-    }
-
     public default void updateInputs(GyroIOInputs inputs) {}
 
-    public default List<StatusSignal<LinearAcceleration>> getAccelerationsSignals() {
-        return List.of();
+    public default StatusSignal<LinearAcceleration> getXAccelerationStatusSignal() {
+        return null;
     }
 
-    public default Pair<StatusSignal<Angle>, StatusSignal<Angle>> getPitchAndRollSignals() {
-        return Pair.of(null, null);
+    public default StatusSignal<LinearAcceleration> getYAccelerationStatusSignal() {
+        return null;
+    }
+
+    public default StatusSignal<Angle> getPitchStatusSignal() {
+        return null;
+    }
+
+    public default StatusSignal<Angle> getRollStatusSignal() {
+        return null;
     }
 
     public default void resetHeading(double headingDegrees) {}

@@ -5,108 +5,110 @@
 package frc.robot.util.poseEstimation;
 
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
+import static edu.wpi.first.units.Units.Seconds;
 
-import java.util.List;
 import java.util.Map.Entry;
 
 import org.littletonrobotics.junction.AutoLogOutput;
 
 import com.ctre.phoenix6.StatusSignal;
 
+import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.interpolation.TimeInterpolatableBuffer;
 import edu.wpi.first.units.measure.Frequency;
 import edu.wpi.first.units.measure.LinearAcceleration;
+import edu.wpi.first.units.measure.Time;
+import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.Timer;
 
 public class CollisionDetector {
-  private final double historySizeSeconds = 0.1;
 
-  private final double xCollisionThreshold = 10;
-  private final double ycollisionThreshold = 10;
-  private final double zCollisionThreshold = 10;
+  private final StatusSignal<LinearAcceleration> xAccelerationSignal;
+  private final StatusSignal<LinearAcceleration> yAccelerationSignal;
 
-  private final List<StatusSignal<LinearAcceleration>> robotAccelerationSignals;
+  private final TimeInterpolatableBuffer<Double> xAccelerationInterpolatableBuffer;
+  private final TimeInterpolatableBuffer<Double> yAccelerationInterpolatableBuffer;
 
-  private final TimeInterpolatableBuffer<Double> xJerkBuffer = TimeInterpolatableBuffer.createDoubleBuffer(historySizeSeconds);
-  private final TimeInterpolatableBuffer<Double> yJerkBuffer = TimeInterpolatableBuffer.createDoubleBuffer(historySizeSeconds);
-  private final TimeInterpolatableBuffer<Double> zJerkBuffer = TimeInterpolatableBuffer.createDoubleBuffer(historySizeSeconds);
+  private final Notifier signalUpdater;
 
+  private final Debouncer xSignalDebouncer;
+  private final Debouncer ySignalDebouncer;
 
-  public CollisionDetector(List<StatusSignal<LinearAcceleration>> robotAccelerationSignals, Frequency processRateHz) {
-    if(robotAccelerationSignals.size() < 3) {
-      throw new IllegalArgumentException("Missing acceleration signal. Only " + robotAccelerationSignals.size() + " signals found.");
-    }
-    this.robotAccelerationSignals = robotAccelerationSignals;
+  @AutoLogOutput
+  private boolean isColliding = false;
+
+  @AutoLogOutput
+  private double currentXJolt = 0;
+
+  @AutoLogOutput
+  private double currentYJolt = 0;
+
+  private Timer timeSinceCollision;
+
+  private final Time accelerationBufferHistorySeconds = Seconds.of(0.05);
+  private final Time debounceSignalTimeSeconds = Seconds.of(0.01);
+
+  private final double xJoltThreshold = 10;
+  private final double yJoltThreshold = 10;
+
+  public CollisionDetector(StatusSignal<LinearAcceleration> xAccelerationSignal, StatusSignal<LinearAcceleration> yAccelerationSignal, Frequency updateFrequency) {
+    this.xAccelerationSignal = xAccelerationSignal;
+    this.yAccelerationSignal = yAccelerationSignal;
+
+    this.xAccelerationInterpolatableBuffer = TimeInterpolatableBuffer.createDoubleBuffer(accelerationBufferHistorySeconds.in(Seconds));
+    this.yAccelerationInterpolatableBuffer = TimeInterpolatableBuffer.createDoubleBuffer(accelerationBufferHistorySeconds.in(Seconds));
+
+    this.signalUpdater = new Notifier(this::updateInputs);
+
+    this.xSignalDebouncer = new Debouncer(debounceSignalTimeSeconds.in(Seconds), DebounceType.kRising);
+    this.ySignalDebouncer = new Debouncer(debounceSignalTimeSeconds.in(Seconds), DebounceType.kRising);
+
+    this.timeSinceCollision = new Timer();
+
+    signalUpdater.startPeriodic(updateFrequency);
   }
 
-  public void updateBuffer() {
+  public void updateInputs() {
     double currentTime = Timer.getFPGATimestamp();
-    xJerkBuffer.addSample(currentTime, robotAccelerationSignals.get(0).getValue().in(MetersPerSecondPerSecond));
-    yJerkBuffer.addSample(currentTime, robotAccelerationSignals.get(1).getValue().in(MetersPerSecondPerSecond));
-    zJerkBuffer.addSample(currentTime, robotAccelerationSignals.get(2).getValue().in(MetersPerSecondPerSecond));
-  }
 
-  @AutoLogOutput
-  public boolean hasXDerivative() {
-    return xJerkBuffer.getInternalBuffer().size() > 1;
-  }
+    xAccelerationInterpolatableBuffer.addSample(currentTime, xAccelerationSignal.getValue().in(MetersPerSecondPerSecond));
+    yAccelerationInterpolatableBuffer.addSample(currentTime, yAccelerationSignal.getValue().in(MetersPerSecondPerSecond));
 
-  @AutoLogOutput
-  public boolean hasYDerivative() {
-    return yJerkBuffer.getInternalBuffer().size() > 1;
-  }
+    if(xAccelerationInterpolatableBuffer.getInternalBuffer().size() > 1) {
+      Entry<Double, Double> start = xAccelerationInterpolatableBuffer.getInternalBuffer().firstEntry();
+      Entry<Double, Double> end = xAccelerationInterpolatableBuffer.getInternalBuffer().lastEntry();
 
-  @AutoLogOutput
-  public boolean hasZDerivative() {
-    return zJerkBuffer.getInternalBuffer().size() > 1;
-  }
-
-  @AutoLogOutput
-  public double getXJerkMetersPerSecPerSecPerSec() {
-    Entry<Double, Double> finalValue = xJerkBuffer.getInternalBuffer().lastEntry();
-    Entry<Double, Double> initialValue = xJerkBuffer.getInternalBuffer().firstEntry();
-
-    if(finalValue == null || initialValue == null) {
-      return 0;
+      currentXJolt = (end.getValue() - start.getValue()) / (end.getKey() - start.getKey());
     }
 
-    return (finalValue.getValue() - initialValue.getValue()) / (finalValue.getKey() - initialValue.getKey());
-  }
+    if(yAccelerationInterpolatableBuffer.getInternalBuffer().size() > 1) {
+      Entry<Double, Double> start = yAccelerationInterpolatableBuffer.getInternalBuffer().firstEntry();
+      Entry<Double, Double> end = yAccelerationInterpolatableBuffer.getInternalBuffer().lastEntry();
 
-  @AutoLogOutput
-  public double getYJerkMetersPerSecPerSecPerSec() {
-    Entry<Double, Double> finalValue = yJerkBuffer.getInternalBuffer().lastEntry();
-    Entry<Double, Double> initialValue = yJerkBuffer.getInternalBuffer().firstEntry();
-
-    if(finalValue == null || initialValue == null) {
-      return 0;
+      currentYJolt = (end.getValue() - start.getValue()) / (end.getKey() - start.getKey());
     }
 
-    return (finalValue.getValue() - initialValue.getValue()) / (finalValue.getKey() - initialValue.getKey());
-  }
+    isColliding = xSignalDebouncer.calculate(Math.abs(currentXJolt) > xJoltThreshold) || ySignalDebouncer.calculate(Math.abs(currentYJolt) > yJoltThreshold);
 
-  @AutoLogOutput
-  public double getZJerkMetersPerSecPerSecPerSec() {
-    Entry<Double, Double> finalValue = zJerkBuffer.getInternalBuffer().lastEntry();
-    Entry<Double, Double> initialValue = zJerkBuffer.getInternalBuffer().firstEntry();
-
-    if(finalValue == null || initialValue == null) {
-      return 0;
+    if(isColliding) {
+      if(!timeSinceCollision.isRunning())
+        timeSinceCollision.start();
+      else
+        timeSinceCollision.reset();
     }
 
-    return (finalValue.getValue() - initialValue.getValue()) / (finalValue.getKey() - initialValue.getKey());
   }
 
-  @AutoLogOutput
   public boolean isColliding() {
-    if(hasXDerivative() && hasYDerivative() && hasZDerivative()) {
-      return (getXJerkMetersPerSecPerSecPerSec() > xCollisionThreshold) && (getYJerkMetersPerSecPerSecPerSec() > ycollisionThreshold) && (getZJerkMetersPerSecPerSecPerSec() > zCollisionThreshold);
-    }
-    return false;
+    return isColliding;
   }
 
-  //Needs to be tested and tuned
-  public boolean isDrivingOverBump() {
-    return robotAccelerationSignals.get(2).getValue().in(MetersPerSecondPerSecond) > zCollisionThreshold;
+  public double getCurrentXJolt() {
+    return currentXJolt;
+  }
+
+  public double getCurrentYJolt() {
+    return currentYJolt;
   }
 }
