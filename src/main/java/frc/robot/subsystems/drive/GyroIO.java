@@ -13,16 +13,25 @@
 
 package frc.robot.subsystems.drive;
 
+import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.LinearAcceleration;
+
+import java.util.List;
 
 import org.littletonrobotics.junction.AutoLog;
+
+import com.ctre.phoenix6.StatusSignal;
 
 public interface GyroIO {
     @AutoLog
     public static class GyroIOInputs {
         public boolean connected = false;
         public Rotation2d yawPosition = new Rotation2d();
+        public double pitchDegrees = 0;
+        public double rollDegrees = 0;
         public double yawVelocityRadPerSec = 1;
         public double xVelocityRadPerSec = 1;
         public double yVelocityRadPerSec = 1;
@@ -43,6 +52,14 @@ public interface GyroIO {
     }
 
     public default void updateInputs(GyroIOInputs inputs) {}
+
+    public default List<StatusSignal<LinearAcceleration>> getAccelerationsSignals() {
+        return List.of();
+    }
+
+    public default Pair<StatusSignal<Angle>, StatusSignal<Angle>> getPitchAndRollSignals() {
+        return Pair.of(null, null);
+    }
 
     public default void resetHeading(double headingDegrees) {}
 }

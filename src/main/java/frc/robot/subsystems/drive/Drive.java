@@ -27,6 +27,7 @@ import edu.wpi.first.hal.FRCNetComm.tInstances;
 import edu.wpi.first.hal.FRCNetComm.tResourceType;
 import edu.wpi.first.hal.HAL;
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -47,7 +48,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 import frc.robot.Constants.Mode;
 import frc.robot.subsystems.vision.Vision;
-import frc.robot.util.poseEstimation.CollisionDetector;
+import frc.robot.util.poseEstimation.BumpDetector;
 import frc.robot.util.poseEstimation.EnhancedSwervePoseEstimator;
 import frc.robot.util.LocalADStarAK;
 import java.util.Arrays;
@@ -63,7 +64,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
     static final Lock odometryLock = new ReentrantLock();
     private final GyroIO gyroIO;
     private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
-    private final CollisionDetector collisionDetector;
+    private final BumpDetector bumpDetector;
     private final Module[] modules = new Module[4]; // FL, FR, BL, BR
     private final SysIdRoutine sysId;
     private final Alert gyroDisconnectedAlert =
@@ -107,7 +108,8 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
         modules[2] = new Module(blModuleIO, 2);
         modules[3] = new Module(brModuleIO, 3);
 
-        collisionDetector = new CollisionDetector(gyroInputs);
+        bumpDetector = new BumpDetector(gyroIO.getPitchAndRollSignals(), Hertz.of(100));
+
 
         try{
             pathConfig = RobotConfig.fromGUISettings();
@@ -199,7 +201,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
                     break;
                 }
             }
-
+            Pair<Double, Double> combinedBaseDevs = bumpDetector.getBaseSTDDevs();
             if (anySkidding) {
                 // If any of the modules are skidding calculate the mean value of their skid velocity
                 double averageXSkid =
@@ -210,18 +212,11 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
                 Logger.recordOutput("averageXSkid", averageXSkid);
                 Logger.recordOutput("averageYSkid", averageYSkid);
 
-                boolean isColliding = collisionDetector.isColliding();
-
-                if(isColliding){
-                    averageXSkid += collisionXDeviation;
-                    averageYSkid += collisionYDeviation;
-                }
-
                 // Increase the state deviations to reflect the amount of skid thats occuring
                 poseEstimator.setStateStdDevs(VecBuilder.fill(
-                    baseXDriveSTDEV + averageXSkid, baseYDriveSTDEV + averageYSkid, baseThetaDriveSTDEV));
+                    combinedBaseDevs.getFirst() + averageXSkid, combinedBaseDevs.getSecond() + averageYSkid, baseThetaDriveSTDEV));
             } else {
-                poseEstimator.setStateStdDevs(VecBuilder.fill(baseXDriveSTDEV, baseYDriveSTDEV,
+                poseEstimator.setStateStdDevs(VecBuilder.fill(combinedBaseDevs.getFirst(), combinedBaseDevs.getSecond(),
                     baseThetaDriveSTDEV));
             }
 
@@ -234,9 +229,10 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
                 Twist2d twist = kinematics.toTwist2d(moduleDeltas);
                 rawGyroRotation = rawGyroRotation.plus(new Rotation2d(twist.dtheta));
             }
-
+            boolean isBumping = bumpDetector.isBumping();
             // Apply update
-            poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
+            if(!isBumping)
+                poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
         }
 
         // Update gyro alert

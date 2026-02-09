@@ -4,39 +4,46 @@
 
 package frc.robot.util.poseEstimation;
 
+import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
+
+import java.util.List;
 import java.util.Map.Entry;
 
 import org.littletonrobotics.junction.AutoLogOutput;
 
+import com.ctre.phoenix6.StatusSignal;
 
 import edu.wpi.first.math.interpolation.TimeInterpolatableBuffer;
+import edu.wpi.first.units.measure.Frequency;
+import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.drive.GyroIO.GyroIOInputs;
 
-public class CollisionDetector extends SubsystemBase {
-  private final double historySizeSeconds = 0.2;
+public class CollisionDetector {
+  private final double historySizeSeconds = 0.1;
 
   private final double xCollisionThreshold = 10;
   private final double ycollisionThreshold = 10;
   private final double zCollisionThreshold = 10;
 
-  private final GyroIOInputs gyroIOInputs;
+  private final List<StatusSignal<LinearAcceleration>> robotAccelerationSignals;
 
   private final TimeInterpolatableBuffer<Double> xJerkBuffer = TimeInterpolatableBuffer.createDoubleBuffer(historySizeSeconds);
   private final TimeInterpolatableBuffer<Double> yJerkBuffer = TimeInterpolatableBuffer.createDoubleBuffer(historySizeSeconds);
   private final TimeInterpolatableBuffer<Double> zJerkBuffer = TimeInterpolatableBuffer.createDoubleBuffer(historySizeSeconds);
 
-  public CollisionDetector(GyroIOInputs gyroIOInputs) {
-    this.gyroIOInputs = gyroIOInputs;
+
+  public CollisionDetector(List<StatusSignal<LinearAcceleration>> robotAccelerationSignals, Frequency processRateHz) {
+    if(robotAccelerationSignals.size() < 3) {
+      throw new IllegalArgumentException("Missing acceleration signal. Only " + robotAccelerationSignals.size() + " signals found.");
+    }
+    this.robotAccelerationSignals = robotAccelerationSignals;
   }
 
-  @Override
-  public void periodic() {
+  public void updateBuffer() {
     double currentTime = Timer.getFPGATimestamp();
-    xJerkBuffer.addSample(currentTime, gyroIOInputs.xAccelerationMetersPerSecondPerSecond);
-    yJerkBuffer.addSample(currentTime, gyroIOInputs.yAccelerationMetersPerSecondPerSecond);
-    zJerkBuffer.addSample(currentTime, gyroIOInputs.zAccelerationMetersPerSecondPerSecond);
+    xJerkBuffer.addSample(currentTime, robotAccelerationSignals.get(0).getValue().in(MetersPerSecondPerSecond));
+    yJerkBuffer.addSample(currentTime, robotAccelerationSignals.get(1).getValue().in(MetersPerSecondPerSecond));
+    zJerkBuffer.addSample(currentTime, robotAccelerationSignals.get(2).getValue().in(MetersPerSecondPerSecond));
   }
 
   @AutoLogOutput
@@ -100,9 +107,6 @@ public class CollisionDetector extends SubsystemBase {
 
   //Needs to be tested and tuned
   public boolean isDrivingOverBump() {
-    if(hasZDerivative()) {
-      return getZJerkMetersPerSecPerSecPerSec() > zCollisionThreshold;
-    }
-    return false;
+    return robotAccelerationSignals.get(2).getValue().in(MetersPerSecondPerSecond) > zCollisionThreshold;
   }
 }

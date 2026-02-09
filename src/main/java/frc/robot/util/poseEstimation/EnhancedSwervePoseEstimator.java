@@ -53,6 +53,7 @@ public class EnhancedSwervePoseEstimator {
     private final NavigableMap<Double, VisionUpdate> m_visionUpdates = new TreeMap<>();
 
     private Pose2d m_poseEstimate;
+    private Pose2d m_lastPose;
 
     /**
      * Constructs a GoldenSwerveDrivePoseEstimator.
