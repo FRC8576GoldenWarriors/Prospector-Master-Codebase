@@ -75,6 +75,7 @@ public class RobotContainer {
 
                 this.vision = new Vision(
                 drive,
+                drive::getChassisSpeeds,
                 new VisionIOLimelight(VisionConstants.camera0Name, drive::getRotation),
                 new VisionIOLimelight(VisionConstants.camera1Name, drive::getRotation),
                 new VisionIOLimelight(VisionConstants.camera2Name, drive::getRotation),
@@ -100,6 +101,7 @@ public class RobotContainer {
 
                 vision = new Vision(
                 drive,
+                drive::getChassisSpeeds,
                 new VisionIOPhotonVisionSim(
                         camera0Name, robotToCamera0, driveSimulation::getSimulatedDriveTrainPose),
                 new VisionIOPhotonVisionSim(
@@ -117,7 +119,7 @@ public class RobotContainer {
                         new ModuleIO() {},
                         new ModuleIO() {},
                         (pose) -> {});
-                vision = new Vision(drive, new VisionIO() {}, new VisionIO() {});
+                vision = new Vision(drive, drive::getChassisSpeeds, new VisionIO() {}, new VisionIO() {});
                 autos = null;
                // shooter = null;
                 break;
@@ -198,7 +200,7 @@ public class RobotContainer {
                     (DriverStation.getAlliance().get() == Alliance.Red) ? Rotation2d.k180deg : Rotation2d.kZero);
             drive.resetGyro(resetPose);
         }));
-        controller.povDown().onTrue(new DriveX(drive, 2).withTimeout(1));
+        controller.povDown().whileTrue(drive.driveToPose(new Pose2d(14.6,4.75,Rotation2d.k180deg)).andThen(new DriveX(drive,-0.1).until(()->drive.getDetected())));
         // controller.leftBumper().onTrue(new InstantCommand(() -> {shooter.setRPS(40);}));
         // controller.rightBumper().onTrue(new InstantCommand(() -> {shooter.setRPS(0);}));
     }

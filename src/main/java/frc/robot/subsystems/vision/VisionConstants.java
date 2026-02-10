@@ -20,7 +20,7 @@ import edu.wpi.first.math.geometry.Transform3d;
 
 public class VisionConstants {
     // AprilTag layout
-    public static AprilTagFieldLayout aprilTagLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
+    public static AprilTagFieldLayout aprilTagLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltAndymark);
 
     // Camera names, must match names configured on coprocessor
     public static String camera0Name = "limelight-barge";
@@ -39,7 +39,7 @@ public class VisionConstants {
 
     // Standard deviation baselines, for 1 meter distance and 1 tag
     // (Adjusted automatically based on distance and # of tags)
-    public static double linearStdDevBaseline = 100;//800 // Meters
+    public static double linearStdDevBaseline = 1;//800 // Meters
     public static double angularStdDevBaseline = 0.06; // Radians
 
     // Standard deviation multipliers for each camera

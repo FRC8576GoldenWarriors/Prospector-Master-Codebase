@@ -148,8 +148,8 @@ public class DriveConstants {
                     KilogramSquareMeters.of(0.02),
                     wheelCOF));
 
-    public static final double skidThresholdX = 0.035;//0.03;
-    public static final double skidThresholdY = 0.035;//0.029;//0.029
+    public static final double skidThresholdX = 0.1;//0.035;//0.03;
+    public static final double skidThresholdY = 0.1;//0.029;//0.029
 
     public static final double baseXDriveSTDEV = 0.09;
     public static final double baseYDriveSTDEV = 0.025;

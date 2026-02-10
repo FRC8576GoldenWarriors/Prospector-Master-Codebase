@@ -21,6 +21,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.hal.FRCNetComm.tInstances;
@@ -43,6 +44,7 @@ import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
@@ -53,6 +55,7 @@ import frc.robot.util.poseEstimation.CollisionDetector;
 import frc.robot.util.poseEstimation.EnhancedSwervePoseEstimator;
 import frc.robot.util.LocalADStarAK;
 import java.util.Arrays;
+import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
@@ -132,7 +135,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
                 this::resetOdometry,
                 this::getChassisSpeeds,
                 this::runVelocity,
-                new PPHolonomicDriveController(new PIDConstants(5.0, 0.0, 0.0), new PIDConstants(5.0, 0.0, 0.0)),
+                new PPHolonomicDriveController(new PIDConstants(7.5, 0.0, 0.0), new PIDConstants(5.0, 0.0, 0.0)),
                 this.pathConfig,
                 () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
                 this);
@@ -217,19 +220,16 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
                 Logger.recordOutput("averageXSkid", averageXSkid);
                 Logger.recordOutput("averageYSkid", averageYSkid);
 
-                xDeviation += averageXSkid;
-                yDeviation += averageYSkid;
+                xDeviation += Math.sqrt(averageXSkid/3);
+                yDeviation += Math.sqrt(averageYSkid/3);
             }
 
             // Bump
-            boolean anyBumping = bumpDetector.isBumping();
 
-            if(anyBumping) {
-                Pair<Double, Double> bumpStandardDeviations = bumpDetector.getBumpSTDDevs();
+            Pair<Double, Double> bumpStandardDeviations = bumpDetector.getBumpSTDDevs();
 
-                xDeviation += bumpStandardDeviations.getFirst();
-                yDeviation += bumpStandardDeviations.getSecond();
-            }
+            xDeviation += bumpStandardDeviations.getFirst();
+            yDeviation += bumpStandardDeviations.getSecond();
 
             // TODO Collision
             boolean anyCollision = collisionDetector.isColliding();
@@ -247,6 +247,8 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
                 Twist2d twist = kinematics.toTwist2d(moduleDeltas);
                 rawGyroRotation = rawGyroRotation.plus(new Rotation2d(twist.dtheta));
             }
+
+            boolean anyBumping = bumpDetector.isBumping();
 
             // Apply update
             if(!anyBumping)
@@ -338,7 +340,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
 
     /** Returns the measured chassis speeds of the robot. */
     @AutoLogOutput(key = "SwerveChassisSpeeds/Measured")
-    private ChassisSpeeds getChassisSpeeds() {
+    public ChassisSpeeds getChassisSpeeds() {
         return kinematics.toChassisSpeeds(getModuleStates());
     }
 
@@ -371,6 +373,12 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
         return getPose().getRotation();
     }
 
+    public Command driveToPose(Pose2d wantedPose){
+        Pathfinding.setStartPosition(getPose().getTranslation());
+        return new DeferredCommand(() ->AutoBuilder.pathfindToPose(wantedPose, new PathConstraints(2.5, 3, 2, 3)),Set.of(this));
+    }
+
+
     /** Resets the current odometry pose. */
     public void resetOdometry(Pose2d pose) {
         // Acquire odometry lock to avoid races with periodic odometry updates.
@@ -394,8 +402,9 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
         }
     }
 
+    @AutoLogOutput(key = "Drive/CANRange Detected")
     public boolean getDetected(){
-        return range.getIsDetected().getValue()&&range2.getIsDetected().getValue();
+        return range.getIsDetected().getValue();
     }
 
     /** Adds a new timestamped vision measurement. */

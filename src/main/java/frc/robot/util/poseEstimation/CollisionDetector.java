@@ -100,6 +100,11 @@ public class CollisionDetector {
 
   }
 
+  // public Pair<Double, Double> getCollisionSTDDevs() {
+
+  //   return Pair.of();
+  // }
+
   public boolean isColliding() {
     return isColliding;
   }
