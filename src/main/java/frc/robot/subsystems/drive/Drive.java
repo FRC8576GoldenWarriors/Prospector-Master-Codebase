@@ -21,12 +21,14 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.hal.FRCNetComm.tInstances;
 import edu.wpi.first.hal.FRCNetComm.tResourceType;
 import edu.wpi.first.hal.HAL;
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -42,14 +44,18 @@ import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 import frc.robot.Constants.Mode;
-import frc.robot.subsystems.Vision.Vision;
-import frc.robot.util.GoldenSwervePoseEstimator;
+import frc.robot.subsystems.vision.Vision;
+import frc.robot.util.poseEstimation.BumpDetector;
+import frc.robot.util.poseEstimation.CollisionDetector;
+import frc.robot.util.poseEstimation.EnhancedSwervePoseEstimator;
 import frc.robot.util.LocalADStarAK;
 import java.util.Arrays;
+import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
@@ -62,19 +68,23 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
     static final Lock odometryLock = new ReentrantLock();
     private final GyroIO gyroIO;
     private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
+    private final BumpDetector bumpDetector;
+    private final CollisionDetector collisionDetector;
     private final Module[] modules = new Module[4]; // FL, FR, BL, BR
     private final SysIdRoutine sysId;
     private final Alert gyroDisconnectedAlert =
             new Alert("Disconnected gyro, using kinematics as fallback.", AlertType.kError);
     private RobotConfig pathConfig;
     private CANrange range;
+    private CANrange range2;
 
     private final double[] skidAmountX = new double[4];
     private final double[] skidAmountY = new double[4];
 
-
     private final SwerveDriveKinematics kinematics = new SwerveDriveKinematics(moduleTranslations);
-    private Rotation2d rawGyroRotation = new Rotation2d();
+    // Access to this is guarded by `odometryLock` in most places; mark volatile to
+    // ensure visibility for any reads done without the lock.
+    private volatile Rotation2d rawGyroRotation = new Rotation2d();
     private final SwerveModulePosition[] lastModulePositions = // For delta tracking
             new SwerveModulePosition[] {
                 new SwerveModulePosition(),
@@ -82,13 +92,13 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
                 new SwerveModulePosition(),
                 new SwerveModulePosition()
             };
-    private final GoldenSwervePoseEstimator poseEstimator = new GoldenSwervePoseEstimator(
+    private final EnhancedSwervePoseEstimator poseEstimator = new EnhancedSwervePoseEstimator(
             kinematics,
             rawGyroRotation,
             lastModulePositions,
             new Pose2d(),
-            VecBuilder.fill(0.1, 0.1, 0.1),
-            VecBuilder.fill(0.25, 0.25, 99999999));
+            VecBuilder.fill(DriveConstants.baseXDriveSTDEV, DriveConstants.baseYDriveSTDEV, DriveConstants.baseThetaDriveSTDEV),
+            VecBuilder.fill(DriveConstants.baseXVisionSTDEV, DriveConstants.baseYVisionSTDEV, DriveConstants.baseThetaVisionSTDEV));
     private final Consumer<Pose2d> resetSimulationPoseCallBack;
 
     public Drive(
@@ -104,6 +114,9 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
         modules[1] = new Module(frModuleIO, 1);
         modules[2] = new Module(blModuleIO, 2);
         modules[3] = new Module(brModuleIO, 3);
+
+        bumpDetector = new BumpDetector(gyroIO.getPitchStatusSignal(), gyroIO.getRollStatusSignal(), Hertz.of(100));
+        collisionDetector = new CollisionDetector(gyroIO.getXAccelerationStatusSignal(), gyroIO.getYAccelerationStatusSignal(), Hertz.of(100));
 
         try{
             pathConfig = RobotConfig.fromGUISettings();
@@ -122,7 +135,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
                 this::resetOdometry,
                 this::getChassisSpeeds,
                 this::runVelocity,
-                new PPHolonomicDriveController(new PIDConstants(5.0, 0.0, 0.0), new PIDConstants(5.0, 0.0, 0.0)),
+                new PPHolonomicDriveController(new PIDConstants(7.5, 0.0, 0.0), new PIDConstants(5.0, 0.0, 0.0)),
                 this.pathConfig,
                 () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
                 this);
@@ -140,6 +153,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
                         null, null, null, (state) -> Logger.recordOutput("Drive/SysIdState", state.toString())),
                 new SysIdRoutine.Mechanism((voltage) -> runCharacterization(voltage.in(Volts)), null, this));
                 range = new CANrange(1);
+                range2 = new CANrange(2);
     }
 
     @Override
@@ -185,10 +199,13 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
                 }
             }
 
-            boolean[] isModulesSkidding = this.calculateSkidding();
-            boolean anySkidding = false;
+            double xDeviation = DriveConstants.baseXDriveSTDEV;
+            double yDeviation = DriveConstants.baseYDriveSTDEV;
+            double thetaDeviation = DriveConstants.baseThetaDriveSTDEV;
 
-            for (boolean bool : isModulesSkidding) {
+            // Skid: reuse the earlier computed isSkidding array
+            boolean anySkidding = false;
+            for (boolean bool : isSkidding) {
                 if (bool) {
                     anySkidding = true;
                     break;
@@ -197,21 +214,29 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
 
             if (anySkidding) {
                 // If any of the modules are skidding calculate the mean value of their skid velocity
-                double averageXSkid =
-                        DoubleStream.of(this.skidAmountX).average().getAsDouble();
-                double averageYSkid =
-                        DoubleStream.of(this.skidAmountY).average().getAsDouble();
+                double averageXSkid = DoubleStream.of(this.skidAmountX).average().orElse(0.0);
+                double averageYSkid = DoubleStream.of(this.skidAmountY).average().orElse(0.0);
 
                 Logger.recordOutput("averageXSkid", averageXSkid);
                 Logger.recordOutput("averageYSkid", averageYSkid);
 
-                // Increase the state deviations to reflect the amount of skid thats occuring
-                poseEstimator.setStateStdDevs(VecBuilder.fill(
-                       baseXDriveSTDEV + averageXSkid, baseYDriveSTDEV + averageYSkid, baseThetaDriveSTDEV));
-            } else {
-                poseEstimator.setStateStdDevs(VecBuilder.fill(baseXDriveSTDEV, baseYDriveSTDEV,
-                    baseThetaDriveSTDEV));
+                xDeviation += Math.sqrt(averageXSkid/3);
+                yDeviation += Math.sqrt(averageYSkid/3);
             }
+
+            // Bump
+
+            Pair<Double, Double> bumpStandardDeviations = bumpDetector.getBumpSTDDevs();
+
+            xDeviation += bumpStandardDeviations.getFirst();
+            yDeviation += bumpStandardDeviations.getSecond();
+
+            // TODO Collision
+            boolean anyCollision = collisionDetector.isColliding();
+
+            // Deviations Update
+            poseEstimator.setStateStdDevs(VecBuilder.fill(xDeviation, yDeviation,
+                thetaDeviation));
 
             // Update gyro angle
             if (gyroInputs.connected) {
@@ -223,8 +248,11 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
                 rawGyroRotation = rawGyroRotation.plus(new Rotation2d(twist.dtheta));
             }
 
+            boolean anyBumping = bumpDetector.isBumping();
+
             // Apply update
-            poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
+            if(!anyBumping)
+                poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
         }
 
         // Update gyro alert
@@ -312,7 +340,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
 
     /** Returns the measured chassis speeds of the robot. */
     @AutoLogOutput(key = "SwerveChassisSpeeds/Measured")
-    private ChassisSpeeds getChassisSpeeds() {
+    public ChassisSpeeds getChassisSpeeds() {
         return kinematics.toChassisSpeeds(getModuleStates());
     }
 
@@ -345,26 +373,50 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
         return getPose().getRotation();
     }
 
+    public Command driveToPose(Pose2d wantedPose){
+        Pathfinding.setStartPosition(getPose().getTranslation());
+        return new DeferredCommand(() ->AutoBuilder.pathfindToPose(wantedPose, new PathConstraints(2.5, 3, 2, 3)),Set.of(this));
+    }
+
+
     /** Resets the current odometry pose. */
     public void resetOdometry(Pose2d pose) {
-        resetSimulationPoseCallBack.accept(pose);
-        poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
+        // Acquire odometry lock to avoid races with periodic odometry updates.
+        odometryLock.lock();
+        try {
+            resetSimulationPoseCallBack.accept(pose);
+            poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
+        } finally {
+            odometryLock.unlock();
+        }
     }
 
     public void resetGyro(Pose2d pose) {
-        resetSimulationPoseCallBack.accept(pose);
-        gyroIO.resetHeading(pose.getRotation().getDegrees());
-        poseEstimator.resetPosition(pose.getRotation(), getModulePositions(), pose);
+        odometryLock.lock();
+        try {
+            resetSimulationPoseCallBack.accept(pose);
+            gyroIO.resetHeading(pose.getRotation().getDegrees());
+            poseEstimator.resetPosition(pose.getRotation(), getModulePositions(), pose);
+        } finally {
+            odometryLock.unlock();
+        }
     }
 
+    @AutoLogOutput(key = "Drive/CANRange Detected")
     public boolean getDetected(){
-        return range.getIsDetected().getValue();
+        return false;//range.getIsDetected().getValue();
     }
 
     /** Adds a new timestamped vision measurement. */
     @Override
     public void accept(Pose2d visionRobotPoseMeters, double timestampSeconds, Matrix<N3, N1> visionMeasurementStdDevs) {
-        poseEstimator.addVisionMeasurement(visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
+        // Protect estimator from concurrent updates
+        odometryLock.lock();
+        try {
+            poseEstimator.addVisionMeasurement(visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
+        } finally {
+            odometryLock.unlock();
+        }
     }
 
     /** Returns the maximum linear speed in meters per sec. */
@@ -378,7 +430,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
     }
 
     public double getVelocity(){
-        return gyroInputs.xVelocityRadPerSec+gyroInputs.yVelocityRadPerSec+gyroInputs.yawVelocityRadPerSec;
+        return gyroInputs.xVelocityRadPerSec+gyroInputs.yVelocityRadPerSec+(gyroInputs.yawVelocityRadPerSec);//(gyroInputs.zVelocityRadPerSec/1.5);
     }
 
     public boolean[] calculateSkidding() {
