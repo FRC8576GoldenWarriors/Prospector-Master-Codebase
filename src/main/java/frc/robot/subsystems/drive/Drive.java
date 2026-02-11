@@ -16,7 +16,6 @@ package frc.robot.subsystems.drive;
 import static edu.wpi.first.units.Units.*;
 import static frc.robot.subsystems.drive.DriveConstants.*;
 
-import com.ctre.phoenix6.hardware.CANrange;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
@@ -404,7 +403,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
 
     @AutoLogOutput(key = "Drive/CANRange Detected")
     public boolean getDetected(){
-        return range.getIsDetected().getValue();
+        return false;//range.getIsDetected().getValue();
     }
 
     /** Adds a new timestamped vision measurement. */

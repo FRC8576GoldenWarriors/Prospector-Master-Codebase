@@ -19,7 +19,6 @@ import static frc.robot.subsystems.vision.VisionConstants.*;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -30,7 +29,6 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.DriveCommands;
-import frc.robot.commands.DriveX;
 //import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.vision.*;
@@ -53,7 +51,7 @@ public class RobotContainer {
     private SwerveDriveSimulation driveSimulation = null;
 
     // Controller
-    private final CommandXboxController controller = new CommandXboxController(0);
+    public static final CommandXboxController controller = new CommandXboxController(0);
 
     public Trigger resetHeadingTrigger = new Trigger(() -> controller.start().getAsBoolean());
     // Dashboard inputs
@@ -82,6 +80,7 @@ public class RobotContainer {
                 new VisionIOLimelight(VisionConstants.camera3Name, drive::getRotation));
                 //shooter = new Shooter(0);
                 autos = new Autos(drive);
+                //intake = new Intake(new IntakeKrakenIO());
                 break;
             case SIM:
                 // create a maple-sim swerve drive simulation instance
@@ -146,10 +145,11 @@ public class RobotContainer {
         //         .a()
         //         .whileTrue(DriveCommands.joystickDriveAtAngle(
         //                 drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> new Rotation2d()));
-        controller.a().onTrue(new DriveX(drive, -0.5).until(()->drive.getDetected()));
-
-        // Switch to X pattern when X button is pressed
+        //controller.a().onTrue(new DriveX(drive, -0.5).until(()->drive.getDetected()));
+        //controller.a().onTrue(intake.setWantedState(IntakeStates.Rest));
+        // Switch to X pattern       when X button is pressed
         // controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
+        //controller.x().onTrue(intake.setWantedState(IntakeStates.Intake));
         controller.x().whileTrue(DriveCommands.joystickDriveAtAngle(drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> Rotation2d.fromDegrees(45)));
 
         // Reset gyro / odometry
