@@ -3,6 +3,8 @@ package frc.robot.subsystems.Shooter;
 import edu.wpi.first.units.measure.*;
 import static edu.wpi.first.units.Units.*;
 
+import edu.wpi.first.math.util.Units;
+
 public class ShooterConstants {
     // Motor IDs (Subset 30-40)
     public static final int LEFT_SHOOTER_ID = 31;
@@ -21,4 +23,11 @@ public class ShooterConstants {
 
     // Manual Testing Constants
     public static final double MANUAL_STEP_RPM = 10.0;
+
+    // Hardware Constants
+    public static final double SHOOTER_HEIGHT_METERS = Units.inchesToMeters(27.25); // When the shooter pivot is in the top position 
+
+    // Measurment Constants
+    public static final double RADIUS_OF_HUB_METERS = Units.inchesToMeters(41.73);
+
 }
