@@ -35,7 +35,7 @@ public class ShooterHood extends SubsystemBase {
 
     private double currentAnglePosition = 0.0;
     private double wantedAnglePosition = 0.0;
-    
+
 
     public ShooterHood(ShooterHoodIO io) {
         this.io = io;
