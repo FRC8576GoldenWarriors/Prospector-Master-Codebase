@@ -11,14 +11,13 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 
-package frc.robot.subsystems.Vision;
+package frc.robot.subsystems.vision;
+
+import static frc.robot.subsystems.vision.VisionConstants.aprilTagLayout;
 
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
-
-import static frc.robot.subsystems.Vision.VisionConstants.aprilTagLayout;
-
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;

@@ -14,7 +14,7 @@
 package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
-import static frc.robot.subsystems.Vision.VisionConstants.*;
+import static frc.robot.subsystems.vision.VisionConstants.*;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -31,9 +31,9 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.DriveX;
-import frc.robot.subsystems.Drive.*;
-import frc.robot.subsystems.Vision.*;
-
+//import frc.robot.subsystems.Shooter;
+import frc.robot.subsystems.drive.*;
+import frc.robot.subsystems.vision.*;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeCoralOnFly;
@@ -48,11 +48,12 @@ public class RobotContainer {
     // Subsystems
     public static Drive drive;
     private final Vision vision;
+    private final GyroIO gyro;
     //private final Shooter shooter;
     private SwerveDriveSimulation driveSimulation = null;
 
     // Controller
-    private final CommandXboxController controller = new CommandXboxController(0);
+    public static final CommandXboxController controller = new CommandXboxController(0);
 
     public Trigger resetHeadingTrigger = new Trigger(() -> controller.start().getAsBoolean());
     // Dashboard inputs
@@ -63,8 +64,9 @@ public class RobotContainer {
         switch (Constants.currentMode) {
             case REAL:
                 // Real robot, instantiate hardware IO implementations
+                gyro = new GyroIOPigeon2();
                 drive = new Drive(
-                        new GyroIOPigeon2(),
+                        gyro,
                         new ModuleIOSpark(0),
                         new ModuleIOSpark(1),
                         new ModuleIOSpark(2),
@@ -73,12 +75,14 @@ public class RobotContainer {
 
                 this.vision = new Vision(
                 drive,
+                drive::getChassisSpeeds,
                 new VisionIOLimelight(VisionConstants.camera0Name, drive::getRotation),
                 new VisionIOLimelight(VisionConstants.camera1Name, drive::getRotation),
-                new VisionIOLimelight(VisionConstants.camera2Name,drive::getRotation),
-                new VisionIOLimelight(VisionConstants.camera3Name,drive::getRotation));
+                new VisionIOLimelight(VisionConstants.camera2Name, drive::getRotation),
+                new VisionIOLimelight(VisionConstants.camera3Name, drive::getRotation));
                 //shooter = new Shooter(0);
                 autos = new Autos(drive);
+                //intake = new Intake(new IntakeKrakenIO());
                 break;
             case SIM:
                 // create a maple-sim swerve drive simulation instance
@@ -87,8 +91,9 @@ public class RobotContainer {
                 // add the simulated drivetrain to the simulation field
                 SimulatedArena.getInstance().addDriveTrainSimulation(driveSimulation);
                 // Sim robot, instantiate physics sim IO implementations
+                gyro = new GyroIOSim(driveSimulation.getGyroSimulation());
                 drive = new Drive(
-                        new GyroIOSim(driveSimulation.getGyroSimulation()),
+                        gyro,
                         new ModuleIOSim(driveSimulation.getModules()[0]),
                         new ModuleIOSim(driveSimulation.getModules()[1]),
                         new ModuleIOSim(driveSimulation.getModules()[2]),
@@ -97,6 +102,7 @@ public class RobotContainer {
 
                 vision = new Vision(
                 drive,
+                drive::getChassisSpeeds,
                 new VisionIOPhotonVisionSim(
                         camera0Name, robotToCamera0, driveSimulation::getSimulatedDriveTrainPose),
                 new VisionIOPhotonVisionSim(
@@ -106,14 +112,15 @@ public class RobotContainer {
                 break;
             default:
                 // Replayed robot, disable IO implementations
+                gyro = new GyroIO() {};
                 drive = new Drive(
-                        new GyroIO() {},
+                        gyro,
                         new ModuleIO() {},
                         new ModuleIO() {},
                         new ModuleIO() {},
                         new ModuleIO() {},
                         (pose) -> {});
-                vision = new Vision(drive, new VisionIO() {}, new VisionIO() {});
+                vision = new Vision(drive, drive::getChassisSpeeds, new VisionIO() {}, new VisionIO() {});
                 autos = null;
                // shooter = null;
                 break;
@@ -140,10 +147,11 @@ public class RobotContainer {
         //         .a()
         //         .whileTrue(DriveCommands.joystickDriveAtAngle(
         //                 drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> new Rotation2d()));
-        controller.a().onTrue(new DriveX(drive, -0.5).until(()->drive.getDetected()));
-
-        // Switch to X pattern when X button is pressed
+        //controller.a().onTrue(new DriveX(drive, -0.5).until(()->drive.getDetected()));
+        //controller.a().onTrue(intake.setWantedState(IntakeStates.Rest));
+        // Switch to X pattern       when X button is pressed
         // controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
+        //controller.x().onTrue(intake.setWantedState(IntakeStates.Intake));
         controller.x().whileTrue(DriveCommands.joystickDriveAtAngle(drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> Rotation2d.fromDegrees(45)));
 
         // Reset gyro / odometry
@@ -182,7 +190,7 @@ public class RobotContainer {
         resetHeadingTrigger.onTrue(new InstantCommand(() -> {
             Pose2d currentPose = drive.getPose();
             Pose2d resetPose = new Pose2d(
-                    new Translation2d(currentPose.getX(), currentPose.getY()),
+                    new Translation2d(Inches.of(651.22).in(Meters), Inches.of(317.69).in(Meters)),//new Translation2d(currentPose.getX(), currentPose.getY()),
                     (DriverStation.getAlliance().get() == Alliance.Red) ? Rotation2d.k180deg : Rotation2d.kZero);
             drive.resetGyro(resetPose);
         }));
@@ -194,7 +202,7 @@ public class RobotContainer {
                     (DriverStation.getAlliance().get() == Alliance.Red) ? Rotation2d.k180deg : Rotation2d.kZero);
             drive.resetGyro(resetPose);
         }));
-        controller.povDown().onTrue(new DriveX(drive, 2).withTimeout(1));
+        controller.povDown().whileTrue(drive.driveToPose(new Pose2d(14.6,4.75,Rotation2d.k180deg)).andThen(new DriveX(drive,-0.1).until(()->drive.getDetected())));
         // controller.leftBumper().onTrue(new InstantCommand(() -> {shooter.setRPS(40);}));
         // controller.rightBumper().onTrue(new InstantCommand(() -> {shooter.setRPS(0);}));
     }

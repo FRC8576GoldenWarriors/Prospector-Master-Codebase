@@ -28,9 +28,8 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.robot.subsystems.Drive.Drive;
-import frc.robot.subsystems.Drive.DriveConstants;
-
+import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.drive.DriveConstants;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.LinkedList;
@@ -108,18 +107,18 @@ public class DriveCommands {
         ProfiledPIDController angleController = new ProfiledPIDController(
                 ANGLE_KP, 0.0, ANGLE_KD, new TrapezoidProfile.Constraints(ANGLE_MAX_VELOCITY, ANGLE_MAX_ACCELERATION));
         angleController.enableContinuousInput(-Math.PI, Math.PI);
-
         // Construct command
         return Commands.run(
                         () -> {
                             // Get linear velocity
                             Translation2d linearVelocity =
                                     getLinearVelocityFromJoysticks(xSupplier.getAsDouble(), ySupplier.getAsDouble());
+                                double rotationAngle = (drive.getRotation().getRadians()>0)?rotationSupplier.get().getRadians():-rotationSupplier.get().getRadians();
 
                             // Calculate angular speed
                             double omega = angleController.calculate(
                                     drive.getRotation().getRadians(),
-                                    rotationSupplier.get().getRadians());
+                                    rotationAngle);
 
                             // Convert to field relative speeds & send command
                             ChassisSpeeds speeds = new ChassisSpeeds(
