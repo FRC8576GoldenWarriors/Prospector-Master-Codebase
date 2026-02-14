@@ -15,7 +15,7 @@ public class ShooterUtil {
         double rHub = ShooterConstants.RADIUS_OF_HUB_METERS;
         double Rmin = limelightDistanceMeters - rHub;
         double Rmax = limelightDistanceMeters + rHub;
-        
+
         // Max and Min Velocity for shooting in hub
         double Vmin = Math.sqrt((9.81 * Math.pow(Rmin, 2)) / (2 * Math.pow(Math.cos(theta), 2) * (Rmin * Math.tan(theta) - netHeight)));
         double Vmax = Math.sqrt((9.81 * Math.pow(Rmax, 2)) / (2 * Math.pow(Math.cos(theta), 2) * (Rmax * Math.tan(theta) - netHeight)));

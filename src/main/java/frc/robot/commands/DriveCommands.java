@@ -108,18 +108,18 @@ public class DriveCommands {
         ProfiledPIDController angleController = new ProfiledPIDController(
                 ANGLE_KP, 0.0, ANGLE_KD, new TrapezoidProfile.Constraints(ANGLE_MAX_VELOCITY, ANGLE_MAX_ACCELERATION));
         angleController.enableContinuousInput(-Math.PI, Math.PI);
+
         // Construct command
         return Commands.run(
                         () -> {
                             // Get linear velocity
                             Translation2d linearVelocity =
                                     getLinearVelocityFromJoysticks(xSupplier.getAsDouble(), ySupplier.getAsDouble());
-                                double rotationAngle = (drive.getRotation().getRadians()>0)?rotationSupplier.get().getRadians():-rotationSupplier.get().getRadians();
 
                             // Calculate angular speed
                             double omega = angleController.calculate(
                                     drive.getRotation().getRadians(),
-                                    rotationAngle);
+                                    rotationSupplier.get().getRadians());
 
                             // Convert to field relative speeds & send command
                             ChassisSpeeds speeds = new ChassisSpeeds(

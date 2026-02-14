@@ -19,7 +19,6 @@ import static frc.robot.subsystems.Drive.DriveConstants.module_average_kA_Turn;
 
 import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.RobotConfig;
-
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -148,18 +147,16 @@ public class DriveConstants {
                     KilogramSquareMeters.of(0.02),
                     wheelCOF));
 
-    public static final double skidThresholdX = 0.1;//0.035;//0.03;
-    public static final double skidThresholdY = 0.1;//0.029;//0.029
+    public static final double skidThresholdX = 0.04;
+    public static final double skidThresholdY = 0.02;//0.029
 
-    public static final double baseXDriveSTDEV = 0.09;
+    public static final double baseXDriveSTDEV = 0.09;//0.09
     public static final double baseYDriveSTDEV = 0.025;
     public static final double baseThetaDriveSTDEV = Units.degreesToRadians(0.001);
 
     public static final double baseXVisionSTDEV = 0.1;
     public static final double baseYVisionSTDEV = 0.1;
     public static final double baseThetaVisionSTDEV = 999999;
-
-    //public static final AprilTagFieldLayout layout = AprilTagFieldLayout.loadField(AprilTagFields.)
 
     // Module 1 Drive kA = 0.016577;
     // Module 2 Drive kA = 0.019138;

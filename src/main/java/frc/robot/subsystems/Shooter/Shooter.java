@@ -48,7 +48,7 @@ public class Shooter extends SubsystemBase {
           break;
 
         case SHOOT:
-          wantedRPS = ShooterUtil.calculateShotVelocity();
+          wantedRPS = ShooterUtil.calculateShotVelocity(0,0);//REPLACE LATER WITH REAL PARAMETERS
           io.setShooterVelocity(wantedRPS, wantedRPS);
           break;
 
