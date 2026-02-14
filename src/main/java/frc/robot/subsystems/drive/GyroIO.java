@@ -11,24 +11,52 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 
-package frc.robot.subsystems.Drive;
+package frc.robot.subsystems.drive;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.LinearAcceleration;
+
+
 import org.littletonrobotics.junction.AutoLog;
+
+import com.ctre.phoenix6.StatusSignal;
 
 public interface GyroIO {
     @AutoLog
     public static class GyroIOInputs {
         public boolean connected = false;
         public Rotation2d yawPosition = new Rotation2d();
+        public double pitchDegrees = 0;
+        public double rollDegrees = 0;
         public double yawVelocityRadPerSec = 1;
         public double xVelocityRadPerSec = 1;
         public double yVelocityRadPerSec = 1;
+        public double zVelocityRadPerSec = 1;
+        public double xAccelerationMetersPerSecondPerSecond = 1;
+        public double yAccelerationMetersPerSecondPerSecond = 1;
+        public double zAccelerationMetersPerSecondPerSecond = 1;
         public double[] odometryYawTimestamps = new double[] {};
         public Rotation2d[] odometryYawPositions = new Rotation2d[] {};
     }
 
     public default void updateInputs(GyroIOInputs inputs) {}
+
+    public default StatusSignal<LinearAcceleration> getXAccelerationStatusSignal() {
+        return null;
+    }
+
+    public default StatusSignal<LinearAcceleration> getYAccelerationStatusSignal() {
+        return null;
+    }
+
+    public default StatusSignal<Angle> getPitchStatusSignal() {
+        return null;
+    }
+
+    public default StatusSignal<Angle> getRollStatusSignal() {
+        return null;
+    }
 
     public default void resetHeading(double headingDegrees) {}
 }

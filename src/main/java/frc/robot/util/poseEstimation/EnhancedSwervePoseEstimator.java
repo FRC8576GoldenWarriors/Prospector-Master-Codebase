@@ -2,7 +2,7 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.util;
+package frc.robot.util.poseEstimation;
 
 import edu.wpi.first.math.MathSharedStore;
 import edu.wpi.first.math.MathUtil;
@@ -31,12 +31,12 @@ import java.util.TreeMap;
  * {@link SwerveDriveOdometry}. This class benefits over {@link SwerveDrivePoseEstimator} by being able to adjust the
  * state deviations after initialization.
  *
- * <p>{@link GoldenSwervePoseEstimator#update} should be called every robot loop.
+ * <p>{@link EnhancedSwervePoseEstimator#update} should be called every robot loop.
  *
- * <p>{@link GoldenSwervePoseEstimator#addVisionMeasurement} can be called as infrequently as you want; if you never
+ * <p>{@link EnhancedSwervePoseEstimator#addVisionMeasurement} can be called as infrequently as you want; if you never
  * call it, then this class will behave as regular encoder odometry.
  */
-public class GoldenSwervePoseEstimator {
+public class EnhancedSwervePoseEstimator {
     private final int m_numModules;
     private final Odometry<SwerveModulePosition[]> m_odometry;
     private final Matrix<N3, N1> m_q = new Matrix<>(Nat.N3(), Nat.N1());
@@ -67,7 +67,7 @@ public class GoldenSwervePoseEstimator {
      *     position in meters, and heading in radians). Increase these numbers to trust the vision pose measurement
      *     less.
      */
-    public GoldenSwervePoseEstimator(
+    public EnhancedSwervePoseEstimator(
             SwerveDriveKinematics kinematics,
             Rotation2d gyroAngle,
             SwerveModulePosition[] modulePositions,
