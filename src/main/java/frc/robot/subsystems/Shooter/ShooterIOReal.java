@@ -20,7 +20,6 @@ public class ShooterIOReal implements ShooterIO {
   public ShooterIOReal() {
     leftMotor = new TalonFX(ShooterConstants.LEFT_SHOOTER_ID);
     rightMotor = new TalonFX(ShooterConstants.RIGHT_SHOOTER_ID);
-    AngleMotor = new 
 
     TalonFXConfiguration config = new TalonFXConfiguration();
 
