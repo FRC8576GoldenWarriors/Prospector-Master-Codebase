@@ -27,6 +27,7 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.RobotContainer;
 import frc.robot.subsystems.vision.VisionIO.PoseObservationType;
 import java.util.LinkedList;
 import java.util.List;
@@ -67,6 +68,12 @@ public class Vision extends SubsystemBase {
      */
     public Rotation2d getTargetX(int cameraIndex) {
         return inputs[cameraIndex].latestTargetObservation.tx();
+    }
+
+    public void resetHeading() {
+        for(VisionIO visionIO : io) {
+            visionIO.resetHeading();
+        }
     }
 
     @Override
@@ -118,7 +125,9 @@ public class Vision extends SubsystemBase {
                         || observation.pose().getX() < 0.0
                         || observation.pose().getX() > aprilTagLayout.getFieldLength()
                         || observation.pose().getY() < 0.0
-                        || observation.pose().getY() > aprilTagLayout.getFieldWidth();
+                        || observation.pose().getY() > aprilTagLayout.getFieldWidth()
+                        || (Math.abs(observation.angularVelocity()) > 0.1 * Math.PI
+                        && RobotContainer.controller.x().getAsBoolean());
 
                 // Add pose to log
                 robotPoses.add(observation.pose());

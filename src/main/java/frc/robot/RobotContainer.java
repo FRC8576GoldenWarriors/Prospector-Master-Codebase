@@ -53,7 +53,7 @@ public class RobotContainer {
     private SwerveDriveSimulation driveSimulation = null;
 
     // Controller
-    private final CommandXboxController controller = new CommandXboxController(0);
+    public static final CommandXboxController controller = new CommandXboxController(0);
 
     public Trigger resetHeadingTrigger = new Trigger(() -> controller.start().getAsBoolean());
     // Dashboard inputs
@@ -76,10 +76,10 @@ public class RobotContainer {
                 this.vision = new Vision(
                 drive,
                 drive::getChassisSpeeds,
-                new VisionIOLimelight(VisionConstants.camera0Name, drive::getRotation),
-                new VisionIOLimelight(VisionConstants.camera1Name, drive::getRotation),
-                new VisionIOLimelight(VisionConstants.camera2Name, drive::getRotation),
-                new VisionIOLimelight(VisionConstants.camera3Name, drive::getRotation));
+                new VisionIOLimelight(VisionConstants.camera0Name, drive::getRotation, drive::getChassisSpeeds),
+                new VisionIOLimelight(VisionConstants.camera1Name, drive::getRotation, drive::getChassisSpeeds),
+                new VisionIOLimelight(VisionConstants.camera2Name, drive::getRotation, drive::getChassisSpeeds),
+                new VisionIOLimelight(VisionConstants.camera3Name, drive::getRotation, drive::getChassisSpeeds));
                 //shooter = new Shooter(0);
                 autos = new Autos(drive);
                 break;
@@ -103,9 +103,9 @@ public class RobotContainer {
                 drive,
                 drive::getChassisSpeeds,
                 new VisionIOPhotonVisionSim(
-                        camera0Name, robotToCamera0, driveSimulation::getSimulatedDriveTrainPose),
+                        camera0Name, robotToCamera0, driveSimulation::getSimulatedDriveTrainPose, drive::getChassisSpeeds),
                 new VisionIOPhotonVisionSim(
-                        camera1Name, robotToCamera1, driveSimulation::getSimulatedDriveTrainPose));
+                        camera1Name, robotToCamera1, driveSimulation::getSimulatedDriveTrainPose, drive::getChassisSpeeds));
                 //shooter = null;
                 autos = new Autos(drive);
                 break;
@@ -150,7 +150,8 @@ public class RobotContainer {
 
         // Switch to X pattern when X button is pressed
         // controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
-        controller.x().whileTrue(DriveCommands.joystickDriveAtAngle(drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> Rotation2d.fromDegrees(45)));
+        controller.x().whileTrue(DriveCommands.joystickDriveAt45(drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), drive::getPose));
+        controller.y().whileTrue(DriveCommands.joystickDriveTagCentric(drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), drive::getPose));
 
         // Reset gyro / odometry
         final Runnable resetGyro = Constants.currentMode == Constants.Mode.SIM
@@ -191,6 +192,7 @@ public class RobotContainer {
                     new Translation2d(Inches.of(651.22).in(Meters), Inches.of(317.69).in(Meters)),//new Translation2d(currentPose.getX(), currentPose.getY()),
                     (DriverStation.getAlliance().get() == Alliance.Red) ? Rotation2d.k180deg : Rotation2d.kZero);
             drive.resetGyro(resetPose);
+            vision.resetHeading();
         }));
         controller.povUp().onTrue(new InstantCommand(() -> {
             Pose2d resetPose = new Pose2d(

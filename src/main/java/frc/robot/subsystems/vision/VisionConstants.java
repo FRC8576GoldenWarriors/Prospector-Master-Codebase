@@ -13,10 +13,13 @@
 
 package frc.robot.subsystems.vision;
 
+import static edu.wpi.first.units.Units.Seconds;
+
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.units.measure.Time;
 
 public class VisionConstants {
     // AprilTag layout
@@ -52,4 +55,7 @@ public class VisionConstants {
     // Multipliers to apply for MegaTag 2 observations
     public static double linearStdDevMegatag2Factor = 0.1;//0.2; // More stable than full 3D solve
     public static double angularStdDevMegatag2Factor = Double.POSITIVE_INFINITY; // No rotation data available
+
+    // Time for internal IMU to converge after reset, in seconds
+    public static final Time internalIMUConvergenceTime = Seconds.of(0.5);
 }

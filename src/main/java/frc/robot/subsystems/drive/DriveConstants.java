@@ -16,6 +16,7 @@ package frc.robot.subsystems.drive;
 import static edu.wpi.first.units.Units.*;
 import static frc.robot.subsystems.drive.DriveConstants.module_average_kA_Drive;
 import static frc.robot.subsystems.drive.DriveConstants.module_average_kA_Turn;
+import static frc.robot.subsystems.drive.DriveConstants.wheelRadiusMeters;
 
 import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.RobotConfig;
@@ -82,6 +83,7 @@ public class DriveConstants {
     public static final double driveEncoderVelocityFactor =
             (2 * Math.PI) / 60.0 / driveMotorReduction; // Rotor RPM -> Wheel Rad/Sec
 
+        public static final double maxSpeedRPM = maxSpeedMetersPerSec/(2*Math.PI*wheelRadiusMeters)*60;
     // Drive PID configuration
     public static final double driveKp = 0.008; // 0.0;
     public static final double driveKd = 0.0;
