@@ -7,6 +7,8 @@ import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
@@ -21,6 +23,8 @@ public class ShooterHood extends SubsystemBase {
     private double FFVoltage;
     private double inputVoltage;
     public ShooterHoodIOKraken motor = new ShooterHoodIOKraken();
+    private Alert shooterHoodMotorAlert = new Alert("The Shooter Hood Motor is disconnected", AlertType.kError);
+    private Alert shooterHoodEncoderAlert = new Alert("The Shooter Hood Encoder is disconnected", AlertType.kError);
 
 
     public enum ShooterHoodStates {
@@ -100,6 +104,10 @@ public class ShooterHood extends SubsystemBase {
   } else {
         setWantedState(ShooterHoodStates.Idle);
   }
+
+    shooterHoodMotorAlert.set(!inputs.isMotorConnected);
+    shooterHoodEncoderAlert.set(!inputs.isEncoderConnected);
+
 
   }
 }
