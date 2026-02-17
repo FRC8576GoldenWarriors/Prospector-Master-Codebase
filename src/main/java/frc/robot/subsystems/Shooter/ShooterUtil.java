@@ -5,9 +5,10 @@ import edu.wpi.first.units.measure.*;
 import static edu.wpi.first.units.Units.*;
 import edu.wpi.first.math.util.Units;
 
+import static frc.robot.subsystems.Shooter.ShooterConstants.netHeight;
+
 public class ShooterUtil {
 
-    public static final double netHeight = Units.inchesToMeters(72) - ShooterConstants.SHOOTER_HEIGHT_METERS;
 
     public static AngularVelocity calculateShotVelocity(double limelightDistanceMeters, double hoodAngleDegrees) {
         //Variables
@@ -26,10 +27,5 @@ public class ShooterUtil {
         // Convert m/s to RPS
         double RPSBest = Vbest / (2.0 * Math.PI * Units.inchesToMeters(3));
         return RotationsPerSecond.of(RPSBest);
-    }
-
-
-    public static double calculateHoodAngleDegrees(double limelightDistanceMeters) {
-        return Math.toDegrees(Math.atan2((netHeight + Math.sqrt(Math.pow(netHeight, 2)+ Math.pow(limelightDistanceMeters, 2))),limelightDistanceMeters));
     }
 }
