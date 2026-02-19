@@ -39,6 +39,8 @@ import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeCoralOnFly;
 import org.littletonrobotics.junction.Logger;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a "declarative" paradigm, very
  * little robot logic should actually be handled in the {@link Robot} periodic methods (other than the scheduler calls).
@@ -138,7 +140,9 @@ public class RobotContainer {
      */
     private void configureButtonBindings() {
         // Default command, normal field-relative drive
-        drive.setDefaultCommand(DriveCommands.joystickDrive(
+        // drive.setDefaultCommand(DriveCommands.joystickDrive(
+        //        drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> -controller.getRightX()));
+        drive.setDefaultCommand(DriveCommands.joystickAdvancedDrive(
                drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> -controller.getRightX()));
 
         // Lock to 0° when A button is held
@@ -150,7 +154,7 @@ public class RobotContainer {
 
         // Switch to X pattern when X button is pressed
         // controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
-        controller.x().whileTrue(DriveCommands.joystickDriveAt45(drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), drive::getPose));
+        controller.x().whileTrue(AutoBuilder.followPath(DriveCommands.driveOverBump(()->drive.getPose())));//DriveCommands.joystickDriveAt45(drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), drive::getPose));
         controller.y().whileTrue(DriveCommands.joystickDriveTagCentric(drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), drive::getPose));
 
         // Reset gyro / odometry

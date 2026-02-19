@@ -10,9 +10,11 @@ import static edu.wpi.first.units.Units.Seconds;
 import java.util.Map.Entry;
 
 import org.littletonrobotics.junction.AutoLogOutput;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 import com.ctre.phoenix6.StatusSignal;
 
+import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.interpolation.TimeInterpolatableBuffer;
@@ -49,8 +51,8 @@ public class CollisionDetector {
   private final Time accelerationBufferHistorySeconds = Seconds.of(0.05);
   private final Time debounceSignalTimeSeconds = Seconds.of(0.01);
 
-  private final double xJoltThreshold = 10;
-  private final double yJoltThreshold = 10;
+  private final LoggedNetworkNumber xJoltThreshold = new LoggedNetworkNumber("tunableXJoltThreshold", 400);
+  private final LoggedNetworkNumber yJoltThreshold = new LoggedNetworkNumber("tunableYJoltThreshold", 400);
 
   public CollisionDetector(StatusSignal<LinearAcceleration> xAccelerationSignal, StatusSignal<LinearAcceleration> yAccelerationSignal, Frequency updateFrequency) {
     this.xAccelerationSignal = xAccelerationSignal;
@@ -80,6 +82,8 @@ public class CollisionDetector {
       Entry<Double, Double> end = xAccelerationInterpolatableBuffer.getInternalBuffer().lastEntry();
 
       currentXJolt = (end.getValue() - start.getValue()) / (end.getKey() - start.getKey());
+    } else {
+      currentXJolt = 0;
     }
 
     if(yAccelerationInterpolatableBuffer.getInternalBuffer().size() > 1) {
@@ -87,9 +91,11 @@ public class CollisionDetector {
       Entry<Double, Double> end = yAccelerationInterpolatableBuffer.getInternalBuffer().lastEntry();
 
       currentYJolt = (end.getValue() - start.getValue()) / (end.getKey() - start.getKey());
+    } else {
+      currentYJolt = 0;
     }
 
-    isColliding = xSignalDebouncer.calculate(Math.abs(currentXJolt) > xJoltThreshold) || ySignalDebouncer.calculate(Math.abs(currentYJolt) > yJoltThreshold);
+    isColliding = xSignalDebouncer.calculate(Math.abs(currentXJolt) > xJoltThreshold.get()) || ySignalDebouncer.calculate(Math.abs(currentYJolt) > yJoltThreshold.get());
 
     if(isColliding) {
       if(!timeSinceCollision.isRunning())
@@ -100,10 +106,13 @@ public class CollisionDetector {
 
   }
 
-  // public Pair<Double, Double> getCollisionSTDDevs() {
+  public Pair<Double, Double> getCollisionSTDDevs() {
+    double timeSinceCollisionSeconds = timeSinceCollision.get();
 
-  //   return Pair.of();
-  // }
+    double xStdDev = (!timeSinceCollision.isRunning()) ? 0.0 : Math.pow(Math.E, -(timeSinceCollisionSeconds - 1.25));
+    double yStdDev = (!timeSinceCollision.isRunning()) ? 0.0 : Math.pow(Math.E, -(timeSinceCollisionSeconds - 1.25));
+    return Pair.of(xStdDev, yStdDev);
+  }
 
   public boolean isColliding() {
     return isColliding;

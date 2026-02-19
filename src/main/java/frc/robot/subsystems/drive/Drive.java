@@ -36,6 +36,7 @@ import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -79,7 +80,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
     private final SysIdRoutine sysId;
     private final Alert gyroDisconnectedAlert =
             new Alert("Disconnected gyro, using kinematics as fallback.", AlertType.kError);
-    private RobotConfig pathConfig;
+    public static RobotConfig pathConfig;
     private CANrange range;
     private CANrange range2;
 
@@ -202,11 +203,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
                 moduleDeltas[moduleIndex] = new SwerveModulePosition(
                         modulePositions[moduleIndex].distanceMeters - lastModulePositions[moduleIndex].distanceMeters,
                         modulePositions[moduleIndex].angle);
-                if (!isSkidding[moduleIndex]) {
-                    lastModulePositions[moduleIndex] = modulePositions[moduleIndex];
-                } else {
-                    modulePositions[moduleIndex] = lastModulePositions[moduleIndex];
-                }
+                modulePositions[moduleIndex] = lastModulePositions[moduleIndex];
             }
 
             double xDeviation = DriveConstants.baseXDriveSTDEV;
@@ -242,7 +239,12 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
             yDeviation += bumpStandardDeviations.getSecond();
 
             // TODO Collision
-            boolean anyCollision = collisionDetector.isColliding();
+            //boolean anyCollision = collisionDetector.isColliding();
+
+            Pair<Double, Double> collisionStandardDeviations = collisionDetector.getCollisionSTDDevs();
+
+            xDeviation += collisionStandardDeviations.getFirst();
+            yDeviation += collisionStandardDeviations.getSecond();
 
             // Deviations Update
             poseEstimator.setStateStdDevs(VecBuilder.fill(xDeviation, yDeviation,
@@ -295,6 +297,64 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
 
         // Log optimized setpoints (runSetpoint mutates each state)
         Logger.recordOutput("SwerveStates/SetpointsOptimized", setpointStates);
+    }
+
+    public void runAdvancedVelocity(ChassisSpeeds speeds) {
+        runAdvancedVelocity(speeds, new Translation2d());
+    }
+
+    public void runAdvancedVelocity(ChassisSpeeds speeds, Translation2d centerOfRotationMeters) {
+
+        speeds = movementOptimizations(speeds, DriveConstants.useChasisDiscretize, DriveConstants.useAngularVelocitySkewCorrection);
+
+
+        // Calculate module setpoints
+        //previousSetpoint = setpointGenerator.generateSetpoint(previousSetpoint, speeds, 0.02);
+        //SwerveModuleState[] setpointStates = previousSetpoint.moduleStates();
+        // speeds = ChassisSpeeds.discretize(speeds, 0.02);
+        //previousSetpoint = setpointGenerator.generateSetpoint(previousSetpoint, speeds, Seconds.of(0.02), Volts.of(RobotController.getBatteryVoltage()));
+        // SwerveModuleState[] setpointStates = previousSetpoint.moduleStates();
+        SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(speeds, centerOfRotationMeters);
+        //SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, maxSpeedMetersPerSec);
+
+
+        // Log unoptimized setpoints
+        Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
+        Logger.recordOutput("SwerveChassisSpeeds/Setpoints", speeds);
+
+        SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, maxSpeedMetersPerSec);
+
+        // Send setpoints to modules
+        for (int i = 0; i < 4; i++) {
+            modules[i].runSetpoint(setpointStates[i]);
+        }
+
+        // Log optimized setpoints (runSetpoint mutates each state)
+        Logger.recordOutput("SwerveStates/SetpointsOptimized", setpointStates);
+    }
+
+    private ChassisSpeeds movementOptimizations(ChassisSpeeds velocity, boolean useChasisDiscretize, boolean useAngularVelocitySkewCorrection) {
+        if(useAngularVelocitySkewCorrection) {
+            velocity = angularVelocitySkewCorrection(velocity);
+        }
+
+        if(useChasisDiscretize) {
+            velocity = ChassisSpeeds.discretize(velocity, 0.02);
+        }
+
+        return velocity;
+    }
+
+    public ChassisSpeeds angularVelocitySkewCorrection(ChassisSpeeds velocity) {
+        Rotation2d currentAngularVelocity = new Rotation2d(gyroInputs.yawVelocityRadPerSec * angularVelocityCoefficient.get());
+        if(currentAngularVelocity.getRadians() != 0) {
+            velocity = ChassisSpeeds.fromRobotRelativeSpeeds(
+                velocity,
+                getRotation()
+            );
+            velocity = ChassisSpeeds.fromFieldRelativeSpeeds(velocity, getRotation().plus(currentAngularVelocity));
+        }
+        return velocity;
     }
 
     /** Runs the drive in a straight line with the specified drive output. */
