@@ -1,10 +1,22 @@
 package frc.robot;
 
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.path.PathPoint;
+import com.pathplanner.lib.path.RotationTarget;
+import com.pathplanner.lib.util.FlippingUtil;
 
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -34,9 +46,10 @@ public class Autos {
 
     public Command testAutonThingy(){
         try{
-        PathPlannerPath path = PathPlannerPath.fromPathFile("Random");
+        PathPlannerPath path = getFlippedPath(PathPlannerPath.fromPathFile("Random"));
+        path.preventFlipping = true;
         return Commands.sequence(
-          Commands.runOnce(() -> drive.resetOdometry(path.getStartingHolonomicPose().get())),
+           // Commands.run(()->drive.resetOdometry(path.getStartingHolonomicPose().get())),
           AutoBuilder.followPath(path));
         }catch(Exception e){
             e.printStackTrace();
@@ -46,5 +59,24 @@ public class Autos {
     }
     public Command getCommand(){
         return autoChooser.get();
+    }
+    public PathPlannerPath getFlippedPath(PathPlannerPath originalPath){
+        List<PathPoint> newPathPoints = new ArrayList<PathPoint>();
+        Rotation2d startingHeading = originalPath.getInitialHeading().plus(Rotation2d.k180deg);
+        TrapezoidProfile rotProfile = new TrapezoidProfile(new Constraints(Units.degreesToRadians(540), Units.degreesToRadians(720)));
+        TrapezoidProfile.State currentState = new TrapezoidProfile.State(MathUtil.angleModulus(startingHeading.getRadians()),0.0);
+
+        for(PathPoint point: originalPath.getAllPathPoints()){
+            //Rotation2d rotGoal = FlippingUtil.flipFieldRotation((point.rotationTarget.rotation()));
+            Rotation2d rotGoal = FlippingUtil.flipFieldPosition((point.position)).getAngle();
+            Rotation2d rotationSetpoint = new Rotation2d(rotProfile.calculate(point.distanceAlongPath, currentState, new TrapezoidProfile.State(MathUtil.angleModulus(rotGoal.getRadians() + Math.PI),0.0)).position);
+            newPathPoints.add(new PathPoint(
+                FlippingUtil.flipFieldPosition(point.position),
+                new RotationTarget(point.waypointRelativePos, rotationSetpoint),
+                point.constraints
+            ));
+        }
+
+        return PathPlannerPath.fromPathPoints(newPathPoints,originalPath.getGlobalConstraints(), originalPath.getGoalEndState().flip());
     }
 }
