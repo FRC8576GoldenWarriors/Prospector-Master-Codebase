@@ -10,7 +10,9 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
@@ -41,6 +43,10 @@ public class Intake extends SubsystemBase {
   private double kPDouble = kP.get();
   private LoggedNetworkNumber kV = new LoggedNetworkNumber("Tuning/kV",0.0);
   private double kVDouble = kV.get();
+  private Alert pivotMotorAlert = new Alert("The Pivot Motor is disconnected", AlertType.kError);
+  private Alert rollerMotorAlert = new Alert("The Roller Motor is disconnected", AlertType.kError);
+  private Alert leftEncoderAlert = new Alert("The Left Encoder is disconnected", AlertType.kError);
+  private Alert rightEncoderAlert = new Alert("The Right Encoder is disconnected", AlertType.kError);
 
   public Intake(IntakeIO io) {
     PID = new ProfiledPIDController(IntakeConstants.Software.kP, IntakeConstants.Software.kI, IntakeConstants.Software.kD, IntakeConstants.Software.profile);
@@ -118,17 +124,10 @@ public class Intake extends SubsystemBase {
         wantedState = IntakeStates.Idle;
      }
 
-
-    Logger.recordOutput("Intake/Wanted State", wantedState);
-    Logger.recordOutput("Intake/Wanted Roller Speed", wantedSpeed);
-    Logger.recordOutput("Intake/Wanted Pivot Position", PID.getSetpoint());
-    Logger.recordOutput("Intake/PID Voltage", PIDVoltage);
-    Logger.recordOutput("Intake/FF Voltage", FFVoltage);
-    Logger.recordOutput("Intake/Input Voltage", inputVoltage);
-
-
-
-
+      pivotMotorAlert.set(!inputs.pivotConnected);
+      rollerMotorAlert.set(!inputs.rollerConnected);
+      leftEncoderAlert.set(!inputs.leftEncoderConnected);
+      rightEncoderAlert.set(!inputs.rightEncoderConnected);
 
 }
 
