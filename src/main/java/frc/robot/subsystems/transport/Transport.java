@@ -40,7 +40,9 @@ public class Transport extends SubsystemBase {
     io.updateInputs(inputs);
     Logger.processInputs("Transport", inputs);
 
-    if (DriverStation.isDisabled() || (!RobotContainer.controller.rightBumper().getAsBoolean() && !isFuelDetected())) {
+    if (DriverStation.isDisabled() ||
+      !RobotContainer.controller.rightBumper().getAsBoolean() ||
+      (RobotContainer.controller.rightBumper().getAsBoolean() && !isFuelDetected())) {
       currentState = TransportStates.Idle;
     }
 
