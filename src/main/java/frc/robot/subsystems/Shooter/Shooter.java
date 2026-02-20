@@ -4,12 +4,17 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import edu.wpi.first.units.measure.*;
 import static edu.wpi.first.units.Units.*;
+
+import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Shooter extends SubsystemBase {
   private final ShooterIO io;
   private final ShooterIOInputsAutoLogged inputs = new ShooterIOInputsAutoLogged();
+  private Alert leftMotorAlert = new Alert("The Left Motor is disconnected", AlertType.kError);
+  private Alert rightMotorAlert = new Alert("The Right Motor is disconnected", AlertType.kError);
 
   public enum ShooterStates {
     IDLE,
@@ -69,5 +74,8 @@ public class Shooter extends SubsystemBase {
     } else {
       currentState = ShooterStates.IDLE;
     }
+
+    leftMotorAlert.set(!inputs.leftMotorConnected);
+    rightMotorAlert.set(!inputs.rightMotorConnected);
   }
 }
