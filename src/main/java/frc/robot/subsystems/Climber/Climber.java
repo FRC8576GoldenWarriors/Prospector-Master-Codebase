@@ -13,6 +13,8 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.RobotContainer;
+
 
 public class Climber extends SubsystemBase {
   /** Creates a new Intake. */
@@ -21,6 +23,9 @@ public class Climber extends SubsystemBase {
 
   public enum ClimberStates{
     Idle,
+    AutonClimb,
+    TeleClimb,
+    VoltageControl
   }
   private ClimberIOInputsAutoLogged inputs = new ClimberIOInputsAutoLogged();
 
@@ -28,11 +33,10 @@ public class Climber extends SubsystemBase {
   private ProfiledPIDController PID;
   private ArmFeedforward FF;
   private double currentPosition;
-  private double wantedSpeed;
   private double PIDVoltage;
   private double FFVoltage;
   private double inputVoltage;
-  private LoggedNetworkNumber kP = new LoggedNetworkNumber("Tuning/kP",IntakeConstants.Software.kP);
+  private LoggedNetworkNumber kP = new LoggedNetworkNumber("Tuning/kP",ClimberConstants.Software.kP);
   private double kPDouble = kP.get();
   private LoggedNetworkNumber kV = new LoggedNetworkNumber("Tuning/kV",0.0);
   private double kVDouble = kV.get();
@@ -47,25 +51,71 @@ public class Climber extends SubsystemBase {
   public void periodic() {
     io.updateInputs(inputs);
     Logger.processInputs("Climber", inputs);
-    currentPosition = inputs.leftEncoderRotations;
+    currentPosition = inputs.encoderRotations;
     kPDouble = kP.getAsDouble();
 
     kVDouble = kV.getAsDouble();
     PID.setP(kPDouble);
     FF.setKv(kVDouble);
      if (DriverStation.isEnabled()) {
+      if(inputs.photoelectricDetected){
+            wantedState = ClimberStates.Idle;
+        }
+      switch (wantedState) {
+        case Idle:
+          PIDVoltage  = 0;
+          FFVoltage   = 0;
+          inputVoltage= 0;
+          break;
+        case AutonClimb:
+          if(inputs.photoelectricDetected){
+            break;
+          }
 
+          PIDVoltage  = PID.calculate(currentPosition, ClimberConstants.Software.autoClimb);
+          FFVoltage = FF.calculate(ClimberConstants.Software.autoClimb, 0.5);
+          inputVoltage = PIDVoltage + FFVoltage;
+
+          io.setPivotSpeed(inputVoltage);
+          break;
+
+        case TeleClimb:
+          if(inputs.photoelectricDetected){
+            break;
+          }
+
+          PIDVoltage  = PID.calculate(currentPosition, ClimberConstants.Software.teleClimb);
+          FFVoltage = FF.calculate(ClimberConstants.Software.teleClimb, 0.5);
+          inputVoltage = PIDVoltage + FFVoltage;
+
+          io.setPivotSpeed(inputVoltage);
+          break;
+
+        case VoltageControl:
+          if (RobotContainer.controller.rightBumper().getAsBoolean()) {
+            io.setPivotSpeed(0.1);
+            } else if (RobotContainer.controller.leftBumper().getAsBoolean()) {
+              io.setPivotSpeed(-0.1);
+            } else {
+                wantedState = ClimberStates.Idle;
+            }
+          break;
+
+
+
+        default:
+          break;
+      }
     }else{
         wantedState = ClimberStates.Idle;
      }
 
 
-    Logger.recordOutput("Intake/Wanted State", wantedState);
-    Logger.recordOutput("Intake/Wanted Roller Speed", wantedSpeed);
-    Logger.recordOutput("Intake/Wanted Pivot Position", PID.getSetpoint());
-    Logger.recordOutput("Intake/PID Voltage", PIDVoltage);
-    Logger.recordOutput("Intake/FF Voltage", FFVoltage);
-    Logger.recordOutput("Intake/Input Voltage", inputVoltage);
+    Logger.recordOutput("Climber/Wanted State", wantedState);
+    Logger.recordOutput("Climber/Wanted Pivot Position", PID.getSetpoint());
+    Logger.recordOutput("Climber/PID Voltage", PIDVoltage);
+    Logger.recordOutput("Climber/FF Voltage", FFVoltage);
+    Logger.recordOutput("Climber/Input Voltage", inputVoltage);
 
 
 
@@ -73,7 +123,11 @@ public class Climber extends SubsystemBase {
 
 }
 
-public void setWantedPosition(IntakeStates wantedState) {
+public double findDiff(){
+  return inputs.frontLeftCANRangeDistance - inputs.frontRightANRangeDistance;
+}
+
+public void setWantedPosition(ClimberStates wantedState) {
     this.wantedState = wantedState;
 }
 
@@ -82,9 +136,9 @@ public void resetPID() {
 }
 
 // TO-DO : MAKE THIS IN MACROS CLASS
-public SequentialCommandGroup setWantedState(IntakeStates state){
+public SequentialCommandGroup setWantedState(ClimberStates state){
     return null;//new SequentialCommandGroup(new InstantCommand(()->this.resetPID(), RobotContainer.intake), new InstantCommand(()->this.setWantedPosition(state), RobotContainer.intake) );
 }
 
-//
+
 }
