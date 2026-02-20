@@ -40,6 +40,12 @@ import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
+import com.pathplanner.lib.path.GoalEndState;
+import com.pathplanner.lib.path.IdealStartingState;
+import com.pathplanner.lib.path.PathConstraints;
+import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.path.Waypoint;
+
 public class DriveCommands {
     private static final double DEADBAND = 0.1;
     private static final double ANGLE_KP = 5.0;
@@ -94,6 +100,36 @@ public class DriveCommands {
                             isFlipped ? drive.getRotation().plus(new Rotation2d(Math.PI)) : drive.getRotation());
                     Logger.recordOutput("Drivetrain/Turn Speeds", speeds.omegaRadiansPerSecond);
                     drive.runVelocity(speeds);
+                },
+                drive);
+    }
+
+    public static Command joystickAdvancedDrive(
+            Drive drive, DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier omegaSupplier) {
+        return Commands.run(
+                () -> {
+                    // Get linear velocity
+                    Translation2d linearVelocity =
+                            getLinearVelocityFromJoysticks(xSupplier.getAsDouble(), ySupplier.getAsDouble());
+
+                    // Apply rotation deadband
+                    double omega = MathUtil.applyDeadband(omegaSupplier.getAsDouble(), DEADBAND);
+
+                    // Square rotation value for more precise control
+                    omega = Math.copySign(omega * omega, omega);
+
+                    // Convert to field relative speeds & send command
+                    ChassisSpeeds speeds = new ChassisSpeeds(
+                            linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
+                            linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
+                            omega * drive.getMaxAngularSpeedRadPerSec());
+                    boolean isFlipped = DriverStation.getAlliance().isPresent()
+                            && DriverStation.getAlliance().get() == Alliance.Red;
+                    speeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+                            speeds,
+                            isFlipped ? drive.getRotation().plus(new Rotation2d(Math.PI)) : drive.getRotation());
+                    Logger.recordOutput("Drivetrain/Turn Speeds", speeds.omegaRadiansPerSecond);
+                    drive.runAdvancedVelocity(speeds);
                 },
                 drive);
     }
@@ -199,7 +235,7 @@ public class DriveCommands {
                                 isFlipped
                                         ? drive.getRotation().plus(new Rotation2d(Math.PI))
                                         : drive.getRotation());
-                        drive.runVelocity(speeds);
+                        drive.runAdvancedVelocity(speeds);
                         },
                         drive)
         )
@@ -262,6 +298,98 @@ public class DriveCommands {
                 // Reset PID controller when command starts
                 .beforeStarting(() -> angleController.reset(drive.getRotation().getRadians()));
     }
+
+//     public static PathPlannerPath driveOverBump(Supplier<Pose2d> currentPose){
+//         Translation2d botTranslation = currentPose.get().getTranslation();
+
+//                                 List<Translation2d> hubs = List.of(
+//                                         new Translation2d(Units.inchesToMeters(181.56), Units.inchesToMeters(158.32)),
+//                                         new Translation2d(Units.inchesToMeters(468.56), Units.inchesToMeters(158.32))
+//                                 );
+//                                 Translation2d closestHub = botTranslation.nearest(hubs);
+
+//                                 double relX = botTranslation.getX() - closestHub.getX();
+//                                 double relY = botTranslation.getY() - closestHub.getY();
+
+//                                 double angle = Math.atan(relY/relX);
+//                                 if(DriverStation.getAlliance().get().equals(Alliance.Red))
+//                                         angle += Math.PI;
+//         Pose2d nextPose = currentPose.get().plus(new Transform2d(Units.inchesToMeters(47*Math.signum(relX)),Units.inchesToMeters(0),Rotation2d.fromRadians(angle).minus(currentPose.get().getRotation())));
+//         List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(currentPose.get(),nextPose);
+//         List<PathPoint> pathPoints = new ArrayList<PathPoint>();
+//         for(Waypoint point: waypoints){
+//                 if(!(point.nextControl() == null))
+//                         pathPoints.add(new PathPoint(point.nextControl()));
+//         }
+//         RobotConfig constraints = RobotContainer.drive.pathConfig;
+//         return (pathPoints==null)?null:PathPlannerPath.fromPathPoints(pathPoints, new PathConstraints(0.5, 0.75, Math.PI/2, Math.PI/1.5), new GoalEndState(MetersPerSecond.of(0), nextPose.getRotation()));
+
+
+//     }
+
+    public static PathPlannerPath driveOverBump(Supplier<Pose2d> currentPose) {
+    Pose2d robotPose = currentPose.get();
+    Translation2d botTranslation = robotPose.getTranslation();
+
+    // Define the hubs (center of the stages/bumps)
+    List<Translation2d> hubs = List.of(
+            new Translation2d(Units.inchesToMeters(181.56), Units.inchesToMeters(158.32)),
+            new Translation2d(Units.inchesToMeters(468.56), Units.inchesToMeters(158.32))
+    );
+    Translation2d closestHub = botTranslation.nearest(hubs);
+
+    // Calculate direction FROM hub TO bot
+    double relX = botTranslation.getX() - closestHub.getX();
+    double relY = botTranslation.getY() - closestHub.getY();
+
+    // The angle from the hub to the robot
+    double angleToBot = Math.atan2(relY, relX);
+
+    // To drive "Over the bump", we want to move toward the hub and out the other side.
+    // We create a translation vector pointing from the bot toward the hub,
+    // then extend it so the robot ends up on the opposite side.
+    double distanceOverBump = Units.inchesToMeters(47); // Adjust distance as needed
+
+    // Direction vector toward the hub (inverted relX/relY)
+        // Calculate the magnitude (distance from hub to bot)
+        double magnitude = Math.hypot(relX, relY);
+
+        // Create a unit vector pointing FROM the bot TOWARD the hub
+        // We divide by magnitude to get a length of 1.0, then multiply by our desired distance
+        Translation2d driveDirection = new Translation2d(-relX / magnitude, -relY / magnitude);
+
+        // Calculate the final target point
+        Translation2d targetTranslation = botTranslation.plus(
+        driveDirection.times(distanceOverBump) // Move 60 inches along that vector
+        );
+
+    // Keep the robot facing the same way or face the movement direction
+    Rotation2d targetRotation = robotPose.getRotation();
+
+        List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(
+        robotPose,
+        new Pose2d(10,6.02, targetRotation)
+        );
+        Logger.recordOutput("Bump Command/Wanted Pose", new Pose2d(targetTranslation, targetRotation));
+        // 2. Convert Waypoints to PathPoints
+        // We use the anchor point (the actual XY position) of each waypoint
+        // List<PathPoint> pathPoints = waypoints.stream()
+        // .map(waypoint -> new PathPoint(waypoint.anchor()))
+        // .toList();
+
+        // // 3. Return using fromPathPoints
+        // PathPlannerPath finalPath = PathPlannerPath.fromPathPoints(
+        // pathPoints,
+        // new PathConstraints(2.0, 2.5, Units.degreesToRadians(360), Units.degreesToRadians(540)),
+        // new GoalEndState(0.0, robotPose.getRotation())
+        //);
+        PathPlannerPath finalPath = new PathPlannerPath(waypoints, new PathConstraints(2.0, 2.5, Units.degreesToRadians(360), Units.degreesToRadians(540)),
+        new IdealStartingState(0, currentPose.get().getRotation()),
+        new GoalEndState(0.0, robotPose.getRotation()));
+        finalPath.preventFlipping = false;
+        Logger.recordOutput("Bump Path",  finalPath.getPathPoses().toArray(new Pose2d[finalPath.getPathPoses().size()]));
+        return finalPath;
+}
 
     /**
      * Measures the velocity feedforward constants for the drive motors.

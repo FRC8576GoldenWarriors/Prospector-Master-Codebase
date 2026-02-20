@@ -28,12 +28,16 @@ import edu.wpi.first.math.util.Units;
 import org.ironmaple.simulation.drivesims.COTS;
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class DriveConstants {
     public static final double maxSpeedMetersPerSec = 4.3; // 5.3; // 4.8;
     public static final double odometryFrequency = 250.0; // Hz
     public static final double trackWidth = Units.inchesToMeters(25);
     public static final double wheelBase = Units.inchesToMeters(25);
+    public static final LoggedNetworkNumber angularVelocityCoefficient = new LoggedNetworkNumber("Drive/angularVelocityCoefficient", 0.175);
+    public static final boolean useChasisDiscretize = false;
+    public static final boolean useAngularVelocitySkewCorrection = true;
     public static final double driveBaseRadius = Math.sqrt((Math.pow(trackWidth, 2) + Math.pow(wheelBase, 2)))
             / 2.0; // Math.hypot(trackWidth / 2.0, wheelBase / 2.0);
     // kevin pfeffer was here
