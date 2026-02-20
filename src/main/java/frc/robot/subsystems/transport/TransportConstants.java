@@ -15,6 +15,13 @@ public class TransportConstants {
     public static final int leftTransportPhotoelectricID = 2;
     public static final int rightTransportPhotoelectricID = 6;
 
+    // Untuned
+    public static final double kP = 0.11;
+    public static final double kI = 0.5;
+    public static final double kD = 0.001;
+    public static final double kV = 0.12;
+
+
     public static final InvertedValue transportMotorInversion = InvertedValue.CounterClockwise_Positive;
     public static final NeutralModeValue transportMotorNeutralMode = NeutralModeValue.Brake;
 
