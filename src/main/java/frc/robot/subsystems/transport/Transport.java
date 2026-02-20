@@ -4,7 +4,7 @@
 
 package frc.robot.subsystems.transport;
 
-import static edu.wpi.first.units.Units.Volts;
+import static edu.wpi.first.units.Units.RPM;
 
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
@@ -40,25 +40,25 @@ public class Transport extends SubsystemBase {
     io.updateInputs(inputs);
     Logger.processInputs("Transport", inputs);
 
-    if (DriverStation.isDisabled() || !RobotContainer.controller.rightBumper().getAsBoolean() && !isFuelDetected()) {
+    if (DriverStation.isDisabled() || (!RobotContainer.controller.rightBumper().getAsBoolean() && !isFuelDetected())) {
       currentState = TransportStates.Idle;
     }
 
     switch (currentState) {
       case Idle:
-        io.setTransportVoltage(Volts.of(0));
+        io.setTransportSpeed(RPM.of(0));
         break;
 
       case TransportIn:
-        io.setTransportVoltage(TransportConstants.transportInVoltage);
+        io.setTransportSpeed(TransportConstants.transportInSpeed);
         break;
 
       case TransportOut:
-        io.setTransportVoltage(TransportConstants.transportOutVoltage);
+        io.setTransportSpeed(TransportConstants.transportOutSpeed);
         break;
 
       default:
-        io.setTransportVoltage(Volts.of(0));
+        io.setTransportSpeed(RPM.of(0));
         currentState = TransportStates.Idle;
         break;
     }
