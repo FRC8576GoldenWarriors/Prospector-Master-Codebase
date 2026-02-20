@@ -57,6 +57,24 @@ public class Autos {
 
         }
     }
+
+    public PathPlannerPath flipPathWithoutHeading(PathPlannerPath originalPath){
+        if(originalPath!=null){
+        List<PathPoint> pathpoints = originalPath.getAllPathPoints();
+        List<PathPoint> endPoints = new ArrayList<PathPoint>();
+        originalPath = originalPath.flipPath();
+        List<PathPoint> flippedPath = originalPath.getAllPathPoints();
+        for(int i =0;i<pathpoints.size();i++){
+            endPoints.add(new PathPoint(
+                flippedPath.get(i).position,
+                pathpoints.get(i).rotationTarget,
+                pathpoints.get(i).constraints
+            ));
+        }
+        return PathPlannerPath.fromPathPoints(endPoints, originalPath.getGlobalConstraints(), originalPath.getGoalEndState());
+    }
+    return new PathPlannerPath(null, null, null, null);
+    }
     public Command getCommand(){
         return autoChooser.get();
     }
