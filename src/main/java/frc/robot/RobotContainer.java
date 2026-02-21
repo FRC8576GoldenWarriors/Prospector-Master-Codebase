@@ -17,6 +17,7 @@ import static edu.wpi.first.units.Units.*;
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
@@ -105,9 +106,9 @@ public class RobotContainer {
                 drive,
                 drive::getChassisSpeeds,
                 new VisionIOPhotonVisionSim(
-                        camera0Name, robotToCamera0, driveSimulation::getSimulatedDriveTrainPose, drive::getChassisSpeeds),
+                        camera0Name, robotToCamera0.minus(Pose3d.kZero), driveSimulation::getSimulatedDriveTrainPose, drive::getChassisSpeeds),
                 new VisionIOPhotonVisionSim(
-                        camera1Name, robotToCamera1, driveSimulation::getSimulatedDriveTrainPose, drive::getChassisSpeeds));
+                        camera1Name, robotToCamera1.minus(Pose3d.kZero), driveSimulation::getSimulatedDriveTrainPose, drive::getChassisSpeeds));
                 //shooter = null;
                 autos = new Autos(drive);
                 break;

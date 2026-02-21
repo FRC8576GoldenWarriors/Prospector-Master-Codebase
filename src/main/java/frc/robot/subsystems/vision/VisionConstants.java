@@ -13,13 +13,18 @@
 
 package frc.robot.subsystems.vision;
 
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Seconds;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.units.measure.Time;
+import frc.robot.util.PoseUtil;
 
 public class VisionConstants {
     // AprilTag layout
@@ -33,8 +38,21 @@ public class VisionConstants {
 
     // Robot to camera transforms
     // (Not used by Limelight, configure in web UI instead)
-    public static Transform3d robotToCamera0 = new Transform3d(0.2, 0.0, 0.2, new Rotation3d(0.0, -0.4, 0.0));
-    public static Transform3d robotToCamera1 = new Transform3d(-0.2, 0.0, 0.2, new Rotation3d(0.0, -0.4, Math.PI));
+    public static Pose3d robotToCamera0 = PoseUtil.toLimelightPose(Inches.of(-0.208), Inches.of(-6.018), Inches.of(-30.998), Degrees.of(0), Degrees.of(15), Degrees.of(0));
+    public static Pose3d robotToCamera1 = PoseUtil.toLimelightPose(Inches.of(3.025), Inches.of(-8.490), Inches.of(-9.252), Degrees.of(0), Degrees.of(15), Degrees.of(180));
+    public static Pose3d robotToCamera2 = PoseUtil.toLimelightPose(Inches.of(0.253), Inches.of(8.023), Inches.of(24.234), Degrees.of(0), Degrees.of(0), Degrees.of(180));
+    public static Pose3d robotToCamera3 = PoseUtil.toLimelightPose(Inches.of(-16.206), Inches.of(-5.881), Inches.of(-22.285), Degrees.of(-5), Degrees.of(0), Degrees.of(90));
+
+    // Name to Transform Map
+    public static HashMap<String, Pose3d> nameToPose3dHashMap = new HashMap<>(
+        Map.ofEntries(
+            Map.entry(camera0Name, robotToCamera0),
+            Map.entry(camera1Name, robotToCamera1),
+            Map.entry(camera2Name, robotToCamera2),
+            Map.entry(camera3Name, robotToCamera3)
+        )
+    );
+
 
     // Basic filtering thresholds
     public static double maxAmbiguity = 0.3;
