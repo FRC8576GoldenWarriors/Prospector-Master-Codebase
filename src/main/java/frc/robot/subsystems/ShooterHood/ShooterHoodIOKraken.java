@@ -49,7 +49,7 @@ public class ShooterHoodIOKraken implements ShooterHoodIO {
 
     @Override
     public void setSpeed(double speed) {
-        hoodMotor.set(speed);;
+        hoodMotor.set(speed);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package frc.robot.subsystems.Shooter;
 
 import edu.wpi.first.units.measure.*;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import static edu.wpi.first.units.Units.*;
 import edu.wpi.first.math.util.Units;
@@ -8,7 +9,6 @@ import edu.wpi.first.math.util.Units;
 import static frc.robot.subsystems.Shooter.ShooterConstants.netHeight;
 
 public class ShooterUtil {
-
 
     public static AngularVelocity calculateShotVelocity(double limelightDistanceMeters, double hoodAngleDegrees) {
         //Variables

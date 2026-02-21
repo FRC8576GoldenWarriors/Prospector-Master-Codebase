@@ -2,13 +2,18 @@ package frc.robot.subsystems.Shooter;
 
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
+
+import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.*;
 import static edu.wpi.first.units.Units.*;
 
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.ShooterHood.ShooterHood;
+
 
 public class Shooter extends SubsystemBase {
   private final ShooterIO io;
@@ -31,8 +36,11 @@ public class Shooter extends SubsystemBase {
   @AutoLogOutput(key = "Shooter/ManualRPMTarget")
   private double manualRPMTarget = 0;
 
-  public Shooter(ShooterIO io) {
+  private final ShooterHood hood;
+
+  public Shooter(ShooterIO io, ShooterHood hood) {
     this.io = io;
+    this.hood = hood;
   }
 
   public void setWantedState(ShooterStates state) {
@@ -42,8 +50,21 @@ public class Shooter extends SubsystemBase {
 
   @Override
   public void periodic() {
+
     io.updateInputs(inputs);
     Logger.processInputs("Shooter", inputs);
+
+    //Establishing and updating value of RPM
+    manualRPMTarget = SmartDashboard.getNumber("ManualRPMTarget: ", manualRPMTarget);
+    SmartDashboard.putNumber("Enter Value for ManualRPMTarget: ", manualRPMTarget);
+
+    //For now we are using manual shooter to hub distance till we get limelight data
+    double manualDistanceMeters = SmartDashboard.getNumber("Shooter to Hub ManualDistanceMeters: ", 0.0);
+    SmartDashboard.putNumber("ManualDistanceMeters", manualDistanceMeters);
+
+    //SmartDashboard Outputs
+    SmartDashboard.putNumber("Shooter/LeftRPM", inputs.leftMotorSpeed);
+    SmartDashboard.putNumber("Shooter/RightRPM", inputs.rightMotorSpeede);
 
     if(!DriverStation.isDisabled()) {
       switch (currentState) {
@@ -53,7 +74,7 @@ public class Shooter extends SubsystemBase {
           break;
 
         case SHOOT:
-          wantedRPS = ShooterUtil.calculateShotVelocity(0,0);//REPLACE LATER WITH REAL PARAMETERS
+          wantedRPS = ShooterUtil.calculateShotVelocity(manualDistanceMeters, hood.getCurrentAnglePosition());//REPLACE LATER WITH REAL PARAMETER for distance
           io.setShooterVelocity(wantedRPS, wantedRPS);
           break;
 
@@ -77,5 +98,7 @@ public class Shooter extends SubsystemBase {
 
     leftMotorAlert.set(!inputs.leftMotorConnected);
     rightMotorAlert.set(!inputs.rightMotorConnected);
+
+
   }
 }
