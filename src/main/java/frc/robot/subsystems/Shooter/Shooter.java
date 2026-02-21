@@ -3,7 +3,6 @@ package frc.robot.subsystems.Shooter;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
-import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.*;
 import static edu.wpi.first.units.Units.*;
 
@@ -63,8 +62,9 @@ public class Shooter extends SubsystemBase {
     SmartDashboard.putNumber("ManualDistanceMeters", manualDistanceMeters);
 
     //SmartDashboard Outputs
-    SmartDashboard.putNumber("Shooter/LeftRPM", inputs.leftMotorSpeed);
-    SmartDashboard.putNumber("Shooter/RightRPM", inputs.rightMotorSpeede);
+    SmartDashboard.putNumber("LeftRPM", inputs.leftMotorSpeed.in(RotationsPerSecond)*60);
+    SmartDashboard.putNumber("RightRPM", inputs.rightMotorSpeed.in(RotationsPerSecond)*60);
+
 
     if(!DriverStation.isDisabled()) {
       switch (currentState) {
