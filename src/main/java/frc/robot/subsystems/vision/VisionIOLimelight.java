@@ -16,6 +16,7 @@ package frc.robot.subsystems.vision;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.DoubleArrayPublisher;
@@ -24,12 +25,14 @@ import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.TimestampedDoubleArray;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
+import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Seconds;
 
@@ -65,8 +68,10 @@ public class VisionIOLimelight implements VisionIO {
 
     public VisionIOLimelight(String name, Supplier<Rotation2d> rotationSupplier, Supplier<ChassisSpeeds> chasisspeedSupplier) {
         table = NetworkTableInstance.getDefault().getTable(name);
+        Pose3d limelightTransform = VisionConstants.nameToPose3dHashMap.get(name);
+        setLimelightPose3d(name, limelightTransform);
         imuResetTimer.reset();
-        //setLimelightIMUMode(IMUMode.EXTERNAL_SEED);
+        setLimelightIMUMode(IMUMode.EXTERNAL_SEED);
         this.chassisSpeedSupplier = chasisspeedSupplier;
         this.rotationSupplier = rotationSupplier; //Set imu to use internal and coverage with external
         orientationPublisher =
@@ -92,10 +97,10 @@ public class VisionIOLimelight implements VisionIO {
 
         // Update orientation for MegaTag 2
         orientationPublisher.accept(new double[] {rotationSupplier.get().getDegrees(), 0.0, 0.0, 0.0, 0.0, 0.0});
-        // if(DriverStation.isDisabled())
-        //     setLimelightIMUMode(IMUMode.EXTERNAL_SEED);
-        // else
-        //     setLimelightIMUMode(IMUMode.INTERNAL_EXTERNAL_ASSIST);
+         if(DriverStation.isDisabled())
+             setLimelightIMUMode(IMUMode.EXTERNAL_SEED);
+        else
+             setLimelightIMUMode(IMUMode.INTERNAL_EXTERNAL_ASSIST);
 
         double[] imuData = imuSubscriber.get();
         inputs.imuDataLength = imuData.length;
@@ -208,7 +213,7 @@ public class VisionIOLimelight implements VisionIO {
 
     @Override
     public void resetHeading() {
-        //setLimelightIMUMode(IMUMode.EXTERNAL_SEED);
+        setLimelightIMUMode(IMUMode.EXTERNAL_SEED);
     }
 
     private void setLimelightIMUMode(IMUMode imuMode) {
@@ -220,6 +225,19 @@ public class VisionIOLimelight implements VisionIO {
         }
         if(imuResetTimer.get() > VisionConstants.internalIMUConvergenceTime.in(Seconds))
             table.getEntry("imumode_set").setNumber(imuMode.getMode());
+    }
+
+    private static void setLimelightPose3d(String name, Pose3d limelightPose3d) {
+        Translation3d cameraTranslation = limelightPose3d.getTranslation();
+        Rotation3d cameraRotation = limelightPose3d.getRotation();
+
+        LimelightHelpers.setCameraPose_RobotSpace(name,
+        cameraTranslation.getMeasureX().in(Meters),
+        cameraTranslation.getMeasureY().in(Meters),
+        cameraTranslation.getMeasureZ().in(Meters),
+        cameraRotation.getMeasureX().in(Degrees),
+        cameraRotation.getMeasureY().in(Degrees),
+        cameraRotation.getMeasureZ().in(Degrees));
     }
 
     /** Parses the 3D pose from a Limelight botpose array. */

@@ -102,7 +102,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
             kinematics,
             rawGyroRotation,
             lastModulePositions,
-            new Pose2d(),
+            (DriverStation.getAlliance().get() == Alliance.Blue) ? Pose2d.kZero : new Pose2d(Translation2d.kZero, Rotation2d.k180deg),
             VecBuilder.fill(DriveConstants.baseXDriveSTDEV, DriveConstants.baseYDriveSTDEV, DriveConstants.baseThetaDriveSTDEV),
             VecBuilder.fill(DriveConstants.baseXVisionSTDEV, DriveConstants.baseYVisionSTDEV, DriveConstants.baseThetaVisionSTDEV));
     private final Consumer<Pose2d> resetSimulationPoseCallBack;
