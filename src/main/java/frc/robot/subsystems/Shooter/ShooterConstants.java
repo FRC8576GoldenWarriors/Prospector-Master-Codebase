@@ -29,5 +29,6 @@ public class ShooterConstants {
 
     // Measurment Constants
     public static final double RADIUS_OF_HUB_METERS = Units.inchesToMeters(41.73);
+    public static final double netHeight = Units.inchesToMeters(72) - SHOOTER_HEIGHT_METERS;
 
 }
