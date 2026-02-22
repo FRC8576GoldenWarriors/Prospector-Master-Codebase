@@ -156,7 +156,7 @@ public class RobotContainer {
         // Switch to X pattern when X button is pressed
         // controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
         controller.x().whileTrue(AutoBuilder.followPath(DriveCommands.driveOverBump(()->drive.getPose())));//DriveCommands.joystickDriveAt45(drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), drive::getPose));
-        controller.y().whileTrue(DriveCommands.joystickDriveTagCentric(drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), drive::getPose));
+        controller.y().whileTrue(DriveCommands.joystickDriveTagCentric(drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> drive.getPose()));
 
         // Reset gyro / odometry
         final Runnable resetGyro = Constants.currentMode == Constants.Mode.SIM

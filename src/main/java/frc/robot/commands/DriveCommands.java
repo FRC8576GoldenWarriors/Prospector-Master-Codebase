@@ -30,7 +30,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.DriveConstants;
-
+import frc.robot.subsystems.vision.VisionConstants;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -38,6 +38,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
+
+
 import org.littletonrobotics.junction.Logger;
 
 import com.pathplanner.lib.path.GoalEndState;
@@ -251,10 +253,16 @@ public class DriveCommands {
                 ANGLE_KP, 0.0, ANGLE_KD, new TrapezoidProfile.Constraints(ANGLE_MAX_VELOCITY, ANGLE_MAX_ACCELERATION));
         angleController.enableContinuousInput(-Math.PI, Math.PI);
 
+
+        Logger.recordOutput("In Red Zone", drivePose.get().getX()  > (0));
+        Logger.recordOutput("GetX", drivePose.get());
+
+
         // Construct command
         return Commands.run(
                         () -> {
-                        Translation2d botTranslation = drivePose.get().getTranslation();
+                                if(drivePose.get().getX()  > (VisionConstants.aprilTagLayout.getFieldLength()-4.61) || drivePose.get().getX() < 4.61){
+                                Translation2d botTranslation = drivePose.get().getTranslation();
 
                                 List<Translation2d> hubs = List.of(
                                         new Translation2d(Units.inchesToMeters(181.56), Units.inchesToMeters(158.32)),
@@ -292,11 +300,37 @@ public class DriveCommands {
                                             ? drive.getRotation().plus(new Rotation2d(Math.PI))
                                             : drive.getRotation());
                             drive.runVelocity(speeds);
-                        },
-                        drive)
+                                }else{
+                                        double angle = Units.degreesToRadians(0);
 
-                // Reset PID controller when command starts
-                .beforeStarting(() -> angleController.reset(drive.getRotation().getRadians()));
+                                // Get linear velocity
+                                Translation2d linearVelocity =
+                                    getLinearVelocityFromJoysticks(xSupplier.getAsDouble(), ySupplier.getAsDouble());
+
+                            // Calculate angular speed
+                            double omega = angleController.calculate(
+                                    drive.getRotation().getRadians(),
+                                    angle);
+
+                            // Convert to field relative speeds & send command
+                            ChassisSpeeds speeds = new ChassisSpeeds(
+                                    linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
+                                    linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(), //* Math.abs(omega) * Math.abs(linearVelocity.getX()) * turnCorrection.get(),
+                                    omega);
+                            boolean isFlipped = DriverStation.getAlliance().isPresent()
+                                    && DriverStation.getAlliance().get() == Alliance.Red;
+                            speeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+                                    speeds,
+                                    isFlipped
+                                            ? drive.getRotation().plus(new Rotation2d(Math.PI))
+                                            : drive.getRotation());
+                            drive.runVelocity(speeds);
+
+                                }
+                        },
+                        drive).beforeStarting(() -> angleController.reset(drive.getRotation().getRadians()));// Reset PID controller when command starts
+
+
     }
 
 //     public static PathPlannerPath driveOverBump(Supplier<Pose2d> currentPose){
