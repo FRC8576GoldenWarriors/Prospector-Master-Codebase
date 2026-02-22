@@ -13,6 +13,7 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
@@ -59,11 +60,11 @@ public class Intake extends SubsystemBase {
     io.updateInputs(inputs);
     Logger.processInputs("Intake", inputs);
     currentPosition = inputs.leftEncoderRotations;
-    kPDouble = kP.getAsDouble();
+    //kPDouble = kP.getAsDouble();
 
     kVDouble = kV.getAsDouble();
-    PID.setP(kPDouble);
-    FF.setKv(kVDouble);
+    //PID.setP(kPDouble);
+    //FF.setKv(kVDouble);
      if (DriverStation.isEnabled()) {
       if(currentPosition>IntakeConstants.Software.intakeSoftStop){
             wantedState = IntakeStates.Idle;
@@ -141,7 +142,7 @@ public void resetPID() {
 
 // TO-DO : MAKE THIS IN MACROS CLASS
 public SequentialCommandGroup setWantedState(IntakeStates state){
-    return null;//new SequentialCommandGroup(new InstantCommand(()->this.resetPID(), RobotContainer.intake), new InstantCommand(()->this.setWantedPosition(state), RobotContainer.intake) );
+    return new SequentialCommandGroup(new InstantCommand(()->this.resetPID(), RobotContainer.intake), new InstantCommand(()->this.setWantedPosition(state), RobotContainer.intake) );
 }
 
 //

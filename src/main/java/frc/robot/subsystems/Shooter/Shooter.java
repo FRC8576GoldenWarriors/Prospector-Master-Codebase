@@ -2,6 +2,8 @@ package frc.robot.subsystems.Shooter;
 
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
+
 import edu.wpi.first.units.measure.*;
 import static edu.wpi.first.units.Units.*;
 
@@ -16,6 +18,8 @@ public class Shooter extends SubsystemBase {
   private Alert leftMotorAlert = new Alert("The Left Motor is disconnected", AlertType.kError);
   private Alert rightMotorAlert = new Alert("The Right Motor is disconnected", AlertType.kError);
 
+  private LoggedNetworkNumber kPNumber = new LoggedNetworkNumber("Tuning/Shooter kP",ShooterConstants.kP);
+  private double kP = kPNumber.get();
   public enum ShooterStates {
     IDLE,
     SHOOT,
@@ -44,7 +48,8 @@ public class Shooter extends SubsystemBase {
   public void periodic() {
     io.updateInputs(inputs);
     Logger.processInputs("Shooter", inputs);
-
+    kP = kPNumber.get();
+    io.setkP(kP);
     if(!DriverStation.isDisabled()) {
       switch (currentState) {
         case IDLE:
@@ -53,13 +58,13 @@ public class Shooter extends SubsystemBase {
           break;
 
         case SHOOT:
-          wantedRPS = ShooterUtil.calculateShotVelocity(0,0);//REPLACE LATER WITH REAL PARAMETERS
+          wantedRPS = RotationsPerSecond.of(160);//ShooterUtil.calculateShotVelocity(0,0);//REPLACE LATER WITH REAL PARAMETERS
           io.setShooterVelocity(wantedRPS, wantedRPS);
           break;
 
         case VOLTAGE_CONTROL_POSITIVE:
           manualRPMTarget += ShooterConstants.MANUAL_STEP_RPM;
-          manualRPMTarget = Math.min(manualRPMTarget, 6000);
+          manualRPMTarget = 1000;//Math.min(manualRPMTarget, 6000);
           io.setShooterVelocity(RotationsPerSecond.of(manualRPMTarget / 60.0),
                                 RotationsPerSecond.of(manualRPMTarget / 60.0));
           break;

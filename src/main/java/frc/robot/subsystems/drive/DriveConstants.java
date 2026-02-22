@@ -45,11 +45,11 @@ public class DriveConstants {
 
     // Zeroed rotation values for each module, see setup instructions
     public static final Rotation2d frontLeftZeroRotation =
-            Rotation2d.fromRotations(0.331787); // -0.143311); // new Rotation2d(0.0);
-    public static final Rotation2d frontRightZeroRotation = Rotation2d.fromRotations(-0.313965); // 0.204834);
+            Rotation2d.fromRotations(-0.340088);//0.331787); // -0.143311); // new Rotation2d(0.0);
+    public static final Rotation2d frontRightZeroRotation = Rotation2d.fromRotations(-0.378418);//-0.313965); // 0.204834);
     public static final Rotation2d backLeftZeroRotation =
-            Rotation2d.fromRotations(0.478760); // 0.464355); // 0.453857);
-    public static final Rotation2d backRightZeroRotation = Rotation2d.fromRotations(0.176025); // 0.171875);
+            Rotation2d.fromRotations(0.017334);//0.037842);//0.478760); // 0.464355); // 0.453857);
+    public static final Rotation2d backRightZeroRotation = Rotation2d.fromRotations(-0.153076);//0.176025); // 0.171875);
 
     // Device CAN IDs
     public static final int pigeonCanId = 0;
@@ -83,7 +83,7 @@ public class DriveConstants {
             (2 * Math.PI) / 60.0 / driveMotorReduction; // Rotor RPM -> Wheel Rad/Sec
 
     // Drive PID configuration
-    public static final double driveKp = 0.008; // 0.0;
+    public static final double driveKp = 0.001;//0.004;//0.008; // 0.0;
     public static final double driveKd = 0.0;
     public static final double driveKs = 0.21962; // 0.19416; // 0; // 0.17266; // 0.0;
     public static final double driveKv = 0.13561; // 0.13421; // 0; // 0.14037; // .135; // .12; // .15; // 0.1;
@@ -107,10 +107,10 @@ public class DriveConstants {
     public static final double module_average_kA_Drive = 0.3;
     public static final double module_average_kA_Turn = 0.574665;
     // Turn PID configuration
-    public static final double turnKp = 4.0; // 2.0; // 1.6; // 0.8; // 0.575; // 0.01; // 2.0;
+    public static final double turnKp = 0.5;//0.01;//1;//2.0; // 2.0; // 1.6; // 0.8; // 0.575; // 0.01; // 2.0;
     public static final double turnKd = 0.0;
     public static final double turnSimP = 8.0;
-    public static final double turnSimD = 0.0;
+    public static final double turnSimD = 0;//.02;//0.04;
     public static final double turnKs = 2.44234;
     public static final double turnKv = 0.67128;
     public static final double turnPIDMinInput = 0; // Radians

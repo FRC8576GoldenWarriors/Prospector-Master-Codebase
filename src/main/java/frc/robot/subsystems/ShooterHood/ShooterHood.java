@@ -4,6 +4,7 @@ import static edu.wpi.first.units.Units.Rotations;
 
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -40,6 +41,8 @@ public class ShooterHood extends SubsystemBase {
     private double currentAnglePosition = 0.0;
     private double wantedAnglePosition = 0.0;
 
+    private LoggedNetworkNumber kPNumber = new LoggedNetworkNumber("Tuning/ShooterHood kP",ShooterHoodConstants.kp);
+    private double kP = kPNumber.get();
 
     public ShooterHood(ShooterHoodIO io) {
         this.io = io;
@@ -61,9 +64,10 @@ public class ShooterHood extends SubsystemBase {
   @Override
   public void periodic() {
     currentAnglePosition = inputs.encoderValue.in(Rotations);
-
     io.updateInputs(inputs);
 
+    kP = kPNumber.get();
+    PID.setP(kP);
     Logger.processInputs("ShooterHood", inputs);
 
     if(!DriverStation.isDisabled()) {

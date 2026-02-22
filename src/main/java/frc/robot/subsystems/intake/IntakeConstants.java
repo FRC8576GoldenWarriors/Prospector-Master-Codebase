@@ -35,7 +35,7 @@ public class IntakeConstants {
 
 
         public static double rollerSpeed = 0.6;
-        public static double intakeSoftStop = 0.28;
+        public static double intakeSoftStop = 0.3;
 
 
         public static Constraints profile = new Constraints(2.0, 3.0);

@@ -11,7 +11,7 @@ public class ShooterHoodConstants {
     public static final double kp = 0.0;
     public static final double ki = 0.0;
     public static final double kd = 0.0;
-    public static Constraints profile = new Constraints(0.0, 0.0);
+    public static Constraints profile = new Constraints(0.1, 0.2);
 
     public static final double ks = 0.0;
     public static final double kg = 0.0;

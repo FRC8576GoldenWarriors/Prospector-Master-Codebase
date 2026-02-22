@@ -5,13 +5,13 @@
 package frc.robot.subsystems.transport;
 
 import static edu.wpi.first.units.Units.RPM;
+import static edu.wpi.first.units.Units.Volts;
 
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.RobotContainer;
 
 public class Transport extends SubsystemBase {
 
@@ -40,9 +40,9 @@ public class Transport extends SubsystemBase {
     io.updateInputs(inputs);
     Logger.processInputs("Transport", inputs);
 
-    if (DriverStation.isDisabled() ||
-      !RobotContainer.controller.rightBumper().getAsBoolean() ||
-      (RobotContainer.controller.rightBumper().getAsBoolean() && !isFuelDetected())) {
+    if (DriverStation.isDisabled()){
+      // !RobotContainer.controller.rightBumper().getAsBoolean() ||
+      // (RobotContainer.controller.rightBumper().getAsBoolean() && !isFuelDetected())) {
       currentState = TransportStates.Idle;
     }
 
@@ -52,11 +52,11 @@ public class Transport extends SubsystemBase {
         break;
 
       case TransportIn:
-        io.setTransportSpeed(TransportConstants.transportInSpeed);
+        io.setTransportVoltage(Volts.of(11));
         break;
 
       case TransportOut:
-        io.setTransportSpeed(TransportConstants.transportOutSpeed);
+        io.setTransportVoltage(Volts.of(-11));
         break;
 
       default:
