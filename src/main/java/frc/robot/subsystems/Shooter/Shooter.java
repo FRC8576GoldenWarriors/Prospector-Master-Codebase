@@ -2,17 +2,13 @@ package frc.robot.subsystems.Shooter;
 
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
-
 import edu.wpi.first.units.measure.*;
 import static edu.wpi.first.units.Units.*;
 
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.ShooterHood.ShooterHood;
-
 
 public class Shooter extends SubsystemBase {
   private final ShooterIO io;
@@ -49,15 +45,6 @@ public class Shooter extends SubsystemBase {
     io.updateInputs(inputs);
     Logger.processInputs("Shooter", inputs);
 
-    //Read editable LoggerBoard inputs
-    manualRPMTarget = manualRPMTargetInput.get();
-    double manualDistanceMeters = manualDistanceMetersInput.get();
-
-    //Log shooter RPMs to LoggerBoard
-    Logger.recordOutput("Shooter/LeftRPM", inputs.leftMotorSpeed.in(RotationsPerSecond) * 60);
-    Logger.recordOutput("Shooter/RightRPM", inputs.rightMotorSpeed.in(RotationsPerSecond) * 60);
-    Logger.recordOutput("Shooter/ManualDistanceMeters", manualDistanceMeters);
-
     if(!DriverStation.isDisabled()) {
       switch (currentState) {
         case IDLE:
@@ -66,7 +53,7 @@ public class Shooter extends SubsystemBase {
           break;
 
         case SHOOT:
-          wantedRPS = ShooterUtil.calculateShotVelocity(manualDistanceMeters, hood.getCurrentAnglePosition());//REPLACE LATER WITH REAL PARAMETER for distance
+          wantedRPS = ShooterUtil.calculateShotVelocity(0,0);//REPLACE LATER WITH REAL PARAMETERS
           io.setShooterVelocity(wantedRPS, wantedRPS);
           break;
 
@@ -90,7 +77,5 @@ public class Shooter extends SubsystemBase {
 
     leftMotorAlert.set(!inputs.leftMotorConnected);
     rightMotorAlert.set(!inputs.rightMotorConnected);
-
-
   }
 }
