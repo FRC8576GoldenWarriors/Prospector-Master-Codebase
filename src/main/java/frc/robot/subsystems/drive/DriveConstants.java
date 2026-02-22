@@ -107,7 +107,7 @@ public class DriveConstants {
     public static final double module_average_kA_Drive = 0.3;
     public static final double module_average_kA_Turn = 0.574665;
     // Turn PID configuration
-    public static final double turnKp = 0.5;//0.01;//1;//2.0; // 2.0; // 1.6; // 0.8; // 0.575; // 0.01; // 2.0;
+    public static final double turnKp = 1;//0.5;//0.01;//1;//2.0; // 2.0; // 1.6; // 0.8; // 0.575; // 0.01; // 2.0;
     public static final double turnKd = 0.0;
     public static final double turnSimP = 8.0;
     public static final double turnSimD = 0;//.02;//0.04;
