@@ -106,9 +106,9 @@ public class RobotContainer {
                 drive,
                 drive::getChassisSpeeds,
                 new VisionIOPhotonVisionSim(
-                        camera0Name, robotToCamera0.minus(Pose3d.kZero), driveSimulation::getSimulatedDriveTrainPose, drive::getChassisSpeeds),
+                        camera0Name, Pose3d.kZero.minus(Pose3d.kZero), driveSimulation::getSimulatedDriveTrainPose, drive::getChassisSpeeds),
                 new VisionIOPhotonVisionSim(
-                        camera1Name, robotToCamera1.minus(Pose3d.kZero), driveSimulation::getSimulatedDriveTrainPose, drive::getChassisSpeeds));
+                        camera1Name, Pose3d.kZero.minus(Pose3d.kZero), driveSimulation::getSimulatedDriveTrainPose, drive::getChassisSpeeds));
                 //shooter = null;
                 autos = new Autos(drive);
                 break;

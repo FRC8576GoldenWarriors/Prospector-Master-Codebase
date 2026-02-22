@@ -247,6 +247,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
             yDeviation += collisionStandardDeviations.getSecond();
 
             // Deviations Update
+            Logger.recordOutput("PoseEstimator/Drive/DriveStandardDeviations", new double[] {xDeviation, yDeviation, thetaDeviation});
             poseEstimator.setStateStdDevs(VecBuilder.fill(xDeviation, yDeviation,
                 thetaDeviation));
 
