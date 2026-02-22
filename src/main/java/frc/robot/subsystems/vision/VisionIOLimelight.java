@@ -68,10 +68,10 @@ public class VisionIOLimelight implements VisionIO {
 
     public VisionIOLimelight(String name, Supplier<Rotation2d> rotationSupplier, Supplier<ChassisSpeeds> chasisspeedSupplier) {
         table = NetworkTableInstance.getDefault().getTable(name);
-        Pose3d limelightTransform = VisionConstants.nameToPose3dHashMap.get(name);
-        setLimelightPose3d(name, limelightTransform);
+        //Pose3d limelightTransform = VisionConstants.nameToPose3dHashMap.get(name);
+        //setLimelightPose3d(name, limelightTransform);
         imuResetTimer.reset();
-        setLimelightIMUMode(IMUMode.EXTERNAL_SEED);
+        setLimelightIMUMode(IMUMode.EXTERNAL_ONLY);
         this.chassisSpeedSupplier = chasisspeedSupplier;
         this.rotationSupplier = rotationSupplier; //Set imu to use internal and coverage with external
         orientationPublisher =

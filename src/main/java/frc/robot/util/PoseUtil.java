@@ -20,8 +20,8 @@ public class PoseUtil {
      * @return A Pose3d object with the given translation and rotation, converted from onshape's coordinate system to Limelight's coordinate system
      */
 
-    public static Pose3d toLimelightPose(Distance x, Distance y, Distance z, Angle roll, Angle pitch, Angle yaw) {
-        return new Pose3d(new Translation3d(y, x, z.baseUnit().zero().minus(z)), new Rotation3d(roll, pitch, yaw));
+    public static Pose3d onshapeToLimelightPose(Distance x, Distance y, Distance z, Angle roll, Angle pitch, Angle yaw) {
+        return new Pose3d(new Translation3d(y.baseUnit().zero().minus(y), x.baseUnit().zero().minus(x), z.baseUnit().zero().minus(z)), new Rotation3d(roll, pitch, yaw));
     }
 
 }
