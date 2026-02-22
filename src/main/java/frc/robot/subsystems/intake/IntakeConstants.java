@@ -18,20 +18,20 @@ public class IntakeConstants {
     }
 
     public class Software{
-        public static double leftZero = 0.62-0.2-0.03-0.007;
-        public static double rightZero = 0.22;
+        public static double leftZero = 0.158-0.7;
+        public static double rightZero = 0.168;
         public static boolean leftInverted = true;
         public static boolean rightInverted = false;
         public static double kP = 15;
         public static double kI = 0;
         public static double kD = 0;
         public static double kS = 0;
-        public static double kG = 0.25;
+        public static double kG = 0.3;
         public static double kV = 0;
         public static double kA = 0;
 
-        public static double intakeUp = 0.27;
-        public static double intakeDown =0.012;
+        public static double intakeUp = 0.197;
+        public static double intakeDown = 0.012;
 
 
         public static double rollerSpeed = 0.6;

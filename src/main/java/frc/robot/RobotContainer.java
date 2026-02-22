@@ -19,6 +19,7 @@ import static frc.robot.subsystems.vision.VisionConstants.*;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -217,6 +218,9 @@ public class RobotContainer {
                     (DriverStation.getAlliance().get() == Alliance.Red) ? Rotation2d.k180deg : Rotation2d.kZero);
             drive.resetGyro(resetPose);
         }));
+        controller.povRight().onTrue(new InstantCommand(() ->
+            drive.runVelocity(new ChassisSpeeds(2, 0, 0))
+        ));
         controller.povUp().onTrue(new InstantCommand(() -> {
             Pose2d resetPose = new Pose2d(
                     new Translation2d(
