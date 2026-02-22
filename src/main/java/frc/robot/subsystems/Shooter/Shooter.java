@@ -2,8 +2,6 @@ package frc.robot.subsystems.Shooter;
 
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
-import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
-
 import edu.wpi.first.units.measure.*;
 import static edu.wpi.first.units.Units.*;
 
@@ -12,6 +10,7 @@ import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.ShooterHood.ShooterHood;
+
 
 public class Shooter extends SubsystemBase {
 
@@ -40,11 +39,8 @@ public class Shooter extends SubsystemBase {
   @AutoLogOutput(key = "Shooter/ManualRPMTarget")
   private double manualRPMTarget = 0;
 
-  private final ShooterHood hood;
-
-  public Shooter(ShooterIO io, ShooterHood hood) {
+  public Shooter(ShooterIO io) {
     this.io = io;
-    this.hood = hood;
   }
 
   public void setWantedState(ShooterStates state) {
@@ -53,18 +49,20 @@ public class Shooter extends SubsystemBase {
 
   @Override
   public void periodic() {
-
     io.updateInputs(inputs);
     Logger.processInputs("Shooter", inputs);
 
-    //Read editable LoggerBoard inputs
-    manualRPMTarget = manualRPMTargetInput.get();
-    double manualDistanceMeters = manualDistanceMetersInput.get();
+    //Establishing and updating value of RPM
+    manualRPMTarget = SmartDashboard.getNumber("ManualRPMTarget: ", manualRPMTarget);
+    SmartDashboard.putNumber("Enter Value for ManualRPMTarget: ", manualRPMTarget);
 
-    //Log shooter RPMs to LoggerBoard
-    Logger.recordOutput("Shooter/LeftRPM", inputs.leftMotorSpeed.in(RotationsPerSecond) * 60);
-    Logger.recordOutput("Shooter/RightRPM", inputs.rightMotorSpeed.in(RotationsPerSecond) * 60);
-    Logger.recordOutput("Shooter/ManualDistanceMeters", manualDistanceMeters);
+    //For now we are using manual shooter to hub distance till we get limelight data
+    double manualDistanceMeters = SmartDashboard.getNumber("Shooter to Hub ManualDistanceMeters: ", 0.0);
+    SmartDashboard.putNumber("ManualDistanceMeters", manualDistanceMeters);
+
+    //SmartDashboard Outputs
+    SmartDashboard.putNumber("Shooter/LeftRPM", inputs.leftMotorSpeed);
+    SmartDashboard.putNumber("Shooter/RightRPM", inputs.rightMotorSpeede);
 
     if (!DriverStation.isDisabled()) {
       switch (currentState) {
@@ -75,7 +73,7 @@ public class Shooter extends SubsystemBase {
           break;
 
         case SHOOT:
-          wantedRPS = ShooterUtil.calculateShotVelocity(manualDistanceMeters, hood.getCurrentAnglePosition());
+          wantedRPS = ShooterUtil.calculateShotVelocity(manualDistanceMeters, hood.getCurrentAnglePosition());//REPLACE LATER WITH REAL PARAMETER for distance
           io.setShooterVelocity(wantedRPS, wantedRPS);
           break;
 

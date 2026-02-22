@@ -110,6 +110,4 @@ public class ShooterHood extends SubsystemBase {
 
 
   }
-  public double getCurrentAnglePosition() {
-    return currentAnglePosition; }
 }

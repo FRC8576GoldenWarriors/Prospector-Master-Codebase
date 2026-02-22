@@ -31,7 +31,7 @@ public class IntakeConstants {
         public static double kA = 0;
 
         public static double intakeUp = 0.27;
-        public static double intakeDown = 0.012;
+        public static double intakeDown =0.012;
 
 
         public static double rollerSpeed = 0.6;

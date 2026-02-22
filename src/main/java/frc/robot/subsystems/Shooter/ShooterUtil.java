@@ -9,6 +9,7 @@ import static frc.robot.subsystems.Shooter.ShooterConstants.netHeight;
 
 public class ShooterUtil {
 
+
     public static AngularVelocity calculateShotVelocity(double limelightDistanceMeters, double hoodAngleDegrees) {
         //Variables
         double theta = Math.toRadians(hoodAngleDegrees);
