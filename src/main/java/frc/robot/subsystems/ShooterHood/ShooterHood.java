@@ -23,7 +23,7 @@ public class ShooterHood extends SubsystemBase {
     private double PIDVoltage;
     private double FFVoltage;
     private double inputVoltage;
-    public ShooterHoodIOKraken motor = new ShooterHoodIOKraken();
+    //public ShooterHoodIOKraken motor = new ShooterHoodIOKraken();
     private Alert shooterHoodMotorAlert = new Alert("The Shooter Hood Motor is disconnected", AlertType.kError);
     private Alert shooterHoodEncoderAlert = new Alert("The Shooter Hood Encoder is disconnected", AlertType.kError);
 
@@ -86,7 +86,7 @@ public class ShooterHood extends SubsystemBase {
                 break;
 
             case Shoot:
-            wantedAnglePosition = getWantedPosition(1);
+            wantedAnglePosition = 0.225;//getWantedPosition(1);
                 PIDVoltage = PID.calculate(currentAnglePosition,wantedAnglePosition);
                 FFVoltage = FF.calculate(wantedAnglePosition, 1.0);
                 inputVoltage = PIDVoltage + FFVoltage;
@@ -108,7 +108,8 @@ public class ShooterHood extends SubsystemBase {
   } else {
         setWantedState(ShooterHoodStates.Idle);
   }
-
+  Logger.recordOutput("ShooterHood/PID Voltage", PIDVoltage);
+  Logger.recordOutput("ShooterHood/FF Voltage", FFVoltage);
     shooterHoodMotorAlert.set(!inputs.isMotorConnected);
     shooterHoodEncoderAlert.set(!inputs.isEncoderConnected);
 

@@ -19,7 +19,6 @@ import static frc.robot.subsystems.vision.VisionConstants.*;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -30,19 +29,16 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.DriveCommands;
-import frc.robot.commands.DriveX;
 import frc.robot.subsystems.Shooter.Shooter;
 import frc.robot.subsystems.Shooter.ShooterIOReal;
-import frc.robot.subsystems.Shooter.Shooter.ShooterStates;
 import frc.robot.subsystems.ShooterHood.ShooterHood;
+import frc.robot.subsystems.ShooterHood.ShooterHoodIOKraken;
+import frc.robot.subsystems.ShooterHood.ShooterHood.ShooterHoodStates;
 //import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeKrakenIO;
 import frc.robot.subsystems.intake.Intake.IntakeStates;
-import frc.robot.subsystems.transport.Transport;
-import frc.robot.subsystems.transport.TransportIOKraken;
-import frc.robot.subsystems.transport.Transport.TransportStates;
 import frc.robot.subsystems.vision.*;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
@@ -62,7 +58,7 @@ public class RobotContainer {
     public static Intake intake;
     public static Shooter shooter;
     public static ShooterHood shooterHood;
-    public static Transport transport;
+    //public static Transport transport;
     //private final Shooter shooter;
     private SwerveDriveSimulation driveSimulation = null;
 
@@ -97,8 +93,8 @@ public class RobotContainer {
                 //shooter = new Shooter(0);
                 intake = new Intake(new IntakeKrakenIO());
                 shooter = new Shooter(new ShooterIOReal());
-               // shooterHood = new ShooterHood(new ShooterHoodIOKraken());
-                transport = new Transport(new TransportIOKraken());
+                shooterHood = new ShooterHood(new ShooterHoodIOKraken());
+               // transport = new Transport(new TransportIOKraken());
                 autos = new Autos(drive);
                 //intake = new Intake(new IntakeKrakenIO());
                 break;
@@ -173,8 +169,10 @@ public class RobotContainer {
         //controller.x().whileTrue(DriveCommands.joystickDriveAtAngle(drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> Rotation2d.fromDegrees(45)));
         controller.a().onTrue(intake.setWantedState(IntakeStates.Intake));
         controller.x().onTrue(intake.setWantedState(IntakeStates.Rest));
-        controller.y().onTrue(new InstantCommand(()->transport.setWantedState(TransportStates.TransportIn),transport));
-        controller.y().onTrue(Commands.parallel(new InstantCommand(()->transport.setWantedState(TransportStates.TransportOut),transport),new InstantCommand(()->shooter.setWantedState(ShooterStates.SHOOT),shooter)));
+        controller.povUp().onTrue(new InstantCommand(()->shooterHood.setWantedState(ShooterHoodStates.Shoot),shooterHood));
+        controller.povDown().whileTrue(new InstantCommand(()->shooterHood.setWantedState(ShooterHoodStates.HoodVoltageControl),shooterHood));
+        // controller.y().onTrue(new InstantCommand(()->transport.setWantedState(TransportStates.TransportIn),transport));
+        // controller.y().onTrue(Commands.parallel(new InstantCommand(()->transport.setWantedState(TransportStates.TransportOut),transport),new InstantCommand(()->shooter.setWantedState(ShooterStates.SHOOT),shooter)));
        // controller.y().whileTrue(new StartEndCommand(()->shooter.setWantedState(ShooterStates.VOLTAGE_CONTROL_POSITIVE),()->shooter.setWantedState(ShooterStates.IDLE),shooter));
         //controller.b().whileTrue(new StartEndCommand(()->shooter.setWantedState(ShooterStates.VOLTAGE_CONTROL_NEGATIVE),()->shooter.setWantedState(ShooterStates.IDLE),shooter));//()->shooter.setWantedState(ShooterStates.VOLTAGE_CONTROL_POSITIVE,()->shooter.setWantedState(ShooterStates.Rest))));
         // Reset gyro / odometry
@@ -217,15 +215,15 @@ public class RobotContainer {
                     (DriverStation.getAlliance().get() == Alliance.Red) ? Rotation2d.k180deg : Rotation2d.kZero);
             drive.resetGyro(resetPose);
         }));
-        controller.povUp().onTrue(new InstantCommand(() -> {
-            Pose2d resetPose = new Pose2d(
-                    new Translation2d(
-                        Units.inchesToMeters(29 / 2) + Units.inchesToMeters(13 / 4),
-                            Units.inchesToMeters(29/2)),//158.32
-                    (DriverStation.getAlliance().get() == Alliance.Red) ? Rotation2d.k180deg : Rotation2d.kZero);
-            drive.resetGyro(resetPose);
-        }));
-        controller.povDown().whileTrue(drive.driveToPose(new Pose2d(14.6,4.75,Rotation2d.k180deg)).andThen(new DriveX(drive,-0.1).until(()->drive.getDetected())));
+        // controller.povUp().onTrue(new InstantCommand(() -> {
+        //     Pose2d resetPose = new Pose2d(
+        //             new Translation2d(
+        //                 Units.inchesToMeters(29 / 2) + Units.inchesToMeters(13 / 4),
+        //                     Units.inchesToMeters(29/2)),//158.32
+        //             (DriverStation.getAlliance().get() == Alliance.Red) ? Rotation2d.k180deg : Rotation2d.kZero);
+        //     drive.resetGyro(resetPose);
+        // }));
+        // controller.povDown().whileTrue(drive.driveToPose(new Pose2d(14.6,4.75,Rotation2d.k180deg)).andThen(new DriveX(drive,-0.1).until(()->drive.getDetected())));
         // controller.leftBumper().onTrue(new InstantCommand(() -> {shooter.setRPS(40);}));
         // controller.rightBumper().onTrue(new InstantCommand(() -> {shooter.setRPS(0);}));
     }
