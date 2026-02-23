@@ -21,6 +21,8 @@ public class TransportConstants {
     public static final double kD = 0;//.001;
     public static final double kV = 0.12;
 
+    public static final double velocityTarget = 75;
+
 
     public static final InvertedValue transportMotorInversion = InvertedValue.Clockwise_Positive;
     public static final NeutralModeValue transportMotorNeutralMode = NeutralModeValue.Brake;

@@ -15,7 +15,7 @@ public class ShooterConstants {
     public static final Current STATOR_CURRENT_LIMIT = Amps.of(60);
 
     // PIDFF Constants (untuned)
-    public static final double kP = 0;//0.11;
+    public static final double kP = 10.0;//0.11;
     public static final double kI = 0.0;
     public static final double kD = 0.0;
     public static final double kV = 0.12;//0.12;

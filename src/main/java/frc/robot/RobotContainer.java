@@ -30,6 +30,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.Shooter.Shooter;
+import frc.robot.subsystems.Shooter.Shooter.ShooterStates;
 import frc.robot.subsystems.Shooter.ShooterIOReal;
 import frc.robot.subsystems.ShooterHood.ShooterHood;
 import frc.robot.subsystems.ShooterHood.ShooterHoodIOKraken;
@@ -39,6 +40,9 @@ import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeKrakenIO;
 import frc.robot.subsystems.intake.Intake.IntakeStates;
+import frc.robot.subsystems.transport.Transport;
+import frc.robot.subsystems.transport.Transport.TransportStates;
+import frc.robot.subsystems.transport.TransportIOKraken;
 import frc.robot.subsystems.vision.*;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
@@ -94,7 +98,7 @@ public class RobotContainer {
                 intake = new Intake(new IntakeKrakenIO());
                 shooter = new Shooter(new ShooterIOReal());
                 shooterHood = new ShooterHood(new ShooterHoodIOKraken());
-               // transport = new Transport(new TransportIOKraken());
+                transport = new Transport(new TransportIOKraken());
                 autos = new Autos(drive);
                 //intake = new Intake(new IntakeKrakenIO());
                 break;
@@ -169,11 +173,12 @@ public class RobotContainer {
         //controller.x().whileTrue(DriveCommands.joystickDriveAtAngle(drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> Rotation2d.fromDegrees(45)));
         controller.a().onTrue(intake.setWantedState(IntakeStates.Intake));
         controller.x().onTrue(intake.setWantedState(IntakeStates.Rest));
-        controller.povUp().onTrue(new InstantCommand(()->shooterHood.setWantedState(ShooterHoodStates.Shoot),shooterHood));
-        controller.povDown().whileTrue(new InstantCommand(()->shooterHood.setWantedState(ShooterHoodStates.HoodVoltageControl),shooterHood));
-        // controller.y().onTrue(new InstantCommand(()->transport.setWantedState(TransportStates.TransportIn),transport));
-        // controller.y().onTrue(Commands.parallel(new InstantCommand(()->transport.setWantedState(TransportStates.TransportOut),transport),new InstantCommand(()->shooter.setWantedState(ShooterStates.SHOOT),shooter)));
-       // controller.y().whileTrue(new StartEndCommand(()->shooter.setWantedState(ShooterStates.VOLTAGE_CONTROL_POSITIVE),()->shooter.setWantedState(ShooterStates.IDLE),shooter));
+        //controller.y().onTrue(new InstantCommand(()->transport.setWantedState(TransportStates.TransportIn),transport));
+       // controller.y().onTrue(new InstantCommand(()->shooter.setWantedState(ShooterStates.SHOOT),shooter));
+
+        //
+        controller.y().onTrue(Commands.parallel(new InstantCommand(()->transport.setWantedState(TransportStates.TransportIn),transport),new InstantCommand(()->shooter.setWantedState(ShooterStates.SHOOT),shooter)));
+        //controller.y().onTrue(new StartEndCommand(()->shooter.setWantedState(ShooterStates.VOLTAGE_CONTROL_POSITIVE),()->shooter.setWantedState(ShooterStates.IDLE),shooter));
         //controller.b().whileTrue(new StartEndCommand(()->shooter.setWantedState(ShooterStates.VOLTAGE_CONTROL_NEGATIVE),()->shooter.setWantedState(ShooterStates.IDLE),shooter));//()->shooter.setWantedState(ShooterStates.VOLTAGE_CONTROL_POSITIVE,()->shooter.setWantedState(ShooterStates.Rest))));
         // Reset gyro / odometry
         final Runnable resetGyro = Constants.currentMode == Constants.Mode.SIM
