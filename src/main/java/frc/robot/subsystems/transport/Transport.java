@@ -53,11 +53,11 @@ public class Transport extends SubsystemBase {
         break;
 
       case TransportIn:
-        io.setTransportSpeed(RotationsPerSecond.of(75));;
+        io.setTransportSpeed(RotationsPerSecond.of(TransportConstants.velocityTarget));;
         break;
 
       case TransportOut:
-        io.setTransportSpeed(RotationsPerSecond.of(-75));;
+        io.setTransportSpeed(RotationsPerSecond.of(-TransportConstants.velocityTarget));;
         break;
 
       default:

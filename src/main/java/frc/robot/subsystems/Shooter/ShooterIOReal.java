@@ -25,7 +25,7 @@ public class ShooterIOReal implements ShooterIO {
     rightMotor = new TalonFX(ShooterConstants.RIGHT_SHOOTER_ID);
 
     config = new TalonFXConfiguration();
-    config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+    config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
     // Current Limits & Brake Mode
     config.CurrentLimits.SupplyCurrentLimit = ShooterConstants.SUPPLY_CURRENT_LIMIT.in(Amps);
     config.CurrentLimits.SupplyCurrentLimitEnable = true;
@@ -77,6 +77,8 @@ public class ShooterIOReal implements ShooterIO {
 
   @Override
   public void stop() {
+     leftMotor.setControl(voltageRequest.withOutput(0));
+    rightMotor.setControl(voltageRequest.withOutput(0));
     leftMotor.stopMotor();
     rightMotor.stopMotor();
   }
