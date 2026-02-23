@@ -34,7 +34,6 @@ import frc.robot.subsystems.Shooter.Shooter.ShooterStates;
 import frc.robot.subsystems.Shooter.ShooterIOReal;
 import frc.robot.subsystems.ShooterHood.ShooterHood;
 import frc.robot.subsystems.ShooterHood.ShooterHoodIOKraken;
-import frc.robot.subsystems.ShooterHood.ShooterHood.ShooterHoodStates;
 //import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.intake.Intake;
@@ -62,7 +61,7 @@ public class RobotContainer {
     public static Intake intake;
     public static Shooter shooter;
     public static ShooterHood shooterHood;
-    //public static Transport transport;
+    public static Transport transport;
     //private final Shooter shooter;
     private SwerveDriveSimulation driveSimulation = null;
 
