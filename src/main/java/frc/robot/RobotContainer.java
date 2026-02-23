@@ -34,7 +34,6 @@ import frc.robot.commands.DriveCommands;
 import frc.robot.commands.DriveX;
 import frc.robot.subsystems.Shooter.Shooter;
 import frc.robot.subsystems.Shooter.ShooterIOReal;
-import frc.robot.subsystems.Shooter.Shooter.ShooterStates;
 import frc.robot.subsystems.ShooterHood.ShooterHood;
 //import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.drive.*;
@@ -175,7 +174,7 @@ public class RobotContainer {
         controller.a().onTrue(intake.setWantedState(IntakeStates.Intake));
         controller.x().onTrue(intake.setWantedState(IntakeStates.Rest));
         controller.y().onTrue(new InstantCommand(()->transport.setWantedState(TransportStates.TransportIn),transport));
-        controller.y().onTrue(Commands.parallel(new InstantCommand(()->transport.setWantedState(TransportStates.TransportOut),transport),new InstantCommand(()->shooter.setWantedState(ShooterStates.SHOOT),shooter)));
+        //controller.y().onTrue(Commands.parallel(new InstantCommand(()->transport.setWantedState(TransportStates.TransportOut),transport),new InstantCommand(()->shooter.setWantedState(ShooterStates.SHOOT),shooter)));
        // controller.y().whileTrue(new StartEndCommand(()->shooter.setWantedState(ShooterStates.VOLTAGE_CONTROL_POSITIVE),()->shooter.setWantedState(ShooterStates.IDLE),shooter));
         //controller.b().whileTrue(new StartEndCommand(()->shooter.setWantedState(ShooterStates.VOLTAGE_CONTROL_NEGATIVE),()->shooter.setWantedState(ShooterStates.IDLE),shooter));//()->shooter.setWantedState(ShooterStates.VOLTAGE_CONTROL_POSITIVE,()->shooter.setWantedState(ShooterStates.Rest))));
         // Reset gyro / odometry

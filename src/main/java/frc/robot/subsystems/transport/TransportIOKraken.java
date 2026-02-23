@@ -66,6 +66,9 @@ public class TransportIOKraken implements TransportIO {
         inputs.transportMotorStatorCurrent = statorCurrentStatusSignal.getValue();
         inputs.transportMotorSupplyCurrent = supplyCurrentStatusSignal.getValue();
 
+        inputs.transportAngularVelocity = transportMotor.getVelocity().getValue();
+
+
     }
 
     @Override
@@ -76,6 +79,22 @@ public class TransportIOKraken implements TransportIO {
     @Override
     public void setTransportVoltage(Voltage volts) {
         transportMotor.setVoltage(volts.in(Volts));
+    }
+
+    @Override
+    public void setkP(double kP){
+        Slot0Configs PIDF = transportMotorConfiguration.Slot0;
+        PIDF.kP = kP;
+        transportMotor.getConfigurator().apply(transportMotorConfiguration);
+    }
+
+
+    @Override
+    public void setkV(double kV){
+        Slot0Configs PIDF = transportMotorConfiguration.Slot0;
+        PIDF.kV = kV;
+        transportMotor.getConfigurator().apply(transportMotorConfiguration);
+
     }
 
 }
