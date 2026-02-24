@@ -50,16 +50,16 @@ public class Shooter extends SubsystemBase {
     Logger.processInputs("Shooter", inputs);
     Logger.recordOutput("Shooter/WantedState", currentState);
     kP = kPNumber.get();
-    io.setkP(kP);
 
 
 
 
 
 
-                  if(DriverStation.isDisabled()) {
+        if(DriverStation.isDisabled()) {
           currentState = ShooterStates.IDLE;
-          }
+          }else{
+                io.setkP(kP);
       switch (currentState) {
         case IDLE:
           manualRPMTarget = 0;
@@ -86,6 +86,7 @@ public class Shooter extends SubsystemBase {
                                 RotationsPerSecond.of(manualRPMTarget / 60.0));
           break;
       }
+    }
 
     leftMotorAlert.set(!inputs.leftMotorConnected);
     rightMotorAlert.set(!inputs.rightMotorConnected);
