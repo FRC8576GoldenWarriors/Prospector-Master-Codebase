@@ -18,6 +18,8 @@ import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.subsystems.Shooter.Shooter.ShooterStates;
+import frc.robot.subsystems.transport.Transport.TransportStates;
 
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeCoralOnFly;
@@ -131,12 +133,18 @@ public class Robot extends LoggedRobot {
     /** This function is called once when the robot is disabled. */
     @Override
     public void disabledInit() {
+                RobotContainer.shooter.setWantedState(ShooterStates.IDLE);
+
         robotContainer.resetSimulationField();
     }
 
     /** This function is called periodically when disabled. */
     @Override
-    public void disabledPeriodic() {}
+    public void disabledPeriodic() {
+        RobotContainer.shooter.setWantedState(ShooterStates.IDLE);
+        RobotContainer.transport.setWantedState(TransportStates.Idle);
+            //ee
+    }
 
     /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
     @Override

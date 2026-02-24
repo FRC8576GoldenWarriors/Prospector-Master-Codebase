@@ -5,7 +5,7 @@
 package frc.robot.subsystems.transport;
 
 import static edu.wpi.first.units.Units.RPM;
-import static edu.wpi.first.units.Units.Volts;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
@@ -35,6 +35,7 @@ public class Transport extends SubsystemBase {
     this.currentState = state;
   }
 
+
   @Override
   public void periodic() {
     io.updateInputs(inputs);
@@ -52,11 +53,11 @@ public class Transport extends SubsystemBase {
         break;
 
       case TransportIn:
-        io.setTransportVoltage(Volts.of(11));
+        io.setTransportSpeed(RotationsPerSecond.of(TransportConstants.velocityTarget));;
         break;
 
       case TransportOut:
-        io.setTransportVoltage(Volts.of(-11));
+        io.setTransportSpeed(RotationsPerSecond.of(-TransportConstants.velocityTarget));;
         break;
 
       default:

@@ -48,18 +48,28 @@ public class Shooter extends SubsystemBase {
   public void periodic() {
     io.updateInputs(inputs);
     Logger.processInputs("Shooter", inputs);
+    Logger.recordOutput("Shooter/WantedState", currentState);
     kP = kPNumber.get();
     io.setkP(kP);
-    if(!DriverStation.isDisabled()) {
+
+
+
+
+
+
+                  if(DriverStation.isDisabled()) {
+          currentState = ShooterStates.IDLE;
+          }
       switch (currentState) {
         case IDLE:
           manualRPMTarget = 0;
           io.stop();
+
           break;
 
         case SHOOT:
           wantedRPS = RotationsPerSecond.of(100);//ShooterUtil.calculateShotVelocity(0,0);//REPLACE LATER WITH REAL PARAMETERS
-          io.setShooterVoltage(Volts.of(12), Volts.of(12));
+          io.setShooterVelocity(wantedRPS, wantedRPS);
           break;
 
         case VOLTAGE_CONTROL_POSITIVE:
@@ -76,9 +86,6 @@ public class Shooter extends SubsystemBase {
                                 RotationsPerSecond.of(manualRPMTarget / 60.0));
           break;
       }
-    } else {
-      currentState = ShooterStates.IDLE;
-    }
 
     leftMotorAlert.set(!inputs.leftMotorConnected);
     rightMotorAlert.set(!inputs.rightMotorConnected);
