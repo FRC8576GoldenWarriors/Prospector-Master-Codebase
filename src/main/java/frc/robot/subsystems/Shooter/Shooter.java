@@ -58,8 +58,8 @@ public class Shooter extends SubsystemBase {
           break;
 
         case SHOOT:
-          wantedRPS = RotationsPerSecond.of(160);//ShooterUtil.calculateShotVelocity(0,0);//REPLACE LATER WITH REAL PARAMETERS
-          io.setShooterVelocity(wantedRPS, wantedRPS);
+          wantedRPS = RotationsPerSecond.of(100);//ShooterUtil.calculateShotVelocity(0,0);//REPLACE LATER WITH REAL PARAMETERS
+          io.setShooterVoltage(Volts.of(12), Volts.of(12));
           break;
 
         case VOLTAGE_CONTROL_POSITIVE:

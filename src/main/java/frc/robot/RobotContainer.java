@@ -34,6 +34,7 @@ import frc.robot.commands.DriveX;
 import frc.robot.subsystems.Shooter.Shooter;
 import frc.robot.subsystems.Shooter.ShooterIOReal;
 import frc.robot.subsystems.Shooter.Shooter.ShooterStates;
+import frc.robot.subsystems.Shooter.ShooterIO;
 import frc.robot.subsystems.ShooterHood.ShooterHood;
 //import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.drive.*;
@@ -126,6 +127,7 @@ public class RobotContainer {
                 new VisionIOPhotonVisionSim(
                         camera1Name, robotToCamera1, driveSimulation::getSimulatedDriveTrainPose));
                 //shooter = null;
+                shooter = new Shooter(new ShooterIO() {});
                 autos = new Autos(drive);
                 break;
             default:
@@ -141,6 +143,7 @@ public class RobotContainer {
                 vision = new Vision(drive, drive::getChassisSpeeds, new VisionIO() {}, new VisionIO() {});
                 autos = null;
                // shooter = null;
+                shooter = new Shooter(new ShooterIO() {});
                 break;
         }
 
@@ -157,8 +160,11 @@ public class RobotContainer {
      */
     private void configureButtonBindings() {
         // Default command, normal field-relative drive
+        drive.setDefaultCommand(DriveCommands.joystickDrive(drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> -controller.getRightX()));
         drive.setDefaultCommand(DriveCommands.joystickDrive(
                drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> -controller.getRightX()));
+
+
 
         // Lock to 0° when A button is held
         // controller
@@ -228,6 +234,9 @@ public class RobotContainer {
         controller.povDown().whileTrue(drive.driveToPose(new Pose2d(14.6,4.75,Rotation2d.k180deg)).andThen(new DriveX(drive,-0.1).until(()->drive.getDetected())));
         // controller.leftBumper().onTrue(new InstantCommand(() -> {shooter.setRPS(40);}));
         // controller.rightBumper().onTrue(new InstantCommand(() -> {shooter.setRPS(0);}));
+        // Shooter control: hold right trigger to run flywheel, release to stop.
+        controller.povRight().whileTrue(new InstantCommand(() -> shooter.setWantedState(ShooterStates.SHOOT),shooter));
+        controller.povRight().onFalse(new InstantCommand(() -> shooter.setWantedState(ShooterStates.IDLE),shooter));
     }
 
     /**
