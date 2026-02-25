@@ -20,6 +20,9 @@ public class Shooter extends SubsystemBase {
 
   private LoggedNetworkNumber kPNumber = new LoggedNetworkNumber("Tuning/Shooter kP",ShooterConstants.kP);
   private double kP = kPNumber.get();
+
+    private LoggedNetworkNumber targetRPS = new LoggedNetworkNumber("Tuning/Shooter Target RPS",50);
+  private double target = targetRPS.get();
   public enum ShooterStates {
     IDLE,
     SHOOT,
@@ -50,16 +53,14 @@ public class Shooter extends SubsystemBase {
     Logger.processInputs("Shooter", inputs);
     Logger.recordOutput("Shooter/WantedState", currentState);
     kP = kPNumber.get();
+    target = targetRPS.get();
 
 
 
-
-
-
-        if(DriverStation.isDisabled()) {
+      if(DriverStation.isDisabled()) {
           currentState = ShooterStates.IDLE;
           }else{
-                io.setkP(kP);
+                //io.setkP(kP);
       switch (currentState) {
         case IDLE:
           manualRPMTarget = 0;
@@ -68,7 +69,7 @@ public class Shooter extends SubsystemBase {
           break;
 
         case SHOOT:
-          wantedRPS = RotationsPerSecond.of(100);//ShooterUtil.calculateShotVelocity(0,0);//REPLACE LATER WITH REAL PARAMETERS
+          wantedRPS = RotationsPerSecond.of(target);//ShooterUtil.calculateShotVelocity(0,0);//REPLACE LATER WITH REAL PARAMETERS
           io.setShooterVelocity(wantedRPS, wantedRPS);
           break;
 

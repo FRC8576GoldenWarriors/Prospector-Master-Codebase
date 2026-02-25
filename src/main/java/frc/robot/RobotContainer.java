@@ -30,6 +30,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.Shooter.Shooter;
+import frc.robot.subsystems.Shooter.Shooter.ShooterStates;
 import frc.robot.subsystems.Shooter.ShooterIOReal;
 import frc.robot.subsystems.ShooterHood.ShooterHood;
 import frc.robot.subsystems.ShooterHood.ShooterHoodIOKraken;
@@ -39,6 +40,7 @@ import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeKrakenIO;
 import frc.robot.subsystems.intake.Intake.IntakeStates;
 import frc.robot.subsystems.transport.Transport;
+import frc.robot.subsystems.transport.Transport.TransportStates;
 import frc.robot.subsystems.transport.TransportIOKraken;
 import frc.robot.subsystems.vision.*;
 import org.ironmaple.simulation.SimulatedArena;
@@ -174,8 +176,9 @@ public class RobotContainer {
         // //controller.x().whileTrue(DriveCommands.joystickDriveAtAngle(drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> Rotation2d.fromDegrees(45)));
         controller.a().onTrue(intake.setWantedState(IntakeStates.Intake));
         controller.x().onTrue(intake.setWantedState(IntakeStates.Rest));
-        //controller.y().onTrue(new InstantCommand(()->transport.setWantedState(TransportStates.TransportIn),transport));
-       // controller.y().onTrue(new InstantCommand(()->shooter.setWantedState(ShooterStates.SHOOT),shooter));
+        controller.b().onTrue(new InstantCommand(()->transport.setWantedState(TransportStates.TransportIn),transport));
+        controller.y().onTrue(new InstantCommand(()->shooter.setWantedState(ShooterStates.SHOOT),shooter));
+
         // controller.rightTrigger(0.5).whileTrue(macros.setWantedState(RobotStates.Shoot));
         // controller.y().onTrue(macros.setWantedState(RobotStates.IntakeOn));
         // controller.b().onTrue(macros.setWantedState(RobotStates.IntakeOff));
