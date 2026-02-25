@@ -62,6 +62,9 @@ public class RobotContainer {
     public static Shooter shooter;
     public static ShooterHood shooterHood;
     public static Transport transport;
+
+    //public static Macros macros;
+
     //private final Shooter shooter;
     private SwerveDriveSimulation driveSimulation = null;
 
@@ -77,6 +80,7 @@ public class RobotContainer {
         switch (Constants.currentMode) {
             case REAL:
                 // Real robot, instantiate hardware IO implementations
+                ///macros = new Macros(shooter, shooterHood, transport, intake);
                 gyro = new GyroIOPigeon2();
                 drive = new Drive(
                         gyro,
@@ -169,14 +173,22 @@ public class RobotContainer {
         // Switch to X pattern       when X button is pressed
         // controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
         //controller.x().onTrue(intake.setWantedState(IntakeStates.Intake));
-        //controller.x().whileTrue(DriveCommands.joystickDriveAtAngle(drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> Rotation2d.fromDegrees(45)));
+        // //controller.x().whileTrue(DriveCommands.joystickDriveAtAngle(drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> Rotation2d.fromDegrees(45)));
         controller.a().onTrue(intake.setWantedState(IntakeStates.Intake));
         controller.x().onTrue(intake.setWantedState(IntakeStates.Rest));
-        //controller.y().onTrue(new InstantCommand(()->transport.setWantedState(TransportStates.TransportIn),transport));
-       // controller.y().onTrue(new InstantCommand(()->shooter.setWantedState(ShooterStates.SHOOT),shooter));
+        controller.b().onTrue(new InstantCommand(()->transport.setWantedState(TransportStates.TransportIn),transport));
+        controller.y().onTrue(new InstantCommand(()->shooter.setWantedState(ShooterStates.SHOOT),shooter));
+
+        // controller.rightTrigger(0.5).whileTrue(macros.setWantedState(RobotStates.Shoot));
+        // controller.y().onTrue(macros.setWantedState(RobotStates.IntakeOn));
+        // controller.b().onTrue(macros.setWantedState(RobotStates.IntakeOff));
+        // controller.x().onTrue(macros.setWantedState(RobotStates.Rest));
+        // controller.a().onTrue(macros.setWantedState(RobotStates.Idle));
+
+
 
         //
-        controller.y().onTrue(Commands.parallel(new InstantCommand(()->transport.setWantedState(TransportStates.TransportIn),transport),new InstantCommand(()->shooter.setWantedState(ShooterStates.SHOOT),shooter)));
+        // controller.y().onTrue(Commands.parallel(new InstantCommand(()->transport.setWantedState(TransportStates.TransportIn),transport),new InstantCommand(()->shooter.setWantedState(ShooterStates.SHOOT),shooter)));
         //controller.y().onTrue(new StartEndCommand(()->shooter.setWantedState(ShooterStates.VOLTAGE_CONTROL_POSITIVE),()->shooter.setWantedState(ShooterStates.IDLE),shooter));
         //controller.b().whileTrue(new StartEndCommand(()->shooter.setWantedState(ShooterStates.VOLTAGE_CONTROL_NEGATIVE),()->shooter.setWantedState(ShooterStates.IDLE),shooter));//()->shooter.setWantedState(ShooterStates.VOLTAGE_CONTROL_POSITIVE,()->shooter.setWantedState(ShooterStates.Rest))));
         // Reset gyro / odometry

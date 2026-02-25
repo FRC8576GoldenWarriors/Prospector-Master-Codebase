@@ -46,10 +46,10 @@ public class Transport extends SubsystemBase {
       // (RobotContainer.controller.rightBumper().getAsBoolean() && !isFuelDetected())) {
       currentState = TransportStates.Idle;
     }
-
+    else{
     switch (currentState) {
       case Idle:
-        io.setTransportSpeed(RPM.of(0));
+        io.setTransportVoltage(0);
         break;
 
       case TransportIn:
@@ -65,6 +65,7 @@ public class Transport extends SubsystemBase {
         currentState = TransportStates.Idle;
         break;
     }
+   }
   }
 
   public boolean isFuelDetected() {

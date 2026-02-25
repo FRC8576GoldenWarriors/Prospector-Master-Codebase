@@ -67,10 +67,11 @@ public class ShooterHood extends SubsystemBase {
     io.updateInputs(inputs);
 
     kP = kPNumber.get();
-    PID.setP(kP);
     Logger.processInputs("ShooterHood", inputs);
 
     if(!DriverStation.isDisabled()) {
+         PID.setP(kP);
+
         switch(currentState) {
             case Idle:
                 io.setVoltage(0.0);
@@ -114,5 +115,8 @@ public class ShooterHood extends SubsystemBase {
     shooterHoodEncoderAlert.set(!inputs.isEncoderConnected);
 
 
+  }
+  public void resetPID(){
+    PID.reset(inputs.encoderValue.in(Rotations), inputs.speed.magnitude());
   }
 }

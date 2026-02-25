@@ -30,11 +30,13 @@ public class IntakeConstants {
         public static double kV = 0;
         public static double kA = 0;
 
-        public static double intakeUp = 0.36;
+        public static double intakeUp = 0.36; //0.36;
+
+
         public static double intakeDown = 0.012;
 
 
-        public static double rollerSpeed = 0.6;
+        public static double rollerSpeed = 0.367;
         public static double intakeSoftStop = 0.4;
 
 

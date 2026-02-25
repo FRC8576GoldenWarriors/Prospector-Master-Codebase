@@ -17,6 +17,8 @@ public class ShooterIOReal implements ShooterIO {
   private final TalonFX rightMotor;
 
   private TalonFXConfiguration config;
+    private TalonFXConfiguration leftConfig;
+
   private final VelocityVoltage velocityRequest = new VelocityVoltage(0).withSlot(0);
   private final VoltageOut voltageRequest = new VoltageOut(0);
 
@@ -41,8 +43,11 @@ public class ShooterIOReal implements ShooterIO {
     config.Slot0.kV = ShooterConstants.kV;
     config.Slot0.kS = ShooterConstants.kS;
 
-    leftMotor.getConfigurator().apply(config);
+
     rightMotor.getConfigurator().apply(config);
+    //leftConfig = config.clone().withMotorOutput(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Brake));
+    leftMotor.getConfigurator().apply(config);
+
   }
 
   @Override
@@ -65,7 +70,8 @@ public class ShooterIOReal implements ShooterIO {
 
   @Override
   public void setShooterVelocity(AngularVelocity leftVel, AngularVelocity rightVel) {
-    leftMotor.setControl(velocityRequest.withVelocity(leftVel));
+    //leftMotor.setControl(velocityRequest.withVelocity(leftVel));
+    leftMotor.setControl(voltageRequest.withOutput(0));
     rightMotor.setControl(velocityRequest.withVelocity(rightVel));
   }
 

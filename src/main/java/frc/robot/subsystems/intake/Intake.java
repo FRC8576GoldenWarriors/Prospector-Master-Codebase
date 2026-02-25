@@ -42,7 +42,7 @@ public class Intake extends SubsystemBase {
   private double inputVoltage;
   private LoggedNetworkNumber kP = new LoggedNetworkNumber("Tuning/kP",IntakeConstants.Software.kP);
   private double kPDouble = kP.get();
-  private LoggedNetworkNumber kV = new LoggedNetworkNumber("Tuning/kV",0.0);
+  private LoggedNetworkNumber kV = new LoggedNetworkNumber("Tuning/kV",IntakeConstants.Software.kG);
   private double kVDouble = kV.get();
   private Alert pivotMotorAlert = new Alert("The Pivot Motor is disconnected", AlertType.kError);
   private Alert rollerMotorAlert = new Alert("The Roller Motor is disconnected", AlertType.kError);
@@ -60,15 +60,15 @@ public class Intake extends SubsystemBase {
     io.updateInputs(inputs);
     Logger.processInputs("Intake", inputs);
     currentPosition = inputs.leftEncoderRotations;
-    //kPDouble = kP.getAsDouble();
-
+    kPDouble = kP.getAsDouble();
     kVDouble = kV.getAsDouble();
-    //PID.setP(kPDouble);
-    //FF.setKv(kVDouble);
+
      if (DriverStation.isEnabled()) {
       if(currentPosition>IntakeConstants.Software.intakeSoftStop){
             wantedState = IntakeStates.Idle;
           }
+        PID.setP(kPDouble);
+        FF.setKg(kVDouble);
       switch (wantedState) {
         case Idle:
           PIDVoltage = 0;
