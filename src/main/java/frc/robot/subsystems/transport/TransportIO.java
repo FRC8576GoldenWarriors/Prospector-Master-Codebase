@@ -28,7 +28,7 @@ public interface TransportIO {
 
     default void updateInputs(TransportIOInputs inputs) {}
 
-    default void setTransportVoltage(Voltage volts) {}
+    default void setTransportVoltage(double volts) {}
     default void setkP(double kP){}
     default void setkV(double kV){}
 

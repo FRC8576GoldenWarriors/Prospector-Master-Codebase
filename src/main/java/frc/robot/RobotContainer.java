@@ -28,10 +28,8 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.Macros.RobotStates;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.Shooter.Shooter;
-import frc.robot.subsystems.Shooter.Shooter.ShooterStates;
 import frc.robot.subsystems.Shooter.ShooterIOReal;
 import frc.robot.subsystems.ShooterHood.ShooterHood;
 import frc.robot.subsystems.ShooterHood.ShooterHoodIOKraken;
@@ -41,7 +39,6 @@ import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeKrakenIO;
 import frc.robot.subsystems.intake.Intake.IntakeStates;
 import frc.robot.subsystems.transport.Transport;
-import frc.robot.subsystems.transport.Transport.TransportStates;
 import frc.robot.subsystems.transport.TransportIOKraken;
 import frc.robot.subsystems.vision.*;
 import org.ironmaple.simulation.SimulatedArena;
@@ -64,7 +61,7 @@ public class RobotContainer {
     public static ShooterHood shooterHood;
     public static Transport transport;
 
-    public static Macros macros;
+    //public static Macros macros;
 
     //private final Shooter shooter;
     private SwerveDriveSimulation driveSimulation = null;
@@ -81,7 +78,7 @@ public class RobotContainer {
         switch (Constants.currentMode) {
             case REAL:
                 // Real robot, instantiate hardware IO implementations
-                macros = new Macros(shooter, shooterHood, transport, intake);
+                ///macros = new Macros(shooter, shooterHood, transport, intake);
                 gyro = new GyroIOPigeon2();
                 drive = new Drive(
                         gyro,
@@ -175,15 +172,15 @@ public class RobotContainer {
         // controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
         //controller.x().onTrue(intake.setWantedState(IntakeStates.Intake));
         // //controller.x().whileTrue(DriveCommands.joystickDriveAtAngle(drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> Rotation2d.fromDegrees(45)));
-        // controller.a().onTrue(intake.setWantedState(IntakeStates.Intake));
-        // controller.x().onTrue(intake.setWantedState(IntakeStates.Rest));
+        controller.a().onTrue(intake.setWantedState(IntakeStates.Intake));
+        controller.x().onTrue(intake.setWantedState(IntakeStates.Rest));
         //controller.y().onTrue(new InstantCommand(()->transport.setWantedState(TransportStates.TransportIn),transport));
        // controller.y().onTrue(new InstantCommand(()->shooter.setWantedState(ShooterStates.SHOOT),shooter));
-        controller.rightTrigger(0.5).whileTrue(macros.setWantedState(RobotStates.Shoot));
-        controller.y().onTrue(macros.setWantedState(RobotStates.IntakeOn));
-        controller.b().onTrue(macros.setWantedState(RobotStates.IntakeOff));
-        controller.x().onTrue(macros.setWantedState(RobotStates.Rest));
-        controller.a().onTrue(macros.setWantedState(RobotStates.Idle));
+        // controller.rightTrigger(0.5).whileTrue(macros.setWantedState(RobotStates.Shoot));
+        // controller.y().onTrue(macros.setWantedState(RobotStates.IntakeOn));
+        // controller.b().onTrue(macros.setWantedState(RobotStates.IntakeOff));
+        // controller.x().onTrue(macros.setWantedState(RobotStates.Rest));
+        // controller.a().onTrue(macros.setWantedState(RobotStates.Idle));
 
 
 

@@ -6,10 +6,12 @@ package frc.robot.subsystems.transport;
 
 import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Volts;
 
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -46,10 +48,10 @@ public class Transport extends SubsystemBase {
       // (RobotContainer.controller.rightBumper().getAsBoolean() && !isFuelDetected())) {
       currentState = TransportStates.Idle;
     }
-
+    else{
     switch (currentState) {
       case Idle:
-        io.setTransportSpeed(RPM.of(0));
+        io.setTransportVoltage(0);
         break;
 
       case TransportIn:
@@ -65,6 +67,7 @@ public class Transport extends SubsystemBase {
         currentState = TransportStates.Idle;
         break;
     }
+   }
   }
 
   public boolean isFuelDetected() {
