@@ -1,6 +1,5 @@
 package frc.robot.subsystems.transport;
 
-import static edu.wpi.first.units.Units.Volts;
 
 import org.littletonrobotics.junction.AutoLogOutput;
 
@@ -14,9 +13,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
-import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.DigitalInput;
-import frc.robot.subsystems.transport.Transport.TransportStates;
 
 public class TransportIOKraken implements TransportIO {
 
@@ -82,7 +79,7 @@ public class TransportIOKraken implements TransportIO {
 
     @Override
     @AutoLogOutput(key = "Transport/Voltage")
-    public void setTransportVoltage(double volts) {    
+    public void setTransportVoltage(double volts) {
         transportMotor.setVoltage(volts);
     }
 

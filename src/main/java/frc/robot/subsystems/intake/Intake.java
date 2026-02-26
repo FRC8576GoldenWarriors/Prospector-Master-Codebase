@@ -62,7 +62,7 @@ public class Intake extends SubsystemBase {
     currentPosition = inputs.leftEncoderRotations;
     kPDouble = kP.getAsDouble();
     kVDouble = kV.getAsDouble();
-    
+
      if (DriverStation.isEnabled()) {
       if(currentPosition>IntakeConstants.Software.intakeSoftStop){
             wantedState = IntakeStates.Idle;
