@@ -10,7 +10,10 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
@@ -39,8 +42,13 @@ public class Intake extends SubsystemBase {
   private double inputVoltage;
   private LoggedNetworkNumber kP = new LoggedNetworkNumber("Tuning/kP",IntakeConstants.Software.kP);
   private double kPDouble = kP.get();
-  private LoggedNetworkNumber kV = new LoggedNetworkNumber("Tuning/kV",0.0);
+  private double pastkP = kP.get();
+  private LoggedNetworkNumber kV = new LoggedNetworkNumber("Tuning/kV",IntakeConstants.Software.kG);
   private double kVDouble = kV.get();
+  private Alert pivotMotorAlert = new Alert("The Pivot Motor is disconnected", AlertType.kError);
+  private Alert rollerMotorAlert = new Alert("The Roller Motor is disconnected", AlertType.kError);
+  private Alert leftEncoderAlert = new Alert("The Left Encoder is disconnected", AlertType.kError);
+  private Alert rightEncoderAlert = new Alert("The Right Encoder is disconnected", AlertType.kError);
 
   public Intake(IntakeIO io) {
     PID = new ProfiledPIDController(IntakeConstants.Software.kP, IntakeConstants.Software.kI, IntakeConstants.Software.kD, IntakeConstants.Software.profile);
@@ -54,14 +62,17 @@ public class Intake extends SubsystemBase {
     Logger.processInputs("Intake", inputs);
     currentPosition = inputs.leftEncoderRotations;
     kPDouble = kP.getAsDouble();
-
     kVDouble = kV.getAsDouble();
-    PID.setP(kPDouble);
-    FF.setKv(kVDouble);
+    if(kPDouble!=pastkP){
+              PID.setP(kPDouble);
+              pastkP = kPDouble;
+            }
      if (DriverStation.isEnabled()) {
-      if(currentPosition>IntakeConstants.Software.intakeSoftStop){
-            wantedState = IntakeStates.Idle;
-          }
+      // if(currentPosition>IntakeConstants.Software.intakeSoftStop){
+      //       wantedState = IntakeStates.Idle;
+      //     }
+        //PID.setP(kPDouble);
+        //FF.setKg(kVDouble);
       switch (wantedState) {
         case Idle:
           PIDVoltage = 0;
@@ -74,7 +85,7 @@ public class Intake extends SubsystemBase {
           break;
 
         case Rest:
-          PIDVoltage  = PID.calculate(currentPosition, IntakeConstants.Software.intakeUp);
+          PIDVoltage  = PID.calculate(currentPosition, IntakeConstants.Software.intakeDown);//intakeUp
           FFVoltage = FF.calculate(IntakeConstants.Software.intakeUp, 0.5);
           inputVoltage = PIDVoltage + FFVoltage;
           wantedSpeed = 0;
@@ -118,18 +129,11 @@ public class Intake extends SubsystemBase {
         wantedState = IntakeStates.Idle;
      }
 
-
-    Logger.recordOutput("Intake/Wanted State", wantedState);
-    Logger.recordOutput("Intake/Wanted Roller Speed", wantedSpeed);
-    Logger.recordOutput("Intake/Wanted Pivot Position", PID.getSetpoint());
-    Logger.recordOutput("Intake/PID Voltage", PIDVoltage);
-    Logger.recordOutput("Intake/FF Voltage", FFVoltage);
-    Logger.recordOutput("Intake/Input Voltage", inputVoltage);
-
-
-
-
-
+      pivotMotorAlert.set(!inputs.pivotConnected);
+      rollerMotorAlert.set(!inputs.rollerConnected);
+      leftEncoderAlert.set(!inputs.leftEncoderConnected);
+      rightEncoderAlert.set(!inputs.rightEncoderConnected);
+      Logger.recordOutput("Intake/Wanted State", wantedState);
 }
 
 public void setWantedPosition(IntakeStates wantedState) {
@@ -137,12 +141,12 @@ public void setWantedPosition(IntakeStates wantedState) {
 }
 
 public void resetPID() {
-    PID.reset(currentPosition, inputs.pivotRPS.magnitude());
+    PID.reset(currentPosition, 0);
 }
 
 // TO-DO : MAKE THIS IN MACROS CLASS
 public SequentialCommandGroup setWantedState(IntakeStates state){
-    return null;//new SequentialCommandGroup(new InstantCommand(()->this.resetPID(), RobotContainer.intake), new InstantCommand(()->this.setWantedPosition(state), RobotContainer.intake) );
+    return new SequentialCommandGroup(new InstantCommand(()->this.resetPID(), RobotContainer.intake), new InstantCommand(()->this.setWantedPosition(state), RobotContainer.intake) );
 }
 
 //

@@ -21,7 +21,7 @@ public interface ShooterHoodIO {
         public Current supplyCurrent = Amps.of(0.0);
         public AngularVelocity speed = RotationsPerSecond.of(0);
         public boolean isMotorConnected = false;
-        public Angle encoderValue = Rotations.of(0);
+        public Angle encoderValue_Rotations = Rotations.of(0);
         public boolean isEncoderConnected = false;
     }
 
