@@ -31,8 +31,8 @@ import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
 public class DriveConstants {
     public static final double maxSpeedMetersPerSec = 4.3; // 5.3; // 4.8;
     public static final double odometryFrequency = 250.0; // Hz
-    public static final double trackWidth = Units.inchesToMeters(25);
-    public static final double wheelBase = Units.inchesToMeters(25);
+    public static final double trackWidth = Units.inchesToMeters(27);
+    public static final double wheelBase = Units.inchesToMeters(27);
     public static final double driveBaseRadius = Math.sqrt((Math.pow(trackWidth, 2) + Math.pow(wheelBase, 2)))
             / 2.0; // Math.hypot(trackWidth / 2.0, wheelBase / 2.0);
     // kevin pfeffer was here
@@ -45,11 +45,11 @@ public class DriveConstants {
 
     // Zeroed rotation values for each module, see setup instructions
     public static final Rotation2d frontLeftZeroRotation =
-            Rotation2d.fromRotations(-0.340088);//0.331787); // -0.143311); // new Rotation2d(0.0);
-    public static final Rotation2d frontRightZeroRotation = Rotation2d.fromRotations(-0.378418);//-0.313965); // 0.204834);
+            Rotation2d.fromRotations(0.158936);//0.031982);//0.151367 );//(0.331787); // -0.143311); // new Rotation2d(0.0);
+    public static final Rotation2d frontRightZeroRotation = Rotation2d.fromRotations(0.367432);//0.367188 );//(-0.313965); // 0.204834);
     public static final Rotation2d backLeftZeroRotation =
-            Rotation2d.fromRotations(0.017334);//0.037842);//0.478760); // 0.464355); // 0.453857);
-    public static final Rotation2d backRightZeroRotation = Rotation2d.fromRotations(-0.153076);//0.176025); // 0.171875);
+            Rotation2d.fromRotations(-0.049072);//0.459961);//-0.192871);//(0.478760); // 0.464355); // 0.453857);
+    public static final Rotation2d backRightZeroRotation = Rotation2d.fromRotations(0.308350);//0.449219 );//(0.176025); // 0.171875);
 
     // Device CAN IDs
     public static final int pigeonCanId = 0;
@@ -94,7 +94,7 @@ public class DriveConstants {
 
     // Turn motor configuration
     public static final boolean turnInverted = true;
-    public static final int turnMotorCurrentLimit = 20;
+    public static final int turnMotorCurrentLimit = 40;
     public static final double turnMotorReduction = 150.0 / 7; // 9424.0 / 203.0;
     public static final DCMotor turnGearbox = DCMotor.getNeo550(1);
 
@@ -107,8 +107,8 @@ public class DriveConstants {
     public static final double module_average_kA_Drive = 0.3;
     public static final double module_average_kA_Turn = 0.574665;
     // Turn PID configuration
-    public static final double turnKp = 2;//1;//0.5;//0.01;//1;//2.0; // 2.0; // 1.6; // 0.8; // 0.575; // 0.01; // 2.0;
-    public static final double turnKd = 0.0;
+    public static final double turnKp = 8;//6;//8;//6;//4.0; // 2.0; // 1.6; // 0.8; // 0.575; // 0.01; // 2.0;
+    public static final double turnKd = 0.008;
     public static final double turnSimP = 8.0;
     public static final double turnSimD = 0;//.02;//0.04;
     public static final double turnKs = 2.44234;
