@@ -19,9 +19,9 @@ public class Shooter extends SubsystemBase {
   private Alert rightMotorAlert = new Alert("The Right Motor is disconnected", AlertType.kError);
 
   private LoggedNetworkNumber kPNumber = new LoggedNetworkNumber("Tuning/Shooter kP",ShooterConstants.kP);
-  private double kP = kPNumber.get();
-
-    private LoggedNetworkNumber targetRPS = new LoggedNetworkNumber("Tuning/Shooter Target RPS",50);
+  private double pastkP = kPNumber.get();
+  private double currentkP = kPNumber.get();
+    private LoggedNetworkNumber targetRPS = new LoggedNetworkNumber("Tuning/Shooter Target RPS",86);
   private double target = targetRPS.get();
   public enum ShooterStates {
     IDLE,
@@ -52,7 +52,7 @@ public class Shooter extends SubsystemBase {
     io.updateInputs(inputs);
     Logger.processInputs("Shooter", inputs);
     Logger.recordOutput("Shooter/WantedState", currentState);
-    kP = kPNumber.get();
+    currentkP = kPNumber.get();
     target = targetRPS.get();
 
 
@@ -60,6 +60,10 @@ public class Shooter extends SubsystemBase {
       if(DriverStation.isDisabled()) {
           currentState = ShooterStates.IDLE;
           }else{
+            if(currentkP!=pastkP){
+              io.setkP(currentkP);
+              pastkP = currentkP;
+            }
                 //io.setkP(kP);
       switch (currentState) {
         case IDLE:
@@ -91,5 +95,8 @@ public class Shooter extends SubsystemBase {
 
     leftMotorAlert.set(!inputs.leftMotorConnected);
     rightMotorAlert.set(!inputs.rightMotorConnected);
+  }
+  public boolean isRevved(){
+    return (inputs.leftMotorSpeed.in(RotationsPerSecond)>targetRPS.get()-10)&&(inputs.leftMotorSpeed.in(RotationsPerSecond)<targetRPS.get()+10);
   }
 }

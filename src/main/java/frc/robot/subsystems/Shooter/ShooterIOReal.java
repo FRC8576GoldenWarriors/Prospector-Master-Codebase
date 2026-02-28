@@ -3,10 +3,12 @@ package frc.robot.subsystems.Shooter;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.units.measure.*;
@@ -44,9 +46,14 @@ public class ShooterIOReal implements ShooterIO {
     config.Slot0.kS = ShooterConstants.kS;
 
 
+
+    config.Slot0.kV = ShooterConstants.kVRight;
     rightMotor.getConfigurator().apply(config);
-    //leftConfig = config.clone().withMotorOutput(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Brake));
+    config.Slot0.kP = ShooterConstants.kPLeft;
     leftMotor.getConfigurator().apply(config);
+    rightMotor.setControl(new Follower(leftMotor.getDeviceID(), MotorAlignmentValue.Aligned));
+    //leftConfig = config.clone().withMotorOutput(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Brake));
+
 
   }
 
@@ -71,8 +78,8 @@ public class ShooterIOReal implements ShooterIO {
   @Override
   public void setShooterVelocity(AngularVelocity leftVel, AngularVelocity rightVel) {
     //leftMotor.setControl(velocityRequest.withVelocity(leftVel));
-    leftMotor.setControl(voltageRequest.withOutput(0));
-    rightMotor.setControl(velocityRequest.withVelocity(rightVel));
+    leftMotor.setControl(velocityRequest.withVelocity(leftVel));
+    //rightMotor.setControl(velocityRequest.withVelocity(0));//rightVel));
   }
 
   @Override
@@ -93,7 +100,7 @@ public class ShooterIOReal implements ShooterIO {
   public void setkP(double kP){
     Slot0Configs PIDF = config.Slot0;
     PIDF.kP = kP;
-    leftMotor.getConfigurator().apply(config);
+    //leftMotor.getConfigurator().apply(config);
     rightMotor.getConfigurator().apply(config);
   }
 }

@@ -43,7 +43,7 @@ public class ShooterHood extends SubsystemBase {
 
     private LoggedNetworkNumber kPNumber = new LoggedNetworkNumber("Tuning/ShooterHood kP",ShooterHoodConstants.kp);
     private double kP = kPNumber.get();
-
+    private double pastkP = kPNumber.get();
     public ShooterHood(ShooterHoodIO io) {
         this.io = io;
         PID = new ProfiledPIDController(ShooterHoodConstants.kp, ShooterHoodConstants.ki, ShooterHoodConstants.kd, ShooterHoodConstants.profile);
@@ -63,14 +63,18 @@ public class ShooterHood extends SubsystemBase {
 
   @Override
   public void periodic() {
-    currentAnglePosition = inputs.encoderValue.in(Rotations);
+    currentAnglePosition = inputs.encoderValue_Rotations.in(Rotations);
     io.updateInputs(inputs);
 
     kP = kPNumber.get();
     Logger.processInputs("ShooterHood", inputs);
 
     if(!DriverStation.isDisabled()) {
-         PID.setP(kP);
+        if(pastkP!=kP){
+            PID.setP(kP);
+            pastkP = kP;
+        }
+         //PID.setP(kP);
 
         switch(currentState) {
             case Idle:
@@ -117,6 +121,6 @@ public class ShooterHood extends SubsystemBase {
 
   }
   public void resetPID(){
-    PID.reset(inputs.encoderValue.in(Rotations), inputs.speed.magnitude());
+    PID.reset(inputs.encoderValue_Rotations.in(Rotations), inputs.speed.magnitude());
   }
 }
