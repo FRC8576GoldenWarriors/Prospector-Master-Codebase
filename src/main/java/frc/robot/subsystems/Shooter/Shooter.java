@@ -21,7 +21,7 @@ public class Shooter extends SubsystemBase {
   private LoggedNetworkNumber kPNumber = new LoggedNetworkNumber("Tuning/Shooter kP",ShooterConstants.kP);
   private double pastkP = kPNumber.get();
   private double currentkP = kPNumber.get();
-    private LoggedNetworkNumber targetRPS = new LoggedNetworkNumber("Tuning/Shooter Target RPS",86);
+    private LoggedNetworkNumber targetRPS = new LoggedNetworkNumber("Tuning/Shooter Target RPS",35);
   private double target = targetRPS.get();
   public enum ShooterStates {
     IDLE,
@@ -97,6 +97,6 @@ public class Shooter extends SubsystemBase {
     rightMotorAlert.set(!inputs.rightMotorConnected);
   }
   public boolean isRevved(){
-    return (inputs.leftMotorSpeed.in(RotationsPerSecond)>targetRPS.get()-10)&&(inputs.leftMotorSpeed.in(RotationsPerSecond)<targetRPS.get()+10);
+    return (inputs.leftMotorSpeed.in(RotationsPerSecond)>targetRPS.get()-6)&&(inputs.leftMotorSpeed.in(RotationsPerSecond)<targetRPS.get()+6);
   }
 }

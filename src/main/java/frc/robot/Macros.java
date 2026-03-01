@@ -107,12 +107,12 @@ public class Macros extends SubsystemBase {
   }
   public void shoot(){
     m_shooter.setWantedState(ShooterStates.SHOOT);
-    if(m_shooter.isRevved()){
+    if(m_shooter.isRevved()&&m_ShooterHood.atSetpoint()){
     //m_ShooterHood.setWantedState(ShooterHoodStates.Shoot);
     m_Transport.setWantedState(TransportStates.TransportIn);
     }
-    //m_ShooterHood.setWantedState(ShooterHoodStates.Shoot);
-    m_Intake.setWantedPosition(IntakeStates.Intake);
+    m_ShooterHood.setWantedState(ShooterHoodStates.Shoot);//UNCOMMENT TO TEST HOOD
+    //m_Intake.setWantedPosition(IntakeStates.Intake);
   }
   public SequentialCommandGroup setWantedState(RobotStates wantedState){
     return new SequentialCommandGroup(

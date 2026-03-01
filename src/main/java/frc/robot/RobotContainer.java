@@ -179,7 +179,7 @@ public class RobotContainer {
         //controller.b().onTrue(new InstantCommand(()->transport.setWantedState(TransportStates.TransportIn),transport));
         controller.y().onTrue(macros.setWantedState(RobotStates.Shoot));
         controller.a().onTrue(macros.setWantedState(RobotStates.IntakeOn));
-        controller.b().onTrue(macros.setWantedState(RobotStates.Idle));
+        controller.b().onTrue(macros.setWantedState(RobotStates.Rest));
         // controller.povUp().whileTrue(new InstantCommand(()->shooterHood.setWantedState(ShooterHoodStates.HoodVoltageControl),shooterHood));
         // controller.povDown().whileTrue(new InstantCommand(()->shooterHood.setWantedState(ShooterHoodStates.HoodVoltageControl),shooterHood));
         // controller.rightTrigger(0.5).whileTrue(macros.setWantedState(RobotStates.Shoot));

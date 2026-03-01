@@ -63,11 +63,12 @@ public class ShooterHood extends SubsystemBase {
 
   @Override
   public void periodic() {
-    currentAnglePosition = inputs.encoderValue_Rotations.in(Rotations);
+    currentAnglePosition = inputs.encoderValue_Radians.in(Rotations);
     io.updateInputs(inputs);
 
     kP = kPNumber.get();
     Logger.processInputs("ShooterHood", inputs);
+    Logger.recordOutput("ShooterHood/Current Position", currentAnglePosition);
 
     if(!DriverStation.isDisabled()) {
         if(pastkP!=kP){
@@ -91,7 +92,7 @@ public class ShooterHood extends SubsystemBase {
                 break;
 
             case Shoot:
-            wantedAnglePosition = 0.225;//getWantedPosition(1);
+            wantedAnglePosition = 0.34;//0.2126;//getWantedPosition(1);
                 PIDVoltage = PID.calculate(currentAnglePosition,wantedAnglePosition);
                 FFVoltage = FF.calculate(wantedAnglePosition, 1.0);
                 inputVoltage = PIDVoltage + FFVoltage;
@@ -121,6 +122,12 @@ public class ShooterHood extends SubsystemBase {
 
   }
   public void resetPID(){
-    PID.reset(inputs.encoderValue_Rotations.in(Rotations), inputs.speed.magnitude());
+    PID.reset(inputs.encoderValue_Radians.in(Rotations), inputs.speed.magnitude());
   }
+
+  public boolean atSetpoint(){
+    return (inputs.encoderValue_Radians.in(Rotations))>(PID.getGoal().position-0.05)&&(inputs.encoderValue_Radians.in(Rotations))<(PID.getGoal().position+0.05);
+  }
+
+  //Min: 22 degrees, Max: 43 degrees
 }

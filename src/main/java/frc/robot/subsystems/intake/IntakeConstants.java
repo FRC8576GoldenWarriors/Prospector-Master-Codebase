@@ -22,21 +22,21 @@ public class IntakeConstants {
         public static double rightZero = 0.168;
         public static boolean leftInverted = true;
         public static boolean rightInverted = false;
-        public static double kP = 15;
+        public static double kP = 15;//15;
         public static double kI = 0;
         public static double kD = 0;
         public static double kS = 0;
-        public static double kG = 0.3;
+        public static double kG = 0.15;//0.3;//0.6;//0.3;
         public static double kV = 0;
         public static double kA = 0;
 
-        public static double intakeUp = 0.36; //0.36;
+        public static double intakeUp = 0.2;//0.36; //0.36;
 
 
         public static double intakeDown = 0.09;//0.012;
 
 
-        public static double rollerSpeed = 0.367*2;
+        public static double rollerSpeed = 1;
         public static double intakeSoftStop = 0.4;
 
 
