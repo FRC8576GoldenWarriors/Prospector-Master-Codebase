@@ -5,18 +5,19 @@
 package frc.robot.subsystems.transport;
 
 import static edu.wpi.first.units.Units.RPM;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.RobotContainer;
 
 public class Transport extends SubsystemBase {
 
   private final TransportIO io;
   private final TransportIOInputsAutoLogged inputs = new TransportIOInputsAutoLogged();
+
 
   @AutoLogOutput(key = "Transport/CurrentState")
   private TransportStates currentState = TransportStates.Idle;
@@ -35,28 +36,29 @@ public class Transport extends SubsystemBase {
     this.currentState = state;
   }
 
+
   @Override
   public void periodic() {
     io.updateInputs(inputs);
     Logger.processInputs("Transport", inputs);
 
-    if (DriverStation.isDisabled() ||
-      !RobotContainer.controller.rightBumper().getAsBoolean() ||
-      (RobotContainer.controller.rightBumper().getAsBoolean() && !isFuelDetected())) {
+    if (DriverStation.isDisabled()){
+      // !RobotContainer.controller.rightBumper().getAsBoolean() ||
+      // (RobotContainer.controller.rightBumper().getAsBoolean() && !isFuelDetected())) {
       currentState = TransportStates.Idle;
     }
-
+    else{
     switch (currentState) {
       case Idle:
-        io.setTransportSpeed(RPM.of(0));
+        io.setTransportVoltage(0);
         break;
 
       case TransportIn:
-        io.setTransportSpeed(TransportConstants.transportInSpeed);
+        io.setTransportSpeed(RotationsPerSecond.of(TransportConstants.velocityTarget));;
         break;
 
       case TransportOut:
-        io.setTransportSpeed(TransportConstants.transportOutSpeed);
+        io.setTransportSpeed(RotationsPerSecond.of(-TransportConstants.velocityTarget));;
         break;
 
       default:
@@ -64,6 +66,7 @@ public class Transport extends SubsystemBase {
         currentState = TransportStates.Idle;
         break;
     }
+   }
   }
 
   public boolean isFuelDetected() {

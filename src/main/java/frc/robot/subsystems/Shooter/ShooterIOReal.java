@@ -1,10 +1,14 @@
 package frc.robot.subsystems.Shooter;
 
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.units.measure.*;
@@ -14,6 +18,9 @@ public class ShooterIOReal implements ShooterIO {
   private final TalonFX leftMotor;
   private final TalonFX rightMotor;
 
+  private TalonFXConfiguration config;
+    private TalonFXConfiguration leftConfig;
+
   private final VelocityVoltage velocityRequest = new VelocityVoltage(0).withSlot(0);
   private final VoltageOut voltageRequest = new VoltageOut(0);
 
@@ -21,8 +28,8 @@ public class ShooterIOReal implements ShooterIO {
     leftMotor = new TalonFX(ShooterConstants.LEFT_SHOOTER_ID);
     rightMotor = new TalonFX(ShooterConstants.RIGHT_SHOOTER_ID);
 
-    TalonFXConfiguration config = new TalonFXConfiguration();
-
+    config = new TalonFXConfiguration();
+    config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
     // Current Limits & Brake Mode
     config.CurrentLimits.SupplyCurrentLimit = ShooterConstants.SUPPLY_CURRENT_LIMIT.in(Amps);
     config.CurrentLimits.SupplyCurrentLimitEnable = true;
@@ -38,8 +45,16 @@ public class ShooterIOReal implements ShooterIO {
     config.Slot0.kV = ShooterConstants.kV;
     config.Slot0.kS = ShooterConstants.kS;
 
-    leftMotor.getConfigurator().apply(config);
+
+
+    config.Slot0.kV = ShooterConstants.kVRight;
     rightMotor.getConfigurator().apply(config);
+    config.Slot0.kP = ShooterConstants.kPLeft;
+    leftMotor.getConfigurator().apply(config);
+    rightMotor.setControl(new Follower(leftMotor.getDeviceID(), MotorAlignmentValue.Aligned));
+    //leftConfig = config.clone().withMotorOutput(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Brake));
+
+
   }
 
   @Override
@@ -62,8 +77,9 @@ public class ShooterIOReal implements ShooterIO {
 
   @Override
   public void setShooterVelocity(AngularVelocity leftVel, AngularVelocity rightVel) {
+    //leftMotor.setControl(velocityRequest.withVelocity(leftVel));
     leftMotor.setControl(velocityRequest.withVelocity(leftVel));
-    rightMotor.setControl(velocityRequest.withVelocity(rightVel));
+    //rightMotor.setControl(velocityRequest.withVelocity(0));//rightVel));
   }
 
   @Override
@@ -74,7 +90,17 @@ public class ShooterIOReal implements ShooterIO {
 
   @Override
   public void stop() {
+     leftMotor.setControl(voltageRequest.withOutput(0));
+    rightMotor.setControl(voltageRequest.withOutput(0));
     leftMotor.stopMotor();
     rightMotor.stopMotor();
+  }
+
+  @Override
+  public void setkP(double kP){
+    Slot0Configs PIDF = config.Slot0;
+    PIDF.kP = kP;
+    //leftMotor.getConfigurator().apply(config);
+    rightMotor.getConfigurator().apply(config);
   }
 }
