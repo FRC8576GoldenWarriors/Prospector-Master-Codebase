@@ -5,7 +5,7 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 public class ShooterHoodConstants {
     public static final int shooterHoodMotorID = 40;
     public static final int shooterHoodEncoderDIO = 3;
-    public static double expectedZero = 0.9024+.17;
+    public static double expectedZero = 0.9024+.17+.97;
     public static final boolean encoderInverted = false;
 
     public static final double kp = 9.5;

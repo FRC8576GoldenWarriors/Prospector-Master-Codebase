@@ -39,9 +39,11 @@ public class ShooterHood extends SubsystemBase {
     private ShooterHoodStates currentState = ShooterHoodStates.Idle;
 
     private double currentAnglePosition = 0.0;
-    private double wantedAnglePosition = 0.0;
 
     private LoggedNetworkNumber kPNumber = new LoggedNetworkNumber("Tuning/ShooterHood kP",ShooterHoodConstants.kp);
+    private LoggedNetworkNumber hoodAngleRotations = new LoggedNetworkNumber("Tuning/ShooterHood Angle",0.2);
+    private double wantedAnglePosition = hoodAngleRotations.get();
+
     private double kP = kPNumber.get();
     private double pastkP = kPNumber.get();
     public ShooterHood(ShooterHoodIO io) {
@@ -67,9 +69,10 @@ public class ShooterHood extends SubsystemBase {
     io.updateInputs(inputs);
 
     kP = kPNumber.get();
+
     Logger.processInputs("ShooterHood", inputs);
     Logger.recordOutput("ShooterHood/Current Position", currentAnglePosition);
-
+    wantedAnglePosition = hoodAngleRotations.get();
     if(!DriverStation.isDisabled()) {
         if(pastkP!=kP){
             PID.setP(kP);
@@ -92,7 +95,7 @@ public class ShooterHood extends SubsystemBase {
                 break;
 
             case Shoot:
-            wantedAnglePosition = 0.34;//0.2126;//getWantedPosition(1);
+            //wantedAnglePosition = hoodAngleRotations.get();//0.2126;//getWantedPosition(1);
                 PIDVoltage = PID.calculate(currentAnglePosition,wantedAnglePosition);
                 FFVoltage = FF.calculate(wantedAnglePosition, 1.0);
                 inputVoltage = PIDVoltage + FFVoltage;

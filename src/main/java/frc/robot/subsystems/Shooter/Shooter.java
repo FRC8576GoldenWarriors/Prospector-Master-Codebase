@@ -97,6 +97,6 @@ public class Shooter extends SubsystemBase {
     rightMotorAlert.set(!inputs.rightMotorConnected);
   }
   public boolean isRevved(){
-    return (inputs.leftMotorSpeed.in(RotationsPerSecond)>targetRPS.get()-6)&&(inputs.leftMotorSpeed.in(RotationsPerSecond)<targetRPS.get()+6);
+    return (inputs.leftMotorSpeed.in(RotationsPerSecond)>targetRPS.get()-0.5)&&(inputs.leftMotorSpeed.in(RotationsPerSecond)<targetRPS.get()+0.5);
   }
 }
