@@ -67,7 +67,8 @@ public class ModuleIOSpark implements ModuleIO {
     private final Debouncer driveConnectedDebounce = new Debouncer(0.5);
     private final Debouncer turnConnectedDebounce = new Debouncer(0.5);
 
-    public ModuleIOSpark(int module) {
+    @SuppressWarnings("removal")
+public ModuleIOSpark(int module) {
         zeroRotation = switch (module) {
             case 0 -> frontLeftZeroRotation;
             case 1 -> frontRightZeroRotation;
@@ -121,9 +122,7 @@ public class ModuleIOSpark implements ModuleIO {
         driveConfig
                 .closedLoop
                 .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-                .pidf(
-                        driveKp, 0.0,
-                        driveKd, 0.0);
+                .pid(driveKp, 0, driveKd, null);
         driveConfig
                 .signals
                 .primaryEncoderPositionAlwaysOn(true)
