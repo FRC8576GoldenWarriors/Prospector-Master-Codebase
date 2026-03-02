@@ -20,7 +20,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -30,10 +29,18 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Macros.RobotStates;
 import frc.robot.commands.DriveCommands;
-import frc.robot.commands.DriveX;
+import frc.robot.subsystems.Shooter.Shooter;
+import frc.robot.subsystems.Shooter.ShooterIOReal;
+import frc.robot.subsystems.ShooterHood.ShooterHood;
+import frc.robot.subsystems.ShooterHood.ShooterHoodIOKraken;
 //import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.drive.*;
+import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.intake.IntakeKrakenIO;
+import frc.robot.subsystems.transport.Transport;
+import frc.robot.subsystems.transport.TransportIOKraken;
 import frc.robot.subsystems.vision.*;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
@@ -52,6 +59,14 @@ public class RobotContainer {
     public static Drive drive;
     private final Vision vision;
     private final GyroIO gyro;
+    public static Intake intake;
+    public static Shooter shooter;
+    public static ShooterHood shooterHood;
+    public static Transport transport;
+    public static Macros macros;
+
+    //public static Macros macros;
+
     //private final Shooter shooter;
     private SwerveDriveSimulation driveSimulation = null;
 
@@ -67,6 +82,7 @@ public class RobotContainer {
         switch (Constants.currentMode) {
             case REAL:
                 // Real robot, instantiate hardware IO implementations
+                ///macros = new Macros(shooter, shooterHood, transport, intake);
                 gyro = new GyroIOPigeon2();
                 drive = new Drive(
                         gyro,
@@ -84,7 +100,13 @@ public class RobotContainer {
                 new VisionIOLimelight(VisionConstants.camera2Name, drive::getRotation, drive::getChassisSpeeds),
                 new VisionIOLimelight(VisionConstants.camera3Name, drive::getRotation, drive::getChassisSpeeds));
                 //shooter = new Shooter(0);
+                intake = new Intake(new IntakeKrakenIO());
+                shooter = new Shooter(new ShooterIOReal());
+                shooterHood = new ShooterHood(new ShooterHoodIOKraken());
+                transport = new Transport(new TransportIOKraken());
                 autos = new Autos(drive);
+                macros = new Macros(shooter, shooterHood, transport, intake);
+                //intake = new Intake(new IntakeKrakenIO());
                 break;
             case SIM:
                 // create a maple-sim swerve drive simulation instance
@@ -151,13 +173,32 @@ public class RobotContainer {
         //         .a()
         //         .whileTrue(DriveCommands.joystickDriveAtAngle(
         //                 drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> new Rotation2d()));
-        controller.a().onTrue(new DriveX(drive, -0.5).until(()->drive.getDetected()));
-
-        // Switch to X pattern when X button is pressed
+        //controller.a().onTrue(new DriveX(drive, -0.5).until(()->drive.getDetected()));
+        //controller.a().onTrue(intake.setWantedState(IntakeStates.Rest));
+        // Switch to X pattern       when X button is pressed
         // controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
-        controller.x().whileTrue(AutoBuilder.followPath(DriveCommands.driveOverBump(()->drive.getPose())));//DriveCommands.joystickDriveAt45(drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), drive::getPose));
-        controller.y().whileTrue(DriveCommands.joystickDriveTagCentric(drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> drive.getPose()));
+        //controller.x().onTrue(intake.setWantedState(IntakeStates.Intake));
+        // //controller.x().whileTrue(DriveCommands.joystickDriveAtAngle(drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> Rotation2d.fromDegrees(45)));
+        //controller.a().onTrue(intake.setWantedState(IntakeStates.Intake));
+        //controller.x().onTrue(intake.setWantedState(IntakeStates.Rest));
+        //controller.b().onTrue(new InstantCommand(()->transport.setWantedState(TransportStates.TransportIn),transport));
+        controller.y().onTrue(macros.setWantedState(RobotStates.Shoot));
+        controller.a().onTrue(macros.setWantedState(RobotStates.IntakeOn));
+        controller.b().onTrue(macros.setWantedState(RobotStates.Rest));
+        // controller.povUp().whileTrue(new InstantCommand(()->shooterHood.setWantedState(ShooterHoodStates.HoodVoltageControl),shooterHood));
+        // controller.povDown().whileTrue(new InstantCommand(()->shooterHood.setWantedState(ShooterHoodStates.HoodVoltageControl),shooterHood));
+        // controller.rightTrigger(0.5).whileTrue(macros.setWantedState(RobotStates.Shoot));
+        // controller.y().onTrue(macros.setWantedState(RobotStates.IntakeOn));
+        // controller.b().onTrue(macros.setWantedState(RobotStates.IntakeOff));
+        // controller.x().onTrue(macros.setWantedState(RobotStates.Rest));
+        // controller.a().onTrue(macros.setWantedState(RobotStates.Idle));
 
+
+
+        //
+        // controller.y().onTrue(Commands.parallel(new InstantCommand(()->transport.setWantedState(TransportStates.TransportIn),transport),new InstantCommand(()->shooter.setWantedState(ShooterStates.SHOOT),shooter)));
+        //controller.y().onTrue(new StartEndCommand(()->shooter.setWantedState(ShooterStates.VOLTAGE_CONTROL_POSITIVE),()->shooter.setWantedState(ShooterStates.IDLE),shooter));
+        //controller.b().whileTrue(new StartEndCommand(()->shooter.setWantedState(ShooterStates.VOLTAGE_CONTROL_NEGATIVE),()->shooter.setWantedState(ShooterStates.IDLE),shooter));//()->shooter.setWantedState(ShooterStates.VOLTAGE_CONTROL_POSITIVE,()->shooter.setWantedState(ShooterStates.Rest))));
         // Reset gyro / odometry
         final Runnable resetGyro = Constants.currentMode == Constants.Mode.SIM
                 ? () -> drive.resetOdometry(
@@ -199,15 +240,15 @@ public class RobotContainer {
             drive.resetGyro(resetPose);
             vision.resetHeading();
         }));
-        controller.povUp().onTrue(new InstantCommand(() -> {
-            Pose2d resetPose = new Pose2d(
-                    new Translation2d(
-                        Units.inchesToMeters(29 / 2) + Units.inchesToMeters(13 / 4),
-                            Units.inchesToMeters(29/2)),//158.32
-                    (DriverStation.getAlliance().get() == Alliance.Red) ? Rotation2d.k180deg : Rotation2d.kZero);
-            drive.resetGyro(resetPose);
-        }));
-        controller.povDown().whileTrue(drive.driveToPose(new Pose2d(14.6,4.75,Rotation2d.k180deg)).andThen(new DriveX(drive,-0.1).until(()->drive.getDetected())));
+        // controller.povUp().onTrue(new InstantCommand(() -> {
+        //     Pose2d resetPose = new Pose2d(
+        //             new Translation2d(
+        //                 Units.inchesToMeters(29 / 2) + Units.inchesToMeters(13 / 4),
+        //                     Units.inchesToMeters(29/2)),//158.32
+        //             (DriverStation.getAlliance().get() == Alliance.Red) ? Rotation2d.k180deg : Rotation2d.kZero);
+        //     drive.resetGyro(resetPose);
+        // }));
+        // controller.povDown().whileTrue(drive.driveToPose(new Pose2d(14.6,4.75,Rotation2d.k180deg)).andThen(new DriveX(drive,-0.1).until(()->drive.getDetected())));
         // controller.leftBumper().onTrue(new InstantCommand(() -> {shooter.setRPS(40);}));
         // controller.rightBumper().onTrue(new InstantCommand(() -> {shooter.setRPS(0);}));
     }

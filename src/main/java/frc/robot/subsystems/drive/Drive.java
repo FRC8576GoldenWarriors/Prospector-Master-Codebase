@@ -279,12 +279,10 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
      */
     public void runVelocity(ChassisSpeeds speeds) {
         // Calculate module setpoints
-        previousSetpoint = setpointGenerator.generateSetpoint(previousSetpoint, speeds, 0.02);
-        SwerveModuleState[] setpointStates = previousSetpoint.moduleStates();
-        // speeds = ChassisSpeeds.discretize(speeds, 0.02);
-        // SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(speeds);
-        //SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, maxSpeedMetersPerSec);
-
+        Logger.recordOutput("SwerveStates/Chassis Speeds", speeds);
+        speeds = ChassisSpeeds.discretize(speeds, 0.02);
+        SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(speeds);
+        SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, maxSpeedMetersPerSec);
 
         // Log unoptimized setpoints
         Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
@@ -477,7 +475,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
 
     @AutoLogOutput(key = "Drive/CANRange Detected")
     public boolean getDetected(){
-        return range.getIsDetected().getValue();
+        return false;//range.getIsDetected().getValue();
     }
 
     /** Adds a new timestamped vision measurement. */
