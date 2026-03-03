@@ -301,11 +301,11 @@ public class DriveCommands {
                                             : drive.getRotation());
                             drive.runVelocity(speeds);
                                 }else{
-                                        
+                                        double angle = 0;
                                         if(DriverStation.getAlliance().get().equals(Alliance.Red)){
-                                                                                        double angle = Units.degreesToRadians(0);
+                                                                                        angle = Units.degreesToRadians(0);
                                         }else{
-                                                                                        double angle = Units.degreesToRadians(180);
+                                                                                        angle = Units.degreesToRadians(180);
 
                                         }
                                 // Get linear velocity
