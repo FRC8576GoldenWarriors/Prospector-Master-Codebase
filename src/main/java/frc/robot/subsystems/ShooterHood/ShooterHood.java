@@ -41,7 +41,7 @@ public class ShooterHood extends SubsystemBase {
     private double currentAnglePosition = 0.0;
 
     private LoggedNetworkNumber kPNumber = new LoggedNetworkNumber("Tuning/ShooterHood kP",ShooterHoodConstants.kp);
-    private LoggedNetworkNumber hoodAngleRotations = new LoggedNetworkNumber("Tuning/ShooterHood Angle",0.2);
+    private LoggedNetworkNumber hoodAngleRotations = new LoggedNetworkNumber("Tuning/ShooterHood Angle",0.37);//Max: .37
     private double wantedAnglePosition = hoodAngleRotations.get();
 
     private double kP = kPNumber.get();
@@ -130,6 +130,10 @@ public class ShooterHood extends SubsystemBase {
 
   public boolean atSetpoint(){
     return (inputs.encoderValue_Radians.in(Rotations))>(PID.getGoal().position-0.05)&&(inputs.encoderValue_Radians.in(Rotations))<(PID.getGoal().position+0.05);
+  }
+
+  public double getAngle(){
+    return inputs.encoderValue_Radians.in(Rotations);
   }
 
   //Min: 22 degrees, Max: 43 degrees

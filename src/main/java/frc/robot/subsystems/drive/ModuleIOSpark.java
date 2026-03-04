@@ -122,7 +122,7 @@ public ModuleIOSpark(int module) {
         driveConfig
                 .closedLoop
                 .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-                .pid(driveKp, 0, driveKd, null);
+                .pid(driveKp, 0, driveKd, ClosedLoopSlot.kSlot0);
         driveConfig
                 .signals
                 .primaryEncoderPositionAlwaysOn(true)

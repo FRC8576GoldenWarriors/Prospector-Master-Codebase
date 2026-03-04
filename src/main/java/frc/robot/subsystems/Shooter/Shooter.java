@@ -4,6 +4,7 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.*;
 import static edu.wpi.first.units.Units.*;
 
@@ -11,6 +12,7 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.RobotContainer;
 
 public class Shooter extends SubsystemBase {
   private final ShooterIO io;
@@ -73,7 +75,7 @@ public class Shooter extends SubsystemBase {
           break;
 
         case SHOOT:
-          wantedRPS = RotationsPerSecond.of(target);//ShooterUtil.calculateShotVelocity(0,0);//REPLACE LATER WITH REAL PARAMETERS
+          wantedRPS = ShooterUtil.calculateShotVelocity(RobotContainer.drive.getDistanceFromHub(),90-(Units.rotationsToDegrees(RobotContainer.shooterHood.getAngle())*4+22));//RotationsPerSecond.of(target);//ShooterUtil.calculateShotVelocity(0,0);//REPLACE LATER WITH REAL PARAMETERS
           io.setShooterVelocity(wantedRPS, wantedRPS);
           break;
 
@@ -91,6 +93,7 @@ public class Shooter extends SubsystemBase {
                                 RotationsPerSecond.of(manualRPMTarget / 60.0));
           break;
       }
+      Logger.recordOutput("Shooter/Wanted Speed", wantedRPS);
     }
 
     leftMotorAlert.set(!inputs.leftMotorConnected);
