@@ -12,17 +12,22 @@ import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.units.measure.*;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+
 import static edu.wpi.first.units.Units.*;
+
 
 public class ShooterIOReal implements ShooterIO {
   private final TalonFX leftMotor;
   private final TalonFX rightMotor;
 
   private TalonFXConfiguration config;
-    private TalonFXConfiguration leftConfig;
+  private TalonFXConfiguration leftConfig;
 
   private final VelocityVoltage velocityRequest = new VelocityVoltage(0).withSlot(0);
   private final VoltageOut voltageRequest = new VoltageOut(0);
+
+  private SysIdRoutine sysId;
 
   public ShooterIOReal() {
     leftMotor = new TalonFX(ShooterConstants.LEFT_SHOOTER_ID);
@@ -42,18 +47,19 @@ public class ShooterIOReal implements ShooterIO {
     config.Slot0.kP = ShooterConstants.kP;
     config.Slot0.kI = ShooterConstants.kI;
     config.Slot0.kD = ShooterConstants.kD;
-    config.Slot0.kV = ShooterConstants.kV;
-    config.Slot0.kS = ShooterConstants.kS;
+    config.Slot0.kV = ShooterConstants.kVLeft;
+    config.Slot0.kA = ShooterConstants.kALeft;
 
 
 
-    config.Slot0.kV = ShooterConstants.kVRight;
-    rightMotor.getConfigurator().apply(config);
-    config.Slot0.kP = ShooterConstants.kPLeft;
+    //config.Slot0.kV = ShooterConstants.kVRight;
     leftMotor.getConfigurator().apply(config);
+    config.Slot0.kP = ShooterConstants.kPLeft;
+    config.Slot0.kV = ShooterConstants.kVRight;
+    config.Slot0.kA = ShooterConstants.kARight;
+    rightMotor.getConfigurator().apply(config);
     rightMotor.setControl(new Follower(leftMotor.getDeviceID(), MotorAlignmentValue.Aligned));
     //leftConfig = config.clone().withMotorOutput(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Brake));
-
 
   }
 
@@ -67,12 +73,14 @@ public class ShooterIOReal implements ShooterIO {
     inputs.leftMotorSupplyCurrent = leftMotor.getSupplyCurrent().getValue();
     inputs.leftMotorSpeed = leftStatus.getValue();
     inputs.leftMotorConnected = leftMotor.isConnected();
+    inputs.leftEncoderPosition = leftMotor.getPosition().getValue().in(Rotations);
 
     inputs.rightMotorVoltage = rightMotor.getMotorVoltage().getValue();
     inputs.rightMotorStatorCurrent = rightMotor.getStatorCurrent().getValue();
     inputs.rightMotorSupplyCurrent = rightMotor.getSupplyCurrent().getValue();
     inputs.rightMotorSpeed = rightStatus.getValue();
     inputs.rightMotorConnected = rightMotor.isConnected();
+    inputs.rightEncoderPosition = rightMotor.getPosition().getValue().in(Rotations);
   }
 
   @Override
