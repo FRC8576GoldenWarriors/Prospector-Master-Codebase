@@ -32,6 +32,7 @@ import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -39,6 +40,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -50,6 +52,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 import frc.robot.Constants.Mode;
 import frc.robot.subsystems.vision.Vision;
+import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.util.poseEstimation.BumpDetector;
 import frc.robot.util.poseEstimation.CollisionDetector;
 import frc.robot.util.poseEstimation.EnhancedSwervePoseEstimator;
@@ -290,6 +293,14 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
         for (int i = 0; i < 4; i++) {
             modules[i].runCharacterization(output);
         }
+    }
+
+    public double getDistanceFromHub(){
+        Translation2d hubPose = DriverStation.getAlliance().equals(Alliance.Red)?new Translation2d(VisionConstants.aprilTagLayout.getFieldLength()-Units.inchesToMeters(182.11),VisionConstants.aprilTagLayout.getFieldWidth()-Units.inchesToMeters(121.25+26.22)):new Translation2d(Units.inchesToMeters(182.11),VisionConstants.aprilTagLayout.getFieldWidth()-Units.inchesToMeters(121.25+26.22));
+
+        Translation2d robotPose = getPose().getTranslation();
+
+        return robotPose.getDistance(hubPose);
     }
 
     /** Stops the drive. */

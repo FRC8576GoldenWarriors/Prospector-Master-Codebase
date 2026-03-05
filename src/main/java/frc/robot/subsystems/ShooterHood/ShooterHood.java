@@ -39,11 +39,13 @@ public class ShooterHood extends SubsystemBase {
     private ShooterHoodStates currentState = ShooterHoodStates.Idle;
 
     private double currentAnglePosition = 0.0;
-    private double wantedAnglePosition = 0.0;
 
     private LoggedNetworkNumber kPNumber = new LoggedNetworkNumber("Tuning/ShooterHood kP",ShooterHoodConstants.kp);
-    private double kP = kPNumber.get();
+    private LoggedNetworkNumber hoodAngleRotations = new LoggedNetworkNumber("Tuning/ShooterHood Angle",0.37);//Max: .37
+    private double wantedAnglePosition = hoodAngleRotations.get();
 
+    private double kP = kPNumber.get();
+    private double pastkP = kPNumber.get();
     public ShooterHood(ShooterHoodIO io) {
         this.io = io;
         PID = new ProfiledPIDController(ShooterHoodConstants.kp, ShooterHoodConstants.ki, ShooterHoodConstants.kd, ShooterHoodConstants.profile);
@@ -63,14 +65,20 @@ public class ShooterHood extends SubsystemBase {
 
   @Override
   public void periodic() {
-    currentAnglePosition = inputs.encoderValue.in(Rotations);
+    currentAnglePosition = inputs.encoderValue_Radians.in(Rotations);
     io.updateInputs(inputs);
 
     kP = kPNumber.get();
-    Logger.processInputs("ShooterHood", inputs);
 
+    Logger.processInputs("ShooterHood", inputs);
+    Logger.recordOutput("ShooterHood/Current Position", currentAnglePosition);
+    wantedAnglePosition = hoodAngleRotations.get();
     if(!DriverStation.isDisabled()) {
-         PID.setP(kP);
+        if(pastkP!=kP){
+            PID.setP(kP);
+            pastkP = kP;
+        }
+         //PID.setP(kP);
 
         switch(currentState) {
             case Idle:
@@ -87,7 +95,7 @@ public class ShooterHood extends SubsystemBase {
                 break;
 
             case Shoot:
-            wantedAnglePosition = 0.225;//getWantedPosition(1);
+            //wantedAnglePosition = hoodAngleRotations.get();//0.2126;//getWantedPosition(1);
                 PIDVoltage = PID.calculate(currentAnglePosition,wantedAnglePosition);
                 FFVoltage = FF.calculate(wantedAnglePosition, 1.0);
                 inputVoltage = PIDVoltage + FFVoltage;
@@ -117,6 +125,16 @@ public class ShooterHood extends SubsystemBase {
 
   }
   public void resetPID(){
-    PID.reset(inputs.encoderValue.in(Rotations), inputs.speed.magnitude());
+    PID.reset(inputs.encoderValue_Radians.in(Rotations), inputs.speed.magnitude());
   }
+
+  public boolean atSetpoint(){
+    return (inputs.encoderValue_Radians.in(Rotations))>(PID.getGoal().position-0.05)&&(inputs.encoderValue_Radians.in(Rotations))<(PID.getGoal().position+0.05);
+  }
+
+  public double getAngle(){
+    return inputs.encoderValue_Radians.in(Rotations);
+  }
+
+  //Min: 22 degrees, Max: 43 degrees
 }

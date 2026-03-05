@@ -4,6 +4,7 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.*;
 import static edu.wpi.first.units.Units.*;
 
@@ -11,6 +12,7 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.RobotContainer;
 
 public class Shooter extends SubsystemBase {
   private final ShooterIO io;
@@ -19,9 +21,9 @@ public class Shooter extends SubsystemBase {
   private Alert rightMotorAlert = new Alert("The Right Motor is disconnected", AlertType.kError);
 
   private LoggedNetworkNumber kPNumber = new LoggedNetworkNumber("Tuning/Shooter kP",ShooterConstants.kP);
-  private double kP = kPNumber.get();
-
-    private LoggedNetworkNumber targetRPS = new LoggedNetworkNumber("Tuning/Shooter Target RPS",50);
+  private double pastkP = kPNumber.get();
+  private double currentkP = kPNumber.get();
+    private LoggedNetworkNumber targetRPS = new LoggedNetworkNumber("Tuning/Shooter Target RPS",35);
   private double target = targetRPS.get();
   public enum ShooterStates {
     IDLE,
@@ -52,7 +54,7 @@ public class Shooter extends SubsystemBase {
     io.updateInputs(inputs);
     Logger.processInputs("Shooter", inputs);
     Logger.recordOutput("Shooter/WantedState", currentState);
-    kP = kPNumber.get();
+    currentkP = kPNumber.get();
     target = targetRPS.get();
 
 
@@ -60,6 +62,10 @@ public class Shooter extends SubsystemBase {
       if(DriverStation.isDisabled()) {
           currentState = ShooterStates.IDLE;
           }else{
+            if(currentkP!=pastkP){
+              io.setkP(currentkP);
+              pastkP = currentkP;
+            }
                 //io.setkP(kP);
       switch (currentState) {
         case IDLE:
@@ -69,11 +75,7 @@ public class Shooter extends SubsystemBase {
           break;
 
         case SHOOT:
-<<<<<<< HEAD
-          wantedRPS = RotationsPerSecond.of(50);//ShooterUtil.calculateShotVelocity(0,0);//REPLACE LATER WITH REAL PARAMETERS
-=======
-          wantedRPS = RotationsPerSecond.of(target);//ShooterUtil.calculateShotVelocity(0,0);//REPLACE LATER WITH REAL PARAMETERS
->>>>>>> 6c4f7c54c4c026ef2ff88c60a8cda35e30ae021b
+          wantedRPS = ShooterUtil.calculateShotVelocity(RobotContainer.drive.getDistanceFromHub(),90-(Units.rotationsToDegrees(RobotContainer.shooterHood.getAngle())*4+22));//RotationsPerSecond.of(target);//ShooterUtil.calculateShotVelocity(0,0);//REPLACE LATER WITH REAL PARAMETERS
           io.setShooterVelocity(wantedRPS, wantedRPS);
           break;
 
@@ -91,9 +93,13 @@ public class Shooter extends SubsystemBase {
                                 RotationsPerSecond.of(manualRPMTarget / 60.0));
           break;
       }
+      Logger.recordOutput("Shooter/Wanted Speed", wantedRPS);
     }
 
     leftMotorAlert.set(!inputs.leftMotorConnected);
     rightMotorAlert.set(!inputs.rightMotorConnected);
+  }
+  public boolean isRevved(){
+    return (inputs.leftMotorSpeed.in(RotationsPerSecond)>targetRPS.get()-0.5)&&(inputs.leftMotorSpeed.in(RotationsPerSecond)<targetRPS.get()+0.5);
   }
 }

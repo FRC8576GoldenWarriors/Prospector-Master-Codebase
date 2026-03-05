@@ -42,8 +42,11 @@ public class Intake extends SubsystemBase {
   private double inputVoltage;
   private LoggedNetworkNumber kP = new LoggedNetworkNumber("Tuning/kP",IntakeConstants.Software.kP);
   private double kPDouble = kP.get();
-  private LoggedNetworkNumber kV = new LoggedNetworkNumber("Tuning/kV",IntakeConstants.Software.kG);
-  private double kVDouble = kV.get();
+  private double pastkP = kP.get();
+  private LoggedNetworkNumber kG = new LoggedNetworkNumber("Tuning/kG",IntakeConstants.Software.kG);
+  private double kGDouble = kG.get();
+    private double pastkG = kG.get();
+
   private Alert pivotMotorAlert = new Alert("The Pivot Motor is disconnected", AlertType.kError);
   private Alert rollerMotorAlert = new Alert("The Roller Motor is disconnected", AlertType.kError);
   private Alert leftEncoderAlert = new Alert("The Left Encoder is disconnected", AlertType.kError);
@@ -61,14 +64,22 @@ public class Intake extends SubsystemBase {
     Logger.processInputs("Intake", inputs);
     currentPosition = inputs.leftEncoderRotations;
     kPDouble = kP.getAsDouble();
-    kVDouble = kV.getAsDouble();
+    kGDouble = kG.getAsDouble();
+    if(kPDouble!=pastkP){
+              PID.setP(kPDouble);
+              pastkP = kPDouble;
+            }
+            if(kGDouble!=pastkG){
+              FF.setKg(kGDouble);
+              pastkG = kGDouble;
+            }
 
      if (DriverStation.isEnabled()) {
-      if(currentPosition>IntakeConstants.Software.intakeSoftStop){
-            wantedState = IntakeStates.Idle;
-          }
-        PID.setP(kPDouble);
-        FF.setKg(kVDouble);
+      // if(currentPosition>IntakeConstants.Software.intakeSoftStop){
+      //       wantedState = IntakeStates.Idle;
+      //     }
+        //PID.setP(kPDouble);
+        //FF.setKg(kVDouble);
       switch (wantedState) {
         case Idle:
           PIDVoltage = 0;
@@ -81,7 +92,7 @@ public class Intake extends SubsystemBase {
           break;
 
         case Rest:
-          PIDVoltage  = PID.calculate(currentPosition, IntakeConstants.Software.intakeUp);
+          PIDVoltage  = PID.calculate(currentPosition, IntakeConstants.Software.intakeUp);//intakeUp
           FFVoltage = FF.calculate(IntakeConstants.Software.intakeUp, 0.5);
           inputVoltage = PIDVoltage + FFVoltage;
           wantedSpeed = 0;
@@ -129,7 +140,7 @@ public class Intake extends SubsystemBase {
       rollerMotorAlert.set(!inputs.rollerConnected);
       leftEncoderAlert.set(!inputs.leftEncoderConnected);
       rightEncoderAlert.set(!inputs.rightEncoderConnected);
-
+      Logger.recordOutput("Intake/Wanted State", wantedState);
 }
 
 public void setWantedPosition(IntakeStates wantedState) {
@@ -137,7 +148,7 @@ public void setWantedPosition(IntakeStates wantedState) {
 }
 
 public void resetPID() {
-    PID.reset(currentPosition, inputs.pivotRPS.magnitude());
+    PID.reset(currentPosition, 0);
 }
 
 // TO-DO : MAKE THIS IN MACROS CLASS

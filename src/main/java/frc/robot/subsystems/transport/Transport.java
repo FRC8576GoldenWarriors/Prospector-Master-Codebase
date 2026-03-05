@@ -18,6 +18,7 @@ public class Transport extends SubsystemBase {
   private final TransportIO io;
   private final TransportIOInputsAutoLogged inputs = new TransportIOInputsAutoLogged();
 
+
   @AutoLogOutput(key = "Transport/CurrentState")
   private TransportStates currentState = TransportStates.Idle;
 
