@@ -11,12 +11,15 @@ import static edu.wpi.first.units.Units.*;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.RobotContainer;
 
 public class Shooter extends SubsystemBase {
   private final ShooterIO io;
   private final ShooterIOInputsAutoLogged inputs = new ShooterIOInputsAutoLogged();
+  private SysIdRoutine sysId;
   private Alert leftMotorAlert = new Alert("The Left Motor is disconnected", AlertType.kError);
   private Alert rightMotorAlert = new Alert("The Right Motor is disconnected", AlertType.kError);
 
@@ -29,7 +32,8 @@ public class Shooter extends SubsystemBase {
     IDLE,
     SHOOT,
     VOLTAGE_CONTROL_POSITIVE,
-    VOLTAGE_CONTROL_NEGATIVE
+    VOLTAGE_CONTROL_NEGATIVE,
+    SYSID
   }
 
   private ShooterStates currentState = ShooterStates.IDLE;
@@ -42,6 +46,17 @@ public class Shooter extends SubsystemBase {
 
   public Shooter(ShooterIO io) {
     this.io = io;
+    sysId = new SysIdRoutine(
+    new SysIdRoutine.Config(
+      null, null, null,
+      (state) -> Logger.recordOutput("SysIdTestState", state.toString())
+    ),
+    new SysIdRoutine.Mechanism(
+      (voltage) -> io.setShooterVoltage(voltage, voltage),
+      null, // No log consumer, since data is recorded by AdvantageKit
+      this
+    )
+  );
   }
 
   public void setWantedState(ShooterStates state) {
@@ -75,23 +90,25 @@ public class Shooter extends SubsystemBase {
           break;
 
         case SHOOT:
-          wantedRPS = ShooterUtil.calculateShotVelocity(RobotContainer.drive.getDistanceFromHub(),90-(Units.rotationsToDegrees(RobotContainer.shooterHood.getAngle())*4+22));//RotationsPerSecond.of(target);//ShooterUtil.calculateShotVelocity(0,0);//REPLACE LATER WITH REAL PARAMETERS
+          wantedRPS = ShooterUtil.calculateShotVelocity(RobotContainer.drive.getDistanceFromHub(),(Units.rotationsToDegrees(RobotContainer.shooterHood.getAngle())*4+22));//RotationsPerSecond.of(target);//ShooterUtil.calculateShotVelocity(0,0);//REPLACE LATER WITH REAL PARAMETERS
           io.setShooterVelocity(wantedRPS, wantedRPS);
           break;
 
         case VOLTAGE_CONTROL_POSITIVE:
           manualRPMTarget += ShooterConstants.MANUAL_STEP_RPM;
           manualRPMTarget = 1000;//Math.min(manualRPMTarget, 6000);
-          io.setShooterVelocity(RotationsPerSecond.of(manualRPMTarget / 60.0),
-                                RotationsPerSecond.of(manualRPMTarget / 60.0));
+          io.setShooterVelocity(RPM.of(manualRPMTarget),
+                                RPM.of(manualRPMTarget));
           break;
 
         case VOLTAGE_CONTROL_NEGATIVE:
           manualRPMTarget -= ShooterConstants.MANUAL_STEP_RPM;
           manualRPMTarget = Math.max(manualRPMTarget, 0);
-          io.setShooterVelocity(RotationsPerSecond.of(manualRPMTarget / 60.0),
-                                RotationsPerSecond.of(manualRPMTarget / 60.0));
+          io.setShooterVelocity(RPM.of(manualRPMTarget),
+                                RPM.of(manualRPMTarget));
           break;
+        case SYSID:
+        break;
       }
       Logger.recordOutput("Shooter/Wanted Speed", wantedRPS);
     }
@@ -99,6 +116,15 @@ public class Shooter extends SubsystemBase {
     leftMotorAlert.set(!inputs.leftMotorConnected);
     rightMotorAlert.set(!inputs.rightMotorConnected);
   }
+
+  public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
+    return sysId.quasistatic(direction);
+  }
+
+  public Command sysIdDynamic(SysIdRoutine.Direction direction) {
+    return sysId.dynamic(direction);
+  }
+
   public boolean isRevved(){
     return (inputs.leftMotorSpeed.in(RotationsPerSecond)>targetRPS.get()-0.5)&&(inputs.leftMotorSpeed.in(RotationsPerSecond)<targetRPS.get()+0.5);
   }

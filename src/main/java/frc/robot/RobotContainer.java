@@ -177,9 +177,16 @@ public class RobotContainer {
         //controller.a().onTrue(intake.setWantedState(IntakeStates.Intake));
         //controller.x().onTrue(intake.setWantedState(IntakeStates.Rest));
         //controller.b().onTrue(new InstantCommand(()->transport.setWantedState(TransportStates.TransportIn),transport));
+
         controller.y().onTrue(macros.setWantedState(RobotStates.Shoot));
         controller.a().onTrue(macros.setWantedState(RobotStates.IntakeOn));
-        controller.b().onTrue(macros.setWantedState(RobotStates.Rest));
+         controller.b().onTrue(macros.setWantedState(RobotStates.Rest));
+
+        // controller.a().whileTrue(shooter.sysIdQuasistatic(Direction.kForward).alongWith(new InstantCommand(()->shooter.setWantedState(ShooterStates.SYSID))));
+        // controller.b().whileTrue(shooter.sysIdQuasistatic(Direction.kReverse).alongWith(new InstantCommand(()->shooter.setWantedState(ShooterStates.SYSID))));
+        // controller.x().whileTrue(shooter.sysIdDynamic(Direction.kForward).alongWith(new InstantCommand(()->shooter.setWantedState(ShooterStates.SYSID))));
+        // controller.y().whileTrue(shooter.sysIdDynamic(Direction.kReverse).alongWith(new InstantCommand(()->shooter.setWantedState(ShooterStates.SYSID))));
+
         // controller.povUp().whileTrue(new InstantCommand(()->shooterHood.setWantedState(ShooterHoodStates.HoodVoltageControl),shooterHood));
         // controller.povDown().whileTrue(new InstantCommand(()->shooterHood.setWantedState(ShooterHoodStates.HoodVoltageControl),shooterHood));
         // controller.rightTrigger(0.5).whileTrue(macros.setWantedState(RobotStates.Shoot));

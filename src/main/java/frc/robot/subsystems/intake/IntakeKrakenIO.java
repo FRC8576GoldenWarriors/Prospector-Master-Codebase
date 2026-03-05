@@ -50,8 +50,13 @@ public class IntakeKrakenIO implements IntakeIO{
         pivotConfig = leadConfig.clone().withMotorOutput(
             leadConfig.MotorOutput.clone()
             .withInverted(IntakeConstants.Hardware.pivotInvert)
-
             );
+        pivotConfig = pivotConfig.withCurrentLimits(
+            new CurrentLimitsConfigs()
+            .withSupplyCurrentLimit(Amps.of(40))
+            .withSupplyCurrentLimitEnable(true)
+            .withStatorCurrentLimit(Amps.of(60))
+        );
 
 
         pivotMotor.getConfigurator().apply(pivotConfig);
