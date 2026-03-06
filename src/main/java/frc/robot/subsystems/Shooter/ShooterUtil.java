@@ -14,7 +14,7 @@ public class ShooterUtil {
 
     public static AngularVelocity calculateShotVelocity(double limelightDistanceMeters, double hoodAngleDegrees) {
         //Variables
-        double theta = Math.toRadians(90 - hoodAngleDegrees);
+        double theta = Math.toRadians(90-hoodAngleDegrees);
         double rHub = ShooterConstants.RADIUS_OF_HUB_METERS;
         double Rmin = limelightDistanceMeters - rHub;
         double Rmax = limelightDistanceMeters + rHub;

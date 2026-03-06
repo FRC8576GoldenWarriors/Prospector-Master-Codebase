@@ -99,7 +99,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
             kinematics,
             rawGyroRotation,
             lastModulePositions,
-            new Pose2d(),
+            (DriverStation.getAlliance().get() == Alliance.Blue) ? Pose2d.kZero : new Pose2d(Translation2d.kZero, Rotation2d.k180deg),
             VecBuilder.fill(DriveConstants.baseXDriveSTDEV, DriveConstants.baseYDriveSTDEV, DriveConstants.baseThetaDriveSTDEV),
             VecBuilder.fill(DriveConstants.baseXVisionSTDEV, DriveConstants.baseYVisionSTDEV, DriveConstants.baseThetaVisionSTDEV));
     private final Consumer<Pose2d> resetSimulationPoseCallBack;
@@ -294,9 +294,9 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
             modules[i].runCharacterization(output);
         }
     }
-
+    @AutoLogOutput(key = "Drive/DistanceToHub")
     public double getDistanceFromHub(){
-        Translation2d hubPose = DriverStation.getAlliance().equals(Alliance.Red)?new Translation2d(VisionConstants.aprilTagLayout.getFieldLength()-Units.inchesToMeters(182.11),VisionConstants.aprilTagLayout.getFieldWidth()-Units.inchesToMeters(121.25+26.22)):new Translation2d(Units.inchesToMeters(182.11),VisionConstants.aprilTagLayout.getFieldWidth()-Units.inchesToMeters(121.25+26.22));
+        Translation2d hubPose = DriverStation.getAlliance().get().equals(Alliance.Red)?new Translation2d(VisionConstants.aprilTagLayout.getFieldLength()-Units.inchesToMeters(182.11),VisionConstants.aprilTagLayout.getFieldWidth()-Units.inchesToMeters(121.25+26.22)):new Translation2d(Units.inchesToMeters(182.11),VisionConstants.aprilTagLayout.getFieldWidth()-Units.inchesToMeters(121.25+26.22));
 
         Translation2d robotPose = getPose().getTranslation();
 

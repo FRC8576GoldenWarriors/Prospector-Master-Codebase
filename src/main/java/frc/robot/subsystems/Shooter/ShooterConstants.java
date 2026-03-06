@@ -18,10 +18,10 @@ public class ShooterConstants {
     public static final double kP = 0;//1;//0;//5;//10;//0.11;
     public static final double kI = 0.0;
     public static final double kD = 0.0;
-    public static final double kVLeft = 0.125175;//0.12;//0.12;
+    public static final double kVLeft = 0.125175*1.15;//0.12;//0.12;
     public static final double kALeft = 0.20611;
     public static final double kS = 0;//0.24;
-    public static final double kVRight = 0.130018;//0.12*1.5;
+    public static final double kVRight = 0.130018*1.15;//0.12*1.5;
     public static final double kARight = 0.17284;
     public static final double kPLeft = 1;//0.17284;//3;
     // Manual Testing Constants

@@ -8,6 +8,7 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -72,7 +73,7 @@ public class ShooterHood extends SubsystemBase {
 
     Logger.processInputs("ShooterHood", inputs);
     Logger.recordOutput("ShooterHood/Current Position", currentAnglePosition);
-    wantedAnglePosition = hoodAngleRotations.get();
+    wantedAnglePosition =hoodAngleRotations.get(); //(ShooterHoodUtil.calculateHoodAngleDegrees(RobotContainer.drive.getDistanceFromHub())-22)*4;//
     if(!DriverStation.isDisabled()) {
         if(pastkP!=kP){
             PID.setP(kP);
@@ -95,7 +96,8 @@ public class ShooterHood extends SubsystemBase {
                 break;
 
             case Shoot:
-            //wantedAnglePosition = hoodAngleRotations.get();//0.2126;//getWantedPosition(1);
+            Logger.recordOutput("ShooterHood/Calculated Angle", Units.degreesToRotations((ShooterHoodUtil.calculateHoodAngleDegrees(RobotContainer.drive.getDistanceFromHub())-22)*4));//0.2126;//getWantedPosition(1);
+            //wantedAnglePosition = //Units.degreesToRotations((ShooterHoodUtil.calculateHoodAngleDegrees(RobotContainer.drive.getDistanceFromHub())-22)*4);
                 PIDVoltage = PID.calculate(currentAnglePosition,wantedAnglePosition);
                 FFVoltage = FF.calculate(wantedAnglePosition, 1.0);
                 inputVoltage = PIDVoltage + FFVoltage;
@@ -133,7 +135,7 @@ public class ShooterHood extends SubsystemBase {
   }
 
   public double getAngle(){
-    return inputs.encoderValue_Radians.in(Rotations);
+    return wantedAnglePosition;
   }
 
   //Min: 22 degrees, Max: 43 degrees
