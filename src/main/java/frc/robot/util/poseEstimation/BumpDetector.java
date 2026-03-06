@@ -20,7 +20,8 @@ public class BumpDetector {
 
     private final Angle pitchThreshold = Degrees.of(4);
     private final Angle rollThreshold = Degrees.of(4);
-    private final Angle pitchOffset = Degrees.of(3.127);
+    private final Angle pitchOffset = Degrees.of(1.845703);
+    private final Angle rollOffset = Degrees.of(-7.338867);
     private final Time debouncerTimeThreshold = Seconds.of(0.4);
 
     private final StatusSignal<Angle> pitchSignal;
@@ -28,7 +29,7 @@ public class BumpDetector {
 
     private final Notifier signalUpdater;
 
-    private final Debouncer yawSignalDebouncer;
+    private final Debouncer rollSignalDebouncer;
     private final Debouncer pitchSignalDebouncer;
 
     private final Timer timeSinceBump;
@@ -42,7 +43,7 @@ public class BumpDetector {
 
         signalUpdater = new Notifier(this::updateInputs);
 
-        yawSignalDebouncer = new Debouncer(debouncerTimeThreshold.in(Seconds), DebounceType.kFalling);
+        rollSignalDebouncer = new Debouncer(debouncerTimeThreshold.in(Seconds), DebounceType.kFalling);
         pitchSignalDebouncer = new Debouncer(debouncerTimeThreshold.in(Seconds), DebounceType.kFalling);
 
         timeSinceBump = new Timer();
@@ -51,7 +52,7 @@ public class BumpDetector {
     }
 
     public void updateInputs() {
-        isBumping = pitchSignalDebouncer.calculate(Math.abs(pitchSignal.getValue().minus(pitchOffset).in(Degrees)) > pitchThreshold.in(Degrees)) || yawSignalDebouncer.calculate(Math.abs(rollSignal.getValue().in(Degrees)) > rollThreshold.in(Degrees));
+        isBumping = pitchSignalDebouncer.calculate(Math.abs(pitchSignal.getValue().minus(pitchOffset).in(Degrees)) > pitchThreshold.in(Degrees)) || rollSignalDebouncer.calculate(Math.abs(rollSignal.getValue().minus(rollOffset).in(Degrees)) > rollThreshold.in(Degrees));
         if(isBumping) {
             if(!timeSinceBump.isRunning())
                 timeSinceBump.start();
