@@ -22,7 +22,7 @@ public class ShooterUtil {
 
         // Max and Min Velocity for shooting in hub
         double Vmin = Math.sqrt((9.81 * Math.pow(Rmin, 2)) / (2 * Math.pow(Math.cos(theta), 2) * (Rmin * Math.tan(theta) - netHeight)));
-        double Vmax = Math.sqrt((9.81 * Math.pow(Rmax, 2)) / (2 * Math.pow(Math.cos(theta), 2) * (Rmax * Math.tan(theta) - netHeight)));
+        double Vmax = Math.sqrt((9.81 * Math.pow(Rmax, 2)) / ( 2 *Math.pow(Math.cos(theta), 2) * (Rmax * Math.tan(theta) - netHeight)));
 
         Logger.recordOutput("VminRPS", Vmin/(2.0 * Math.PI * Units.inchesToMeters(avgRad)));
         Logger.recordOutput("VmaxRPS", Vmax/(2.0 * Math.PI * Units.inchesToMeters(avgRad)));

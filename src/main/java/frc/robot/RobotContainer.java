@@ -181,6 +181,7 @@ public class RobotContainer {
         controller.y().onTrue(macros.setWantedState(RobotStates.Shoot));
         controller.a().onTrue(macros.setWantedState(RobotStates.IntakeOn));
          controller.b().onTrue(macros.setWantedState(RobotStates.Rest));
+         controller.x().onTrue(macros.setWantedState(RobotStates.IntakeOff));
          //controller.x().onTrue(new InstantCommand(()->transport.setWantedState(TransportStates.TransportIn),transport));
 
         // controller.a().whileTrue(shooter.sysIdQuasistatic(Direction.kForward).alongWith(new InstantCommand(()->shooter.setWantedState(ShooterStates.SYSID))));
