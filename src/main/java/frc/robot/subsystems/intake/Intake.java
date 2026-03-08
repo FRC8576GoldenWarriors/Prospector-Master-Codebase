@@ -4,10 +4,11 @@
 
 package frc.robot.subsystems.intake;
 
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
-
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.wpilibj.Alert;
@@ -27,6 +28,8 @@ public class Intake extends SubsystemBase {
     Idle,
     Rest,
     Intake,
+    IntakeDown,
+    Agitate,
     PivotVC,
     RollerVC
   }
@@ -100,7 +103,24 @@ public class Intake extends SubsystemBase {
           io.setPivotVoltage(inputVoltage);
           io.setRollerSpeed(wantedSpeed);
           break;
+        case IntakeDown:
+          PIDVoltage  = PID.calculate(currentPosition, IntakeConstants.Software.intakeDown);
+          FFVoltage = FF.calculate(IntakeConstants.Software.intakeDown, 0.5);
+          inputVoltage = PIDVoltage + FFVoltage;
+          wantedSpeed = 0;
 
+          io.setPivotVoltage(inputVoltage);
+          io.setRollerSpeed(wantedSpeed);
+          break;
+        case Agitate:
+          PIDVoltage  = PID.calculate(currentPosition, IntakeConstants.Software.agitatePosition);
+          FFVoltage = FF.calculate(IntakeConstants.Software.agitatePosition, 0.5);
+          inputVoltage = PIDVoltage + FFVoltage;
+          wantedSpeed = 0;
+
+          io.setPivotVoltage(inputVoltage);
+          io.setRollerSpeed(wantedSpeed);
+          break;
         case Intake:
           PIDVoltage  = PID.calculate(currentPosition, IntakeConstants.Software.intakeDown);
           FFVoltage = FF.calculate(IntakeConstants.Software.intakeDown, 0.5);
@@ -149,6 +169,16 @@ public void setWantedPosition(IntakeStates wantedState) {
 
 public void resetPID() {
     PID.reset(currentPosition, 0);
+}
+@AutoLogOutput (key = "Intake/Near Setpoint")
+public boolean nearSetpoint(){
+  return MathUtil.isNear(PID.getGoal().position, inputs.leftEncoderRotations, 0.1);
+}
+public boolean nearSetpointAgitate(){
+  return MathUtil.isNear(PID.getGoal().position, inputs.leftEncoderRotations, 0.1);
+}
+public IntakeStates getState(){
+  return wantedState;
 }
 
 // TO-DO : MAKE THIS IN MACROS CLASS

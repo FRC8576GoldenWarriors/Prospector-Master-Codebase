@@ -95,10 +95,10 @@ public class RobotContainer {
                 this.vision = new Vision(
                 drive,
                 drive::getChassisSpeeds,
-                new VisionIOLimelight(VisionConstants.camera0Name, drive::getRotation, drive::getChassisSpeeds),
-                new VisionIOLimelight(VisionConstants.camera1Name, drive::getRotation, drive::getChassisSpeeds),
-                new VisionIOLimelight(VisionConstants.camera2Name, drive::getRotation, drive::getChassisSpeeds),
-                new VisionIOLimelight(VisionConstants.camera3Name, drive::getRotation, drive::getChassisSpeeds));
+                new VisionIOLimelight(VisionConstants.camera0Name, drive::getRotation),
+                new VisionIOLimelight(VisionConstants.camera1Name, drive::getRotation),
+                //new VisionIOLimelight(VisionConstants.camera2Name, drive::getRotation),
+                new VisionIOLimelight(VisionConstants.camera3Name, drive::getRotation));
                 //shooter = new Shooter(0);
                 intake = new Intake(new IntakeKrakenIO());
                 shooter = new Shooter(new ShooterIOReal());
@@ -186,6 +186,8 @@ public class RobotContainer {
         controller.y().onTrue(macros.setWantedState(RobotStates.Shoot));
         controller.a().onTrue(macros.setWantedState(RobotStates.IntakeOn));
          controller.b().onTrue(macros.setWantedState(RobotStates.Rest));
+         controller.x().onTrue(macros.setWantedState(RobotStates.IntakeOff));
+         //controller.x().onTrue(new InstantCommand(()->transport.setWantedState(TransportStates.TransportIn),transport));
 
         // controller.a().whileTrue(shooter.sysIdQuasistatic(Direction.kForward).alongWith(new InstantCommand(()->shooter.setWantedState(ShooterStates.SYSID))));
         // controller.b().whileTrue(shooter.sysIdQuasistatic(Direction.kReverse).alongWith(new InstantCommand(()->shooter.setWantedState(ShooterStates.SYSID))));
