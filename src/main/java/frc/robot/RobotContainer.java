@@ -17,6 +17,7 @@ import static edu.wpi.first.units.Units.*;
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -45,6 +46,8 @@ import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeCoralOnFly;
 import org.littletonrobotics.junction.Logger;
+
+import com.pathplanner.lib.auto.AutoBuilder;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a "declarative" paradigm, very
@@ -125,9 +128,9 @@ public class RobotContainer {
                 drive,
                 drive::getChassisSpeeds,
                 new VisionIOPhotonVisionSim(
-                        camera0Name, robotToCamera0, driveSimulation::getSimulatedDriveTrainPose),
+                        camera0Name, robotToCamera0.minus(Pose3d.kZero), driveSimulation::getSimulatedDriveTrainPose, drive::getChassisSpeeds),
                 new VisionIOPhotonVisionSim(
-                        camera1Name, robotToCamera1, driveSimulation::getSimulatedDriveTrainPose));
+                        camera1Name, robotToCamera1.minus(Pose3d.kZero), driveSimulation::getSimulatedDriveTrainPose, drive::getChassisSpeeds));
                 //shooter = null;
                 autos = new Autos(drive);
                 break;
@@ -160,7 +163,9 @@ public class RobotContainer {
      */
     private void configureButtonBindings() {
         // Default command, normal field-relative drive
-        drive.setDefaultCommand(DriveCommands.joystickDrive(
+        // drive.setDefaultCommand(DriveCommands.joystickDrive(
+        //        drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> -controller.getRightX()));
+        drive.setDefaultCommand(DriveCommands.joystickAdvancedDrive(
                drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> -controller.getRightX()));
 
         // Lock to 0° when A button is held
@@ -242,6 +247,7 @@ public class RobotContainer {
                     new Translation2d(Inches.of(651.22).in(Meters), Inches.of(317.69).in(Meters)),//new Translation2d(currentPose.getX(), currentPose.getY()),
                     (DriverStation.getAlliance().get() == Alliance.Red) ? Rotation2d.k180deg : Rotation2d.kZero);
             drive.resetGyro(resetPose);
+            vision.resetHeading();
         }));
         // controller.povUp().onTrue(new InstantCommand(() -> {
         //     Pose2d resetPose = new Pose2d(
