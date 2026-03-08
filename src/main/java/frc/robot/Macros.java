@@ -101,7 +101,11 @@ public class Macros extends SubsystemBase {
     m_Intake.setWantedPosition(IntakeStates.Rest);
   }
   public void intakeOn(){
-    m_Intake.setWantedPosition(IntakeStates.Intake);
+    if(!m_Intake.nearSetpoint()){
+    m_Intake.setWantedPosition(IntakeStates.IntakeDown);
+    }else{
+      m_Intake.setWantedPosition(IntakeStates.Intake);
+    }
   }
   public void intakeOff(){
     m_Transport.setWantedState(TransportStates.TransportIn);//m_Intake.setWantedPosition(IntakeStates.Rest);
@@ -114,6 +118,13 @@ public class Macros extends SubsystemBase {
     }else{
       m_Transport.setWantedState(TransportStates.Idle);
     }
+    if((m_Intake.getState()==IntakeStates.IntakeDown||m_Intake.getState()==IntakeStates.Intake)&&m_Intake.nearSetpoint()){
+      m_Intake.setWantedPosition(IntakeStates.Agitate);
+    }
+    else if(m_Intake.getState()==IntakeStates.Agitate&&m_Intake.nearSetpoint()){
+      m_Intake.setWantedPosition(IntakeStates.IntakeDown);
+    }
+   
     m_ShooterHood.setWantedState(ShooterHoodStates.Shoot);//UNCOMMENT TO TEST HOOD
    // m_Intake.setWantedPosition(IntakeStates.Intake);
   }

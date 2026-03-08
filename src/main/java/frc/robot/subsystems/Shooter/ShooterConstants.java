@@ -15,7 +15,7 @@ public class ShooterConstants {
     public static final Current STATOR_CURRENT_LIMIT = Amps.of(60);
 
     // PIDFF Constants (untuned)
-    public static final double kP = 0.2;//1;//0;//5;//10;//0.11;
+    public static final double kP = 4;//1;//0;//5;//10;//0.11;
     public static final double kI = 0.0;
     public static final double kD = 0.0;
     public static final double kVLeft = 0.125175*1.15;//0.12;//0.12;
@@ -23,7 +23,7 @@ public class ShooterConstants {
     public static final double kS = 0;//0.24;
     public static final double kVRight = 0.130018*1.15;//0.12*1.5;
     public static final double kARight = 0.17284;
-    public static final double kPLeft = 1.2;//0.17284;//3;
+    public static final double kPLeft = 3;//0.17284;//3;
     // Manual Testing Constants
     public static final double MANUAL_STEP_RPM = 50.0;
 

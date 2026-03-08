@@ -127,7 +127,7 @@ public class Shooter extends SubsystemBase {
 
   @AutoLogOutput(key = "Shooter/IsRevved")
   public boolean isRevved(){
-    return MathUtil.isNear(wantedRPS.in(RotationsPerSecond),(inputs.leftMotorSpeed.in(RotationsPerSecond)+inputs.rightMotorSpeed.in(RotationsPerSecond))/2,0.5);
+    return MathUtil.isNear(wantedRPS.in(RotationsPerSecond),(inputs.leftMotorSpeed.in(RotationsPerSecond)+inputs.rightMotorSpeed.in(RotationsPerSecond))/2,4);//1
     //return (inputs.leftMotorSpeed.in(RotationsPerSecond)>targetRPS.get()-10)&&(inputs.leftMotorSpeed.in(RotationsPerSecond)<targetRPS.get()+10);//0.5
   }
 }

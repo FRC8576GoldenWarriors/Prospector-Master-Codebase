@@ -108,7 +108,7 @@ public class ShooterIOReal implements ShooterIO {
   public void setkP(double kP){
     Slot0Configs PIDF = config.Slot0;
     PIDF.kP = kP;
-    //leftMotor.getConfigurator().apply(config);
-    rightMotor.getConfigurator().apply(config);
+    // leftMotor.getConfigurator().apply(config);
+    // rightMotor.getConfigurator().apply(config);
   }
 }
