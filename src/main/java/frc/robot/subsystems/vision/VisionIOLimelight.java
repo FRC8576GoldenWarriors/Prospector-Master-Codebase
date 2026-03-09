@@ -16,32 +16,18 @@ package frc.robot.subsystems.vision;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.DoubleArrayPublisher;
 import edu.wpi.first.networktables.DoubleArraySubscriber;
 import edu.wpi.first.networktables.DoubleSubscriber;
-import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.TimestampedDoubleArray;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.Timer;
-
-import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.DegreesPerSecond;
-import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.Radians;
-import static edu.wpi.first.units.Units.Seconds;
-
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
-
 
 /** IO implementation for real Limelight hardware. */
 public class VisionIOLimelight implements VisionIO {
@@ -53,8 +39,7 @@ public class VisionIOLimelight implements VisionIO {
     private final DoubleSubscriber tySubscriber;
     private final DoubleArraySubscriber megatag1Subscriber;
     private final DoubleArraySubscriber megatag2Subscriber;
-    //private final DoubleArraySubscriber standardDeviationSubscriber;
-    private final DoubleArraySubscriber imuSubscriber;
+    private final DoubleArraySubscriber standardDeviationSubscriber;
     private final String name;
     /**
      * Creates a new VisionIOLimelight.
@@ -62,18 +47,9 @@ public class VisionIOLimelight implements VisionIO {
      * @param name The configured name of the Limelight.
      * @param rotationSupplier Supplier for the current estimated rotation, used for MegaTag 2.
      */
-    private final NetworkTable table;
-    private final Timer imuResetTimer = new Timer();
-    private final Supplier<ChassisSpeeds> chassisSpeedSupplier;
-
-    public VisionIOLimelight(String name, Supplier<Rotation2d> rotationSupplier, Supplier<ChassisSpeeds> chasisspeedSupplier) {
-        table = NetworkTableInstance.getDefault().getTable(name);
-        Pose3d limelightTransform = VisionConstants.nameToPose3dHashMap.get(name);
-        setLimelightPose3d(name, limelightTransform);
-        imuResetTimer.reset();
-        setLimelightIMUMode(IMUMode.EXTERNAL_SEED);
-        this.chassisSpeedSupplier = chasisspeedSupplier;
-        this.rotationSupplier = rotationSupplier; //Set imu to use internal and coverage with external
+    public VisionIOLimelight(String name, Supplier<Rotation2d> rotationSupplier) {
+        var table = NetworkTableInstance.getDefault().getTable(name);
+        this.rotationSupplier = rotationSupplier;
         orientationPublisher =
                 table.getDoubleArrayTopic("robot_orientation_set").publish();
         latencySubscriber = table.getDoubleTopic("tl").subscribe(0.0);
@@ -81,8 +57,7 @@ public class VisionIOLimelight implements VisionIO {
         tySubscriber = table.getDoubleTopic("ty").subscribe(0.0);
         megatag1Subscriber = table.getDoubleArrayTopic("botpose_wpiblue").subscribe(new double[] {});
         megatag2Subscriber = table.getDoubleArrayTopic("botpose_orb_wpiblue").subscribe(new double[] {});
-        //standardDeviationSubscriber = table.getDoubleArrayTopic("stddevs").subscribe(new double[] {});
-        imuSubscriber = table.getDoubleArrayTopic("imu").subscribe(new double[] {});
+        standardDeviationSubscriber = table.getDoubleArrayTopic("stddevs").subscribe(new double[] {});
         this.name = name;
     }
 
@@ -97,40 +72,18 @@ public class VisionIOLimelight implements VisionIO {
 
         // Update orientation for MegaTag 2
         orientationPublisher.accept(new double[] {rotationSupplier.get().getDegrees(), 0.0, 0.0, 0.0, 0.0, 0.0});
-         if(DriverStation.isDisabled())
-             setLimelightIMUMode(IMUMode.EXTERNAL_SEED);
-        else
-             setLimelightIMUMode(IMUMode.INTERNAL_EXTERNAL_ASSIST);
-
-        double[] imuData = imuSubscriber.get();
-        inputs.imuDataLength = imuData.length;
-
-        if(inputs.imuDataLength > 9) {
-            inputs.imuRobotYaw = new Rotation2d(Degrees.of(imuData[0]).in(Radians));
-            inputs.imuRoll = Degrees.of(imuData[1]);
-            inputs.imuPitch = Degrees.of(imuData[2]);
-            inputs.imuInternalYaw = Degrees.of(imuData[3]);
-            inputs.imuRollVelocity = DegreesPerSecond.of(imuData[4]);
-            inputs.imuPitchVelocity = DegreesPerSecond.of(imuData[5]);
-            inputs.imuYawVelocity = DegreesPerSecond.of(imuData[6]);
-            inputs.imuRollAcceleration = DegreesPerSecondPerSecond.of(imuData[7]);
-            inputs.imuPitchAcceleration = DegreesPerSecondPerSecond.of(imuData[8]);
-            inputs.imuYawAcceleration = DegreesPerSecondPerSecond.of(imuData[9]);
-        }
-
         NetworkTableInstance.getDefault().flush(); // Increases network traffic but recommended by Limelight
 
         // Read new pose observations from NetworkTables
         Set<Integer> tagIds = new HashSet<>();
         List<PoseObservation> poseObservations = new LinkedList<>();
-        //TimestampedDoubleArray[] standardDeviations = standardDeviationSubscriber.readQueue();
+        TimestampedDoubleArray[] standardDeviations = standardDeviationSubscriber.readQueue();
         for (var rawSample : megatag1Subscriber.readQueue()) {
             if (rawSample.value.length == 0) continue;
             for (int i = 11; i < rawSample.value.length; i += 7) {
                 tagIds.add((int) rawSample.value[i]);
             }
-            ChassisSpeeds speeds = chassisSpeedSupplier.get();
-            //double[] stdArray = findTimestampedValue(standardDeviations, rawSample.timestamp);
+            double[] stdArray = findTimestampedValue(standardDeviations, rawSample.timestamp);
             poseObservations.add(new PoseObservation(
                     // Timestamp, based on server timestamp of publish and latency
                     rawSample.timestamp * 1.0e-6 - rawSample.value[6] * 1.0e-3,
@@ -149,7 +102,6 @@ public class VisionIOLimelight implements VisionIO {
 
                     // Standard Deviations
                     //new double[]{stdArray[0], stdArray[1], stdArray[2]},
-                    speeds.omegaRadiansPerSecond,
 
                     // Observation type
                     PoseObservationType.MEGATAG_1));
@@ -159,8 +111,7 @@ public class VisionIOLimelight implements VisionIO {
             for (int i = 11; i < rawSample.value.length; i += 7) {
                 tagIds.add((int) rawSample.value[i]);
             }
-            //double[] stdArray = findTimestampedValue(standardDeviations, rawSample.timestamp);
-            ChassisSpeeds speeds = chassisSpeedSupplier.get();
+            double[] stdArray = findTimestampedValue(standardDeviations, rawSample.timestamp);
             poseObservations.add(new PoseObservation(
                     // Timestamp, based on server timestamp of publish and latency
                     rawSample.timestamp * 1.0e-6 - rawSample.value[6] * 1.0e-3,
@@ -179,7 +130,6 @@ public class VisionIOLimelight implements VisionIO {
 
                     // Standard Deviations
                     //new double[]{stdArray[6], stdArray[7], stdArray[8]},
-                    speeds.omegaRadiansPerSecond,
 
                     // Observation type
                     PoseObservationType.MEGATAG_2));
@@ -209,35 +159,6 @@ public class VisionIOLimelight implements VisionIO {
             }
         }
         return values;
-    }
-
-    @Override
-    public void resetHeading() {
-        setLimelightIMUMode(IMUMode.EXTERNAL_SEED);
-    }
-
-    private void setLimelightIMUMode(IMUMode imuMode) {
-        if(imuMode == IMUMode.EXTERNAL_SEED) {
-            if(!imuResetTimer.isRunning()) {
-                imuResetTimer.start();
-            }
-            imuResetTimer.reset();
-        }
-        if(imuResetTimer.get() > VisionConstants.internalIMUConvergenceTime.in(Seconds))
-            table.getEntry("imumode_set").setNumber(imuMode.getMode());
-    }
-
-    private static void setLimelightPose3d(String name, Pose3d limelightPose3d) {
-        Translation3d cameraTranslation = limelightPose3d.getTranslation();
-        Rotation3d cameraRotation = limelightPose3d.getRotation();
-
-        LimelightHelpers.setCameraPose_RobotSpace(name,
-        cameraTranslation.getMeasureX().in(Meters),
-        cameraTranslation.getMeasureY().in(Meters),
-        cameraTranslation.getMeasureZ().in(Meters),
-        cameraRotation.getMeasureX().in(Degrees),
-        cameraRotation.getMeasureY().in(Degrees),
-        cameraRotation.getMeasureZ().in(Degrees));
     }
 
     /** Parses the 3D pose from a Limelight botpose array. */

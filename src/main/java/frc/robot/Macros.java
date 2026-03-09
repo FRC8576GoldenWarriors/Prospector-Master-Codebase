@@ -124,7 +124,7 @@ public class Macros extends SubsystemBase {
     else if(m_Intake.getState()==IntakeStates.Agitate&&m_Intake.nearSetpoint()){
       m_Intake.setWantedPosition(IntakeStates.IntakeDown);
     }
-   
+
     m_ShooterHood.setWantedState(ShooterHoodStates.Shoot);//UNCOMMENT TO TEST HOOD
    // m_Intake.setWantedPosition(IntakeStates.Intake);
   }

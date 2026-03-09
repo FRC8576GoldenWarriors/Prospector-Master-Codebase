@@ -18,21 +18,16 @@ import static frc.robot.subsystems.vision.VisionConstants.aprilTagLayout;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
-
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Supplier;
-
 import org.photonvision.PhotonCamera;
 
 /** IO implementation for real PhotonVision hardware. */
 public class VisionIOPhotonVision implements VisionIO {
     protected final PhotonCamera camera;
     protected final Transform3d robotToCamera;
-    private final Supplier<ChassisSpeeds> chassisSpeedSupplier;
 
     /**
      * Creates a new VisionIOPhotonVision.
@@ -40,10 +35,9 @@ public class VisionIOPhotonVision implements VisionIO {
      * @param name The configured name of the camera.
      * @param rotationSupplier The 3D position of the camera relative to the robot.
      */
-    public VisionIOPhotonVision(String name, Transform3d robotToCamera, Supplier<ChassisSpeeds> chassisSpeedsSupplier) {
+    public VisionIOPhotonVision(String name, Transform3d robotToCamera) {
         camera = new PhotonCamera(name);
         this.robotToCamera = robotToCamera;
-        this.chassisSpeedSupplier = chassisSpeedsSupplier;
     }
 
     @Override
@@ -81,7 +75,7 @@ public class VisionIOPhotonVision implements VisionIO {
 
                 // Add tag IDs
                 tagIds.addAll(multitagResult.fiducialIDsUsed);
-                ChassisSpeeds speeds = chassisSpeedSupplier.get();
+
                 // Add observation
                 poseObservations.add(new PoseObservation(
                         result.getTimestampSeconds(), // Timestamp
@@ -90,7 +84,6 @@ public class VisionIOPhotonVision implements VisionIO {
                         multitagResult.fiducialIDsUsed.size(), // Tag count
                         totalTagDistance / result.targets.size(),
                         //new double[3], // Average tag distance
-                        speeds.omegaRadiansPerSecond,
                         PoseObservationType.PHOTONVISION)); // Observation type
 
             } else if (!result.targets.isEmpty()) { // Single tag result
@@ -108,7 +101,7 @@ public class VisionIOPhotonVision implements VisionIO {
 
                     // Add tag ID
                     tagIds.add((short) target.fiducialId);
-                    ChassisSpeeds speeds = chassisSpeedSupplier.get();
+
                     // Add observation
                     poseObservations.add(new PoseObservation(
                             result.getTimestampSeconds(), // Timestamp
@@ -117,7 +110,6 @@ public class VisionIOPhotonVision implements VisionIO {
                             1, // Tag count
                             cameraToTarget.getTranslation().getNorm(),
                             //new double[3], // Average tag distance
-                            speeds.omegaRadiansPerSecond,
                             PoseObservationType.PHOTONVISION)); // Observation type
                 }
             }

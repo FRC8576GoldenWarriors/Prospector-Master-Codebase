@@ -33,6 +33,7 @@ import frc.robot.Macros.RobotStates;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.Shooter.Shooter;
 import frc.robot.subsystems.Shooter.ShooterIOReal;
+import frc.robot.subsystems.Shooter.ShooterUtil;
 import frc.robot.subsystems.ShooterHood.ShooterHood;
 import frc.robot.subsystems.ShooterHood.ShooterHoodIOKraken;
 //import frc.robot.subsystems.Shooter;
@@ -47,7 +48,6 @@ import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeCoralOnFly;
 import org.littletonrobotics.junction.Logger;
 
-import com.pathplanner.lib.auto.AutoBuilder;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a "declarative" paradigm, very
@@ -64,6 +64,7 @@ public class RobotContainer {
     public static ShooterHood shooterHood;
     public static Transport transport;
     public static Macros macros;
+    public static ShooterUtil shooterUtil = new ShooterUtil();
 
     //public static Macros macros;
 
@@ -97,7 +98,7 @@ public class RobotContainer {
                 drive::getChassisSpeeds,
                 new VisionIOLimelight(VisionConstants.camera0Name, drive::getRotation),
                 new VisionIOLimelight(VisionConstants.camera1Name, drive::getRotation),
-                //new VisionIOLimelight(VisionConstants.camera2Name, drive::getRotation),
+                new VisionIOLimelight(VisionConstants.camera2Name, drive::getRotation),
                 new VisionIOLimelight(VisionConstants.camera3Name, drive::getRotation));
                 //shooter = new Shooter(0);
                 intake = new Intake(new IntakeKrakenIO());
@@ -128,9 +129,9 @@ public class RobotContainer {
                 drive,
                 drive::getChassisSpeeds,
                 new VisionIOPhotonVisionSim(
-                        camera0Name, robotToCamera0.minus(Pose3d.kZero), driveSimulation::getSimulatedDriveTrainPose, drive::getChassisSpeeds),
+                        camera0Name, robotToCamera0.minus(Pose3d.kZero), driveSimulation::getSimulatedDriveTrainPose),
                 new VisionIOPhotonVisionSim(
-                        camera1Name, robotToCamera1.minus(Pose3d.kZero), driveSimulation::getSimulatedDriveTrainPose, drive::getChassisSpeeds));
+                        camera1Name, robotToCamera1.minus(Pose3d.kZero), driveSimulation::getSimulatedDriveTrainPose));
                 //shooter = null;
                 autos = new Autos(drive);
                 break;
@@ -186,7 +187,8 @@ public class RobotContainer {
         controller.y().onTrue(macros.setWantedState(RobotStates.Shoot));
         controller.a().onTrue(macros.setWantedState(RobotStates.IntakeOn));
          controller.b().onTrue(macros.setWantedState(RobotStates.Rest));
-         controller.x().onTrue(macros.setWantedState(RobotStates.IntakeOff));
+        controller.leftTrigger().whileTrue(DriveCommands.joystickDriveTagCentric(drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> drive.getPose()));
+         //controller.x().onTrue(macros.setWantedState(RobotStates.IntakeOff));
          //controller.x().onTrue(new InstantCommand(()->transport.setWantedState(TransportStates.TransportIn),transport));
 
         // controller.a().whileTrue(shooter.sysIdQuasistatic(Direction.kForward).alongWith(new InstantCommand(()->shooter.setWantedState(ShooterStates.SYSID))));
@@ -247,7 +249,6 @@ public class RobotContainer {
                     new Translation2d(Inches.of(651.22).in(Meters), Inches.of(317.69).in(Meters)),//new Translation2d(currentPose.getX(), currentPose.getY()),
                     (DriverStation.getAlliance().get() == Alliance.Red) ? Rotation2d.k180deg : Rotation2d.kZero);
             drive.resetGyro(resetPose);
-            vision.resetHeading();
         }));
         // controller.povUp().onTrue(new InstantCommand(() -> {
         //     Pose2d resetPose = new Pose2d(

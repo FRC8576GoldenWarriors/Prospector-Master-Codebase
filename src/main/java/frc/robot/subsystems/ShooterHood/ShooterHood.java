@@ -97,7 +97,7 @@ public class ShooterHood extends SubsystemBase {
 
             case Shoot:
             Logger.recordOutput("ShooterHood/Calculated Angle", Units.degreesToRotations((ShooterHoodUtil.calculateHoodAngleDegrees(RobotContainer.drive.getDistanceFromHub())-22)*4));//0.2126;//getWantedPosition(1);
-            //wantedAnglePosition = //Units.degreesToRotations((ShooterHoodUtil.calculateHoodAngleDegrees(RobotContainer.drive.getDistanceFromHub())-22)*4);
+            wantedAnglePosition = RobotContainer.shooterUtil.getAngle(RobotContainer.drive.getDistanceFromHub()); //Units.degreesToRotations((ShooterHoodUtil.calculateHoodAngleDegrees(RobotContainer.drive.getDistanceFromHub())-22)*4);
                 PIDVoltage = PID.calculate(currentAnglePosition,wantedAnglePosition);
                 FFVoltage = FF.calculate(wantedAnglePosition, 1.0);
                 inputVoltage = PIDVoltage + FFVoltage;

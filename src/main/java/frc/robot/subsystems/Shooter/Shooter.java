@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.RobotContainer;
 
 public class Shooter extends SubsystemBase {
   private final ShooterIO io;
@@ -90,7 +91,7 @@ public class Shooter extends SubsystemBase {
           break;
 
         case SHOOT:
-          //wantedRPS = //(ShooterUtil.calculateShotVelocity(RobotContainer.drive.getDistanceFromHub(),(Units.rotationsToDegrees(RobotContainer.shooterHood.getAngle())+22)/4)).plus(RotationsPerSecond.of(15));//RotationsPerSecond.of(30);//RotationsPerSecond.of(target);//ShooterUtil.calculateShotVelocity(0,0);//REPLACE LATER WITH REAL PARAMETERS
+          wantedRPS = RobotContainer.shooterUtil.getRPS(RobotContainer.drive.getDistanceFromHub());//(ShooterUtil.calculateShotVelocity(RobotContainer.drive.getDistanceFromHub(),(Units.rotationsToDegrees(RobotContainer.shooterHood.getAngle())+22)/4)).plus(RotationsPerSecond.of(15));//RotationsPerSecond.of(30);//RotationsPerSecond.of(target);//ShooterUtil.calculateShotVelocity(0,0);//REPLACE LATER WITH REAL PARAMETERS
           io.setShooterVelocity(wantedRPS, wantedRPS);
           break;
 
