@@ -12,6 +12,7 @@ import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -28,7 +29,8 @@ public class Intake extends SubsystemBase {
     Rest,
     Intake,
     PivotVC,
-    RollerVC
+    RollerVC,
+    Agitate
   }
   private IntakeIOInputsAutoLogged inputs = new IntakeIOInputsAutoLogged();
 
@@ -130,6 +132,17 @@ public class Intake extends SubsystemBase {
                 wantedState = IntakeStates.Idle;
             }
           break;
+
+          case Agitate:
+          PIDVoltage  = PID.calculate(currentPosition, IntakeConstants.Software.intakeDown);
+          FFVoltage = FF.calculate(IntakeConstants.Software.intakeDown, 0.5);
+          inputVoltage = PIDVoltage + FFVoltage;
+
+          io.setPivotVoltage(inputVoltage);
+          double shakeSpeed = Math.sin(Timer.getFPGATimestamp()*20)*0.1;
+          io.setPivotSpeed(shakeSpeed);
+          break;
+
 
       }
      }else{
