@@ -17,6 +17,7 @@ import static edu.wpi.first.units.Units.*;
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -32,6 +33,7 @@ import frc.robot.Macros.RobotStates;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.Shooter.Shooter;
 import frc.robot.subsystems.Shooter.ShooterIOReal;
+import frc.robot.subsystems.Shooter.ShooterUtil;
 import frc.robot.subsystems.ShooterHood.ShooterHood;
 import frc.robot.subsystems.ShooterHood.ShooterHoodIOKraken;
 //import frc.robot.subsystems.Shooter;
@@ -45,6 +47,7 @@ import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeCoralOnFly;
 import org.littletonrobotics.junction.Logger;
+
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a "declarative" paradigm, very
@@ -61,6 +64,7 @@ public class RobotContainer {
     public static ShooterHood shooterHood;
     public static Transport transport;
     public static Macros macros;
+    public static ShooterUtil shooterUtil = new ShooterUtil();
 
     //public static Macros macros;
 
@@ -125,9 +129,9 @@ public class RobotContainer {
                 drive,
                 drive::getChassisSpeeds,
                 new VisionIOPhotonVisionSim(
-                        camera0Name, robotToCamera0, driveSimulation::getSimulatedDriveTrainPose),
+                        camera0Name, robotToCamera0.minus(Pose3d.kZero), driveSimulation::getSimulatedDriveTrainPose),
                 new VisionIOPhotonVisionSim(
-                        camera1Name, robotToCamera1, driveSimulation::getSimulatedDriveTrainPose));
+                        camera1Name, robotToCamera1.minus(Pose3d.kZero), driveSimulation::getSimulatedDriveTrainPose));
                 //shooter = null;
                 autos = new Autos(drive);
                 break;
@@ -160,7 +164,9 @@ public class RobotContainer {
      */
     private void configureButtonBindings() {
         // Default command, normal field-relative drive
-        drive.setDefaultCommand(DriveCommands.joystickDrive(
+        // drive.setDefaultCommand(DriveCommands.joystickDrive(
+        //        drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> -controller.getRightX()));
+        drive.setDefaultCommand(DriveCommands.joystickAdvancedDrive(
                drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> -controller.getRightX()));
 
         // Lock to 0° when A button is held
@@ -181,6 +187,9 @@ public class RobotContainer {
         controller.y().onTrue(macros.setWantedState(RobotStates.Shoot));
         controller.a().onTrue(macros.setWantedState(RobotStates.IntakeOn));
          controller.b().onTrue(macros.setWantedState(RobotStates.Rest));
+        controller.leftTrigger().whileTrue(DriveCommands.joystickDriveTagCentric(drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> drive.getPose()));
+         //controller.x().onTrue(macros.setWantedState(RobotStates.IntakeOff));
+         //controller.x().onTrue(new InstantCommand(()->transport.setWantedState(TransportStates.TransportIn),transport));
 
         // controller.a().whileTrue(shooter.sysIdQuasistatic(Direction.kForward).alongWith(new InstantCommand(()->shooter.setWantedState(ShooterStates.SYSID))));
         // controller.b().whileTrue(shooter.sysIdQuasistatic(Direction.kReverse).alongWith(new InstantCommand(()->shooter.setWantedState(ShooterStates.SYSID))));

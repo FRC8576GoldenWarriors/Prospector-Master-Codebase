@@ -25,7 +25,8 @@ public class Transport extends SubsystemBase {
   public enum TransportStates {
     Idle,
     TransportIn,
-    TransportOut
+    TransportOut,
+    Rest
   }
 
   public Transport(TransportIO io) {
@@ -61,6 +62,9 @@ public class Transport extends SubsystemBase {
         io.setTransportSpeed(RotationsPerSecond.of(-TransportConstants.velocityTarget));;
         break;
 
+      case Rest:
+        io.setTransportSpeed(RotationsPerSecond.of(TransportConstants.velocityTargetSlower));;
+        break;
       default:
         io.setTransportSpeed(RPM.of(0));
         currentState = TransportStates.Idle;

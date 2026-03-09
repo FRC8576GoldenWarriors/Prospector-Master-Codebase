@@ -37,6 +37,7 @@ public class Macros extends SubsystemBase {
     ClimbDown,
     IntakeOff,
     Rest
+    //Testing
   }
 
 
@@ -100,19 +101,32 @@ public class Macros extends SubsystemBase {
     m_Intake.setWantedPosition(IntakeStates.Rest);
   }
   public void intakeOn(){
-    m_Intake.setWantedPosition(IntakeStates.Intake);
+    if(!m_Intake.nearSetpoint()){
+    m_Intake.setWantedPosition(IntakeStates.IntakeDown);
+    }else{
+      m_Intake.setWantedPosition(IntakeStates.Intake);
+    }
   }
   public void intakeOff(){
-    m_Intake.setWantedPosition(IntakeStates.Rest);
+    m_Transport.setWantedState(TransportStates.TransportIn);//m_Intake.setWantedPosition(IntakeStates.Rest);
   }
   public void shoot(){
     m_shooter.setWantedState(ShooterStates.SHOOT);
     if(m_shooter.isRevved()&&m_ShooterHood.atSetpoint()){
     //m_ShooterHood.setWantedState(ShooterHoodStates.Shoot);
     m_Transport.setWantedState(TransportStates.TransportIn);
+    }else{
+      m_Transport.setWantedState(TransportStates.Idle);
     }
+    if((m_Intake.getState()==IntakeStates.IntakeDown||m_Intake.getState()==IntakeStates.Intake)&&m_Intake.nearSetpoint()){
+      m_Intake.setWantedPosition(IntakeStates.Agitate);
+    }
+    else if(m_Intake.getState()==IntakeStates.Agitate&&m_Intake.nearSetpoint()){
+      m_Intake.setWantedPosition(IntakeStates.IntakeDown);
+    }
+
     m_ShooterHood.setWantedState(ShooterHoodStates.Shoot);//UNCOMMENT TO TEST HOOD
-    //m_Intake.setWantedPosition(IntakeStates.Intake);
+   // m_Intake.setWantedPosition(IntakeStates.Intake);
   }
   public SequentialCommandGroup setWantedState(RobotStates wantedState){
     return new SequentialCommandGroup(

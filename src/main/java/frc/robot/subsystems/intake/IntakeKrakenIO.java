@@ -55,8 +55,7 @@ public class IntakeKrakenIO implements IntakeIO{
             new CurrentLimitsConfigs()
             .withSupplyCurrentLimit(Amps.of(40))
             .withSupplyCurrentLimitEnable(true)
-            .withStatorCurrentLimit(Amps.of(60))
-        );
+            .withStatorCurrentLimitEnable(false));
 
 
         pivotMotor.getConfigurator().apply(pivotConfig);

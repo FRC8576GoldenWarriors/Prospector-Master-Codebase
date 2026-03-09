@@ -16,6 +16,7 @@ package frc.robot.subsystems.drive;
 import static edu.wpi.first.units.Units.*;
 import static frc.robot.subsystems.drive.DriveConstants.module_average_kA_Drive;
 import static frc.robot.subsystems.drive.DriveConstants.module_average_kA_Turn;
+import static frc.robot.subsystems.drive.DriveConstants.wheelRadiusMeters;
 
 import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.RobotConfig;
@@ -27,12 +28,16 @@ import edu.wpi.first.math.util.Units;
 import org.ironmaple.simulation.drivesims.COTS;
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class DriveConstants {
     public static final double maxSpeedMetersPerSec = 4.3; // 5.3; // 4.8;
     public static final double odometryFrequency = 250.0; // Hz
-    public static final double trackWidth = Units.inchesToMeters(27);
-    public static final double wheelBase = Units.inchesToMeters(27);
+    public static final double trackWidth = Units.inchesToMeters(25);
+    public static final double wheelBase = Units.inchesToMeters(25);
+    public static final LoggedNetworkNumber angularVelocityCoefficient = new LoggedNetworkNumber("Drive/angularVelocityCoefficient", 0.175);
+    public static final boolean useChasisDiscretize = false;
+    public static final boolean useAngularVelocitySkewCorrection = true;
     public static final double driveBaseRadius = Math.sqrt((Math.pow(trackWidth, 2) + Math.pow(wheelBase, 2)))
             / 2.0; // Math.hypot(trackWidth / 2.0, wheelBase / 2.0);
     // kevin pfeffer was here
@@ -82,6 +87,7 @@ public class DriveConstants {
     public static final double driveEncoderVelocityFactor =
             (2 * Math.PI) / 60.0 / driveMotorReduction; // Rotor RPM -> Wheel Rad/Sec
 
+        public static final double maxSpeedRPM = maxSpeedMetersPerSec/(2*Math.PI*wheelRadiusMeters)*60;
     // Drive PID configuration
     public static final double driveKp = 0.001;//0.004;//0.008; // 0.0;
     public static final double driveKd = 0.0;
