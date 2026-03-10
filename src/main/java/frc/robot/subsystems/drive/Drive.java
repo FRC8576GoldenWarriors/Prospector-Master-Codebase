@@ -75,7 +75,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
     static final Lock odometryLock = new ReentrantLock();
     private final GyroIO gyroIO;
     private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
-    private final BumpDetector bumpDetector;
+    public static BumpDetector bumpDetector;
     private final CollisionDetector collisionDetector;
     private final Module[] modules = new Module[4]; // FL, FR, BL, BR
     private final SysIdRoutine sysId;
@@ -140,7 +140,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
 
         // Configure AutoBuilder for PathPlanner
         AutoBuilder.configure(
-                this::getPose,
+                this::getAutonPose,//this::getPose,
                 this::resetOdometry,
                 this::getChassisSpeeds,
                 this::runVelocity,
@@ -261,10 +261,10 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
                 rawGyroRotation = rawGyroRotation.plus(new Rotation2d(twist.dtheta));
             }
 
-            boolean anyBumping = bumpDetector.isBumping();
+            //boolean anyBumping = bumpDetector.isBumping();
 
             // Apply update
-            if(!anyBumping)
+            // if(!anyBumping)
                 poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
         }
 
@@ -330,6 +330,10 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
 
         // Log optimized setpoints (runSetpoint mutates each state)
         Logger.recordOutput("SwerveStates/SetpointsOptimized", setpointStates);
+    }
+    @AutoLogOutput (key = "Odometry/Auton Pose")
+    public Pose2d getAutonPose(){
+        return new Pose2d(getPose().getX(),getPose().getY(),getRotation().plus(Rotation2d.k180deg));
     }
 
     private ChassisSpeeds movementOptimizations(ChassisSpeeds velocity, boolean useChasisDiscretize, boolean useAngularVelocitySkewCorrection) {

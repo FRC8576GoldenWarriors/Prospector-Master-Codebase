@@ -36,7 +36,8 @@ public class Macros extends SubsystemBase {
     ClimbUp,
     ClimbDown,
     IntakeOff,
-    Rest
+    Rest,
+    RunContinous
     //Testing
   }
 
@@ -71,6 +72,9 @@ public class Macros extends SubsystemBase {
         case Rest:
             rest();
             break;
+        case RunContinous:
+          runContinous();
+          break;
         default:
             break;
      }
@@ -118,7 +122,7 @@ public class Macros extends SubsystemBase {
     }else{
       m_Transport.setWantedState(TransportStates.Idle);
     }
-    if((m_Intake.getState()==IntakeStates.IntakeDown||m_Intake.getState()==IntakeStates.Intake)&&m_Intake.nearSetpoint()){
+    if(!(m_Intake.getState()==IntakeStates.Agitate)&&m_Intake.nearSetpoint()){
       m_Intake.setWantedPosition(IntakeStates.Agitate);
     }
     else if(m_Intake.getState()==IntakeStates.Agitate&&m_Intake.nearSetpoint()){
@@ -128,12 +132,30 @@ public class Macros extends SubsystemBase {
     m_ShooterHood.setWantedState(ShooterHoodStates.Shoot);//UNCOMMENT TO TEST HOOD
    // m_Intake.setWantedPosition(IntakeStates.Intake);
   }
+
+  public void runContinous(){
+    m_shooter.setWantedState(ShooterStates.Tuning);
+    if(m_shooter.isRevved()){
+    //m_ShooterHood.setWantedState(ShooterHoodStates.Shoot);
+    m_Transport.setWantedState(TransportStates.TransportIn);
+    }
+    //m_Transport.setWantedState(TransportStates.TransportIn);
+    if(!(m_Intake.getState()==IntakeStates.Agitate)&&m_Intake.nearSetpoint()){
+      m_Intake.setWantedPosition(IntakeStates.Agitate);
+    }
+    else if(m_Intake.getState()==IntakeStates.Agitate&&m_Intake.nearSetpoint()){
+      m_Intake.setWantedPosition(IntakeStates.IntakeDown);
+    }
+    //m_Transport.setWantedState(TransportStates.TransportIn);
+  }
   public SequentialCommandGroup setWantedState(RobotStates wantedState){
     return new SequentialCommandGroup(
         Commands.parallel(new InstantCommand(()->m_Intake.resetPID(), m_Intake),
         new InstantCommand(()->m_ShooterHood.resetPID(), m_ShooterHood)
         ), new InstantCommand(()->this.setWantedStatePrivate(wantedState), this));
     }
+
+
 
 
 }

@@ -184,7 +184,7 @@ public class RobotContainer {
         //controller.x().onTrue(intake.setWantedState(IntakeStates.Rest));
         //controller.b().onTrue(new InstantCommand(()->transport.setWantedState(TransportStates.TransportIn),transport));
 
-        controller.y().onTrue(macros.setWantedState(RobotStates.Shoot));
+        controller.y().onTrue(macros.setWantedState(RobotStates.RunContinous));
         controller.a().onTrue(macros.setWantedState(RobotStates.IntakeOn));
          controller.b().onTrue(macros.setWantedState(RobotStates.Rest));
         controller.leftTrigger().whileTrue(DriveCommands.joystickDriveTagCentric(drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> drive.getPose()));
