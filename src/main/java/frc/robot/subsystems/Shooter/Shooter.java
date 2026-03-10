@@ -5,6 +5,7 @@ import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.BangBangController;
 import edu.wpi.first.units.measure.*;
 import static edu.wpi.first.units.Units.*;
 
@@ -27,6 +28,7 @@ public class Shooter extends SubsystemBase {
   private double pastkP = kPNumber.get();
   private double currentkP = kPNumber.get();
     private LoggedNetworkNumber targetRPS = new LoggedNetworkNumber("Tuning/Shooter Target RPS",35);
+  private BangBangController bangBangController = new BangBangController(1);
   private double target = targetRPS.get();
   public enum ShooterStates {
     IDLE,
@@ -92,7 +94,7 @@ public class Shooter extends SubsystemBase {
 
         case SHOOT:
           wantedRPS = RobotContainer.shooterUtil.getRPS(RobotContainer.drive.getDistanceFromHub());//(ShooterUtil.calculateShotVelocity(RobotContainer.drive.getDistanceFromHub(),(Units.rotationsToDegrees(RobotContainer.shooterHood.getAngle())+22)/4)).plus(RotationsPerSecond.of(15));//RotationsPerSecond.of(30);//RotationsPerSecond.of(target);//ShooterUtil.calculateShotVelocity(0,0);//REPLACE LATER WITH REAL PARAMETERS
-          io.setShooterVelocity(wantedRPS, wantedRPS);
+          setShooter(wantedRPS);
           break;
 
         case VOLTAGE_CONTROL_POSITIVE:
@@ -131,4 +133,13 @@ public class Shooter extends SubsystemBase {
     return MathUtil.isNear(wantedRPS.in(RotationsPerSecond),(inputs.leftMotorSpeed.in(RotationsPerSecond)+inputs.rightMotorSpeed.in(RotationsPerSecond))/2,4);//1
     //return (inputs.leftMotorSpeed.in(RotationsPerSecond)>targetRPS.get()-10)&&(inputs.leftMotorSpeed.in(RotationsPerSecond)<targetRPS.get()+10);//0.5
   }
+
+   public void setShooter(AngularVelocity wantedRPS){
+    double bangBangCalculation = bangBangController.calculate(inputs.leftMotorSpeed.in(RotationsPerSecond),wantedRPS.in(RotationsPerSecond));
+    if(bangBangCalculation==0){
+      io.setShooterVelocity(wantedRPS, wantedRPS);
+    }else{
+      io.setShooterSpeeds(bangBangCalculation);
+    }
+   }
 }

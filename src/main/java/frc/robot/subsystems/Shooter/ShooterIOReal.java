@@ -111,4 +111,9 @@ public class ShooterIOReal implements ShooterIO {
     // leftMotor.getConfigurator().apply(config);
     // rightMotor.getConfigurator().apply(config);
   }
+  @Override
+  public void setShooterSpeeds(double speed){
+    leftMotor.set(speed);
+    rightMotor.set(speed);
+  }
 }
