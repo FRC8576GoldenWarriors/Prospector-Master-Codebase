@@ -34,9 +34,10 @@ public class Autos {
 
     public Command testAutonThingy(){
         try{
-        PathPlannerPath path = PathPlannerPath.fromPathFile("Random");
+        PathPlannerPath path = PathPlannerPath.fromPathFile("Random");//getFlippedPath(PathPlannerPath.fromPathFile("Random"));
+        //path.preventFlipping = true;
         return Commands.sequence(
-          Commands.runOnce(() -> drive.resetOdometry(path.getStartingHolonomicPose().get())),
+           //Commands.run(()->drive.resetOdometry(path.getStartingHolonomicPose().get())),
           AutoBuilder.followPath(path));
         }catch(Exception e){
             e.printStackTrace();
@@ -44,6 +45,7 @@ public class Autos {
 
         }
     }
+    
     public Command getCommand(){
         return autoChooser.get();
     }
