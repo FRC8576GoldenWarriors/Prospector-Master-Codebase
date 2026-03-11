@@ -1,0 +1,31 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Copy of OverBump"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "CurveAround"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "AfterCurve"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}

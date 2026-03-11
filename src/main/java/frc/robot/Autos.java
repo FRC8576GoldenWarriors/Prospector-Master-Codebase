@@ -45,11 +45,12 @@ public class Autos {
         autoChooser.addOption("Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
         autoChooser.addOption("Auto Class Test", testAutonThingy());
         SmartDashboard.putData("Auto Chooser",autoChooser.getSendableChooser());
+        autoChooser.addOption("Drive Fully Around", AutoBuilder.buildAuto("DriveAround"));
     }
 
     public Command testAutonThingy(){
         try{
-        PathPlannerPath path = getFlippedPath(PathPlannerPath.fromPathFile("Rand"));
+        PathPlannerPath path = getFlippedPath(PathPlannerPath.fromPathFile(""));
         path.preventFlipping = true;
         return Commands.sequence(
            // Commands.run(()->drive.resetOdometry(path.getStartingHolonomicPose().get())),

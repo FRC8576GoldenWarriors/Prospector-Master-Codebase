@@ -273,7 +273,7 @@ public class DriveCommands {
                                 double relX = botTranslation.getX() - closestHub.getX();
                                 double relY = botTranslation.getY() - closestHub.getY();
 
-                                double angle = Math.atan(relY/relX);
+                                double angle = Math.atan2(relY,relX);
                                 if(DriverStation.getAlliance().get().equals(Alliance.Red))
                                         angle += Math.PI;
 
