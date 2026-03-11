@@ -3,12 +3,10 @@ package frc.robot.subsystems.Shooter;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
-import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.units.measure.*;
@@ -36,29 +34,29 @@ public class ShooterIOReal implements ShooterIO {
     config = new TalonFXConfiguration();
     config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
     // Current Limits & Brake Mode
-    config.CurrentLimits.SupplyCurrentLimit = ShooterConstants.SUPPLY_CURRENT_LIMIT.in(Amps);
-    config.CurrentLimits.SupplyCurrentLimitEnable = true;
-    config.CurrentLimits.StatorCurrentLimit = ShooterConstants.STATOR_CURRENT_LIMIT.in(Amps);
-    config.CurrentLimits.StatorCurrentLimitEnable = true;
+    // config.CurrentLimits.SupplyCurrentLimit = ShooterConstants.SUPPLY_CURRENT_LIMIT.in(Amps);
+    // config.CurrentLimits.SupplyCurrentLimitEnable = true;
+    // config.CurrentLimits.StatorCurrentLimit = ShooterConstants.STATOR_CURRENT_LIMIT.in(Amps);
+    // config.CurrentLimits.StatorCurrentLimitEnable = true;
 
     config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 
     // PIDFF
-    config.Slot0.kP = ShooterConstants.kP;
-    config.Slot0.kI = ShooterConstants.kI;
-    config.Slot0.kD = ShooterConstants.kD;
-    config.Slot0.kV = ShooterConstants.kVLeft;
-    config.Slot0.kA = ShooterConstants.kALeft;
+    // config.Slot0.kP = ShooterConstants.kP;
+    // config.Slot0.kI = ShooterConstants.kI;
+    // config.Slot0.kD = ShooterConstants.kD;
+    // config.Slot0.kV = ShooterConstants.kVLeft;
+    // config.Slot0.kA = ShooterConstants.kALeft;
 
 
 
     //config.Slot0.kV = ShooterConstants.kVRight;
     leftMotor.getConfigurator().apply(config);
-    config.Slot0.kP = ShooterConstants.kPLeft;
-    config.Slot0.kV = ShooterConstants.kVRight;
-    config.Slot0.kA = ShooterConstants.kARight;
+    // config.Slot0.kP = ShooterConstants.kPLeft;
+    // config.Slot0.kV = ShooterConstants.kVRight;
+    // config.Slot0.kA = ShooterConstants.kARight;
     rightMotor.getConfigurator().apply(config);
-    rightMotor.setControl(new Follower(leftMotor.getDeviceID(), MotorAlignmentValue.Aligned));
+    //rightMotor.setControl(new Follower(leftMotor.getDeviceID(), MotorAlignmentValue.Aligned));
     //leftConfig = config.clone().withMotorOutput(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Brake));
 
   }
@@ -110,5 +108,13 @@ public class ShooterIOReal implements ShooterIO {
     PIDF.kP = kP;
     // leftMotor.getConfigurator().apply(config);
     // rightMotor.getConfigurator().apply(config);
+  }
+  @Override
+  public void setShooterSpeeds(double speed){
+    // DutyCycleOut speedRequest = new DutyCycleOut(speed);
+    // speedRequest.IgnoreHardwareLimits = true;
+    // speedRequest.IgnoreSoftwareLimits = true;
+    leftMotor.setVoltage(speed*12);//setControl(speedRequest);
+    rightMotor.setVoltage(speed*12);//setControl(speedRequest);
   }
 }

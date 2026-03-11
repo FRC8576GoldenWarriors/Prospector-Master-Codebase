@@ -105,7 +105,7 @@ public class RobotContainer {
                 shooter = new Shooter(new ShooterIOReal());
                 shooterHood = new ShooterHood(new ShooterHoodIOKraken());
                 transport = new Transport(new TransportIOKraken());
-                autos = new Autos(drive);
+                autos = new Autos(drive,macros);
                 macros = new Macros(shooter, shooterHood, transport, intake);
                 //intake = new Intake(new IntakeKrakenIO());
                 break;
@@ -133,7 +133,7 @@ public class RobotContainer {
                 new VisionIOPhotonVisionSim(
                         camera1Name, robotToCamera1.minus(Pose3d.kZero), driveSimulation::getSimulatedDriveTrainPose));
                 //shooter = null;
-                autos = new Autos(drive);
+                autos = new Autos(drive,macros);
                 break;
             default:
                 // Replayed robot, disable IO implementations
@@ -184,7 +184,7 @@ public class RobotContainer {
         //controller.x().onTrue(intake.setWantedState(IntakeStates.Rest));
         //controller.b().onTrue(new InstantCommand(()->transport.setWantedState(TransportStates.TransportIn),transport));
 
-        controller.y().onTrue(macros.setWantedState(RobotStates.Shoot));
+        controller.y().onTrue(macros.setWantedState(RobotStates.RunContinous));
         controller.a().onTrue(macros.setWantedState(RobotStates.IntakeOn));
          controller.b().onTrue(macros.setWantedState(RobotStates.Rest));
         controller.leftTrigger().whileTrue(DriveCommands.joystickDriveTagCentric(drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> drive.getPose()));

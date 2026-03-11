@@ -21,14 +21,17 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.Macros.RobotStates;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.drive.Drive;
 
 public class Autos {
     private Drive drive;
+    private Macros macros;
     private final LoggedDashboardChooser<Command> autoChooser;
-    public Autos(Drive drive){
+    public Autos(Drive drive, Macros macros){
         this.drive = drive;
+        this.macros = macros;
         autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
         // Set up SysId routines
@@ -46,15 +49,16 @@ public class Autos {
 
     public Command testAutonThingy(){
         try{
-        PathPlannerPath path = getFlippedPath(PathPlannerPath.fromPathFile("Random"));
+        PathPlannerPath path = getFlippedPath(PathPlannerPath.fromPathFile("Rand"));
         path.preventFlipping = true;
         return Commands.sequence(
            // Commands.run(()->drive.resetOdometry(path.getStartingHolonomicPose().get())),
-          AutoBuilder.followPath(path));
+          //AutoBuilder.followPath(path));
+          macros.setWantedState(RobotStates.Shoot));
+         // Commands.parallel(macros.setWantedState(RobotStates.Shoot),DriveCommands.joystickDriveTagCentric(drive, ()->0, ()->0, ()->drive.getPose())));
         }catch(Exception e){
             e.printStackTrace();
             return Commands.none();
-
         }
     }
 

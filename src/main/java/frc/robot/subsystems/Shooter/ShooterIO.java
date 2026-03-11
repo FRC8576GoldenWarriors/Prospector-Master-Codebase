@@ -27,4 +27,5 @@ public interface ShooterIO {
   public default void setShooterVoltage(Voltage leftVolts, Voltage rightVolts) {}
   public default void setkP(double kP){}
   public default void stop() {}
+  public default void setShooterSpeeds(double speed){}
 }
