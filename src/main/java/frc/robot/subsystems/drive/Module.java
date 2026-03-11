@@ -64,6 +64,7 @@ public class Module {
         state.optimize(getAngle());
         state.cosineScale(inputs.turnPosition);
 
+
         // Apply setpoints
         io.setDriveVelocity(state.speedMetersPerSecond / wheelRadiusMeters);
         io.setTurnPosition(state.angle);
@@ -79,13 +80,14 @@ public class Module {
         // MOI SysID
         io.setDriveOpenLoop(output);
         io.setTurnPosition(Rotation2d.fromDegrees(
-                switch (index) {
-                    case 0 -> 135.0;
-                    case 1 -> 45.0;
-                    case 2 -> -135.0;
-                    case 3 -> -45.0;
-                    default -> 0.0;
-                }));
+                // switch (index) {
+                //     case 0 -> 135.0;
+                //     case 1 -> 45.0;
+                //     case 2 -> -135.0;
+                //     case 3 -> -45.0;
+                //     default -> 0.0;
+                //}
+                0));
     }
 
     /** Disables all outputs to motors. */

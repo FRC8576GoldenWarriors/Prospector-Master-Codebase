@@ -43,7 +43,7 @@ public class ShooterHoodIOKraken implements ShooterHoodIO {
         inputs.supplyCurrent = hoodMotor.getSupplyCurrent().getValue();
         inputs.speed = hoodMotor.getVelocity().getValue();
         inputs.isMotorConnected = hoodMotor.isConnected();
-        inputs.encoderValue = Rotations.of(hoodEncoder.get());
+        inputs.encoderValue_Radians = Rotations.of(hoodEncoder.get());
         inputs.isEncoderConnected = hoodEncoder.isConnected();
     }
 

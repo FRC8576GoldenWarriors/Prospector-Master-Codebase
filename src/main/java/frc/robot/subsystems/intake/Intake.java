@@ -4,15 +4,17 @@
 
 package frc.robot.subsystems.intake;
 
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
-
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
@@ -26,6 +28,8 @@ public class Intake extends SubsystemBase {
     Idle,
     Rest,
     Intake,
+    IntakeDown,
+    Agitate,
     PivotVC,
     RollerVC
   }
@@ -41,8 +45,11 @@ public class Intake extends SubsystemBase {
   private double inputVoltage;
   private LoggedNetworkNumber kP = new LoggedNetworkNumber("Tuning/kP",IntakeConstants.Software.kP);
   private double kPDouble = kP.get();
-  private LoggedNetworkNumber kV = new LoggedNetworkNumber("Tuning/kV",0.0);
-  private double kVDouble = kV.get();
+  private double pastkP = kP.get();
+  private LoggedNetworkNumber kG = new LoggedNetworkNumber("Tuning/kG",IntakeConstants.Software.kG);
+  private double kGDouble = kG.get();
+    private double pastkG = kG.get();
+
   private Alert pivotMotorAlert = new Alert("The Pivot Motor is disconnected", AlertType.kError);
   private Alert rollerMotorAlert = new Alert("The Roller Motor is disconnected", AlertType.kError);
   private Alert leftEncoderAlert = new Alert("The Left Encoder is disconnected", AlertType.kError);
@@ -60,14 +67,22 @@ public class Intake extends SubsystemBase {
     Logger.processInputs("Intake", inputs);
     currentPosition = inputs.leftEncoderRotations;
     kPDouble = kP.getAsDouble();
+    kGDouble = kG.getAsDouble();
+    if(kPDouble!=pastkP){
+              PID.setP(kPDouble);
+              pastkP = kPDouble;
+            }
+            if(kGDouble!=pastkG){
+              FF.setKg(kGDouble);
+              pastkG = kGDouble;
+            }
 
-    kVDouble = kV.getAsDouble();
-    PID.setP(kPDouble);
-    FF.setKv(kVDouble);
      if (DriverStation.isEnabled()) {
-      if(currentPosition>IntakeConstants.Software.intakeSoftStop){
-            wantedState = IntakeStates.Idle;
-          }
+      // if(currentPosition>IntakeConstants.Software.intakeSoftStop){
+      //       wantedState = IntakeStates.Idle;
+      //     }
+        //PID.setP(kPDouble);
+        //FF.setKg(kVDouble);
       switch (wantedState) {
         case Idle:
           PIDVoltage = 0;
@@ -80,7 +95,7 @@ public class Intake extends SubsystemBase {
           break;
 
         case Rest:
-          PIDVoltage  = PID.calculate(currentPosition, IntakeConstants.Software.intakeUp);
+          PIDVoltage  = PID.calculate(currentPosition, IntakeConstants.Software.intakeUp);//intakeUp
           FFVoltage = FF.calculate(IntakeConstants.Software.intakeUp, 0.5);
           inputVoltage = PIDVoltage + FFVoltage;
           wantedSpeed = 0;
@@ -88,7 +103,24 @@ public class Intake extends SubsystemBase {
           io.setPivotVoltage(inputVoltage);
           io.setRollerSpeed(wantedSpeed);
           break;
+        case IntakeDown:
+          PIDVoltage  = PID.calculate(currentPosition, IntakeConstants.Software.intakeDown);
+          FFVoltage = FF.calculate(IntakeConstants.Software.intakeDown, 0.5);
+          inputVoltage = PIDVoltage + FFVoltage;
+          wantedSpeed = 0;
 
+          io.setPivotVoltage(inputVoltage);
+          io.setRollerSpeed(wantedSpeed);
+          break;
+        case Agitate:
+          PIDVoltage  = PID.calculate(currentPosition, IntakeConstants.Software.agitatePosition);
+          FFVoltage = FF.calculate(IntakeConstants.Software.agitatePosition, 0.5);
+          inputVoltage = PIDVoltage + FFVoltage;
+          wantedSpeed = 0;
+
+          io.setPivotVoltage(inputVoltage);
+          io.setRollerSpeed(wantedSpeed);
+          break;
         case Intake:
           PIDVoltage  = PID.calculate(currentPosition, IntakeConstants.Software.intakeDown);
           FFVoltage = FF.calculate(IntakeConstants.Software.intakeDown, 0.5);
@@ -128,7 +160,7 @@ public class Intake extends SubsystemBase {
       rollerMotorAlert.set(!inputs.rollerConnected);
       leftEncoderAlert.set(!inputs.leftEncoderConnected);
       rightEncoderAlert.set(!inputs.rightEncoderConnected);
-
+      Logger.recordOutput("Intake/Wanted State", wantedState);
 }
 
 public void setWantedPosition(IntakeStates wantedState) {
@@ -136,12 +168,22 @@ public void setWantedPosition(IntakeStates wantedState) {
 }
 
 public void resetPID() {
-    PID.reset(currentPosition, inputs.pivotRPS.magnitude());
+    PID.reset(currentPosition, 0);
+}
+@AutoLogOutput (key = "Intake/Near Setpoint")
+public boolean nearSetpoint(){
+  return MathUtil.isNear(PID.getGoal().position, inputs.leftEncoderRotations, 0.1);
+}
+public boolean nearSetpointAgitate(){
+  return MathUtil.isNear(PID.getGoal().position, inputs.leftEncoderRotations, 0.1);
+}
+public IntakeStates getState(){
+  return wantedState;
 }
 
 // TO-DO : MAKE THIS IN MACROS CLASS
 public SequentialCommandGroup setWantedState(IntakeStates state){
-    return null;//new SequentialCommandGroup(new InstantCommand(()->this.resetPID(), RobotContainer.intake), new InstantCommand(()->this.setWantedPosition(state), RobotContainer.intake) );
+    return new SequentialCommandGroup(new InstantCommand(()->this.resetPID(), RobotContainer.intake), new InstantCommand(()->this.setWantedPosition(state), RobotContainer.intake) );
 }
 
 //

@@ -4,9 +4,11 @@ import static edu.wpi.first.units.Units.Rotations;
 
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -22,7 +24,7 @@ public class ShooterHood extends SubsystemBase {
     private double PIDVoltage;
     private double FFVoltage;
     private double inputVoltage;
-    public ShooterHoodIOKraken motor = new ShooterHoodIOKraken();
+    //public ShooterHoodIOKraken motor = new ShooterHoodIOKraken();
     private Alert shooterHoodMotorAlert = new Alert("The Shooter Hood Motor is disconnected", AlertType.kError);
     private Alert shooterHoodEncoderAlert = new Alert("The Shooter Hood Encoder is disconnected", AlertType.kError);
 
@@ -38,9 +40,13 @@ public class ShooterHood extends SubsystemBase {
     private ShooterHoodStates currentState = ShooterHoodStates.Idle;
 
     private double currentAnglePosition = 0.0;
-    private double wantedAnglePosition = 0.0;
 
+    private LoggedNetworkNumber kPNumber = new LoggedNetworkNumber("Tuning/ShooterHood kP",ShooterHoodConstants.kp);
+    private LoggedNetworkNumber hoodAngleRotations = new LoggedNetworkNumber("Tuning/ShooterHood Angle",0.37);//Max: .37
+    private double wantedAnglePosition = hoodAngleRotations.get();
 
+    private double kP = kPNumber.get();
+    private double pastkP = kPNumber.get();
     public ShooterHood(ShooterHoodIO io) {
         this.io = io;
         PID = new ProfiledPIDController(ShooterHoodConstants.kp, ShooterHoodConstants.ki, ShooterHoodConstants.kd, ShooterHoodConstants.profile);
@@ -60,13 +66,21 @@ public class ShooterHood extends SubsystemBase {
 
   @Override
   public void periodic() {
-    currentAnglePosition = inputs.encoderValue.in(Rotations);
-
+    currentAnglePosition = inputs.encoderValue_Radians.in(Rotations);
     io.updateInputs(inputs);
 
-    Logger.processInputs("ShooterHood", inputs);
+    kP = kPNumber.get();
 
+    Logger.processInputs("ShooterHood", inputs);
+    Logger.recordOutput("ShooterHood/Current Position", currentAnglePosition);
+    wantedAnglePosition =hoodAngleRotations.get(); //(ShooterHoodUtil.calculateHoodAngleDegrees(RobotContainer.drive.getDistanceFromHub())-22)*4;//
     if(!DriverStation.isDisabled()) {
+        if(pastkP!=kP){
+            PID.setP(kP);
+            pastkP = kP;
+        }
+         //PID.setP(kP);
+
         switch(currentState) {
             case Idle:
                 io.setVoltage(0.0);
@@ -82,7 +96,8 @@ public class ShooterHood extends SubsystemBase {
                 break;
 
             case Shoot:
-            wantedAnglePosition = getWantedPosition(1);
+            Logger.recordOutput("ShooterHood/Calculated Angle", Units.degreesToRotations((ShooterHoodUtil.calculateHoodAngleDegrees(RobotContainer.drive.getDistanceFromHub())-22)*4));//0.2126;//getWantedPosition(1);
+            wantedAnglePosition = RobotContainer.shooterUtil.getAngle(RobotContainer.drive.getDistanceFromHub()); //Units.degreesToRotations((ShooterHoodUtil.calculateHoodAngleDegrees(RobotContainer.drive.getDistanceFromHub())-22)*4);
                 PIDVoltage = PID.calculate(currentAnglePosition,wantedAnglePosition);
                 FFVoltage = FF.calculate(wantedAnglePosition, 1.0);
                 inputVoltage = PIDVoltage + FFVoltage;
@@ -104,10 +119,24 @@ public class ShooterHood extends SubsystemBase {
   } else {
         setWantedState(ShooterHoodStates.Idle);
   }
-
+  Logger.recordOutput("ShooterHood/PID Voltage", PIDVoltage);
+  Logger.recordOutput("ShooterHood/FF Voltage", FFVoltage);
     shooterHoodMotorAlert.set(!inputs.isMotorConnected);
     shooterHoodEncoderAlert.set(!inputs.isEncoderConnected);
 
 
   }
+  public void resetPID(){
+    PID.reset(inputs.encoderValue_Radians.in(Rotations), inputs.speed.magnitude());
+  }
+
+  public boolean atSetpoint(){
+    return (inputs.encoderValue_Radians.in(Rotations))>(PID.getGoal().position-0.05)&&(inputs.encoderValue_Radians.in(Rotations))<(PID.getGoal().position+0.05);
+  }
+
+  public double getAngle(){
+    return wantedAnglePosition;
+  }
+
+  //Min: 22 degrees, Max: 43 degrees
 }

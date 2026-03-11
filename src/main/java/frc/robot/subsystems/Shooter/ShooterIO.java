@@ -11,17 +11,21 @@ public interface ShooterIO {
     public Current leftMotorStatorCurrent = Amps.of(0.0);
     public Current leftMotorSupplyCurrent = Amps.of(0.0);
     public AngularVelocity leftMotorSpeed = RotationsPerSecond.of(0.0);
+    public double leftEncoderPosition = 0;
     public boolean leftMotorConnected = false;
 
     public Voltage rightMotorVoltage = Volts.of(0.0);
     public Current rightMotorStatorCurrent = Amps.of(0.0);
     public Current rightMotorSupplyCurrent = Amps.of(0.0);
     public AngularVelocity rightMotorSpeed = RotationsPerSecond.of(0.0);
+    public double rightEncoderPosition = 0;
     public boolean rightMotorConnected = false;
   }
 
   public default void updateInputs(ShooterIOInputs inputs) {}
   public default void setShooterVelocity(AngularVelocity leftVel, AngularVelocity rightVel) {}
   public default void setShooterVoltage(Voltage leftVolts, Voltage rightVolts) {}
+  public default void setkP(double kP){}
   public default void stop() {}
+  public default void setShooterSpeeds(double speed){}
 }

@@ -50,8 +50,12 @@ public class IntakeKrakenIO implements IntakeIO{
         pivotConfig = leadConfig.clone().withMotorOutput(
             leadConfig.MotorOutput.clone()
             .withInverted(IntakeConstants.Hardware.pivotInvert)
-
             );
+        pivotConfig = pivotConfig.withCurrentLimits(
+            new CurrentLimitsConfigs()
+            .withSupplyCurrentLimit(Amps.of(40))
+            .withSupplyCurrentLimitEnable(true)
+            .withStatorCurrentLimitEnable(false));
 
 
         pivotMotor.getConfigurator().apply(pivotConfig);
@@ -99,5 +103,7 @@ public class IntakeKrakenIO implements IntakeIO{
     public void setRollerSpeed(double speed) {
         rollerMotor.set(speed);//speed
     }
+
+
 
 }

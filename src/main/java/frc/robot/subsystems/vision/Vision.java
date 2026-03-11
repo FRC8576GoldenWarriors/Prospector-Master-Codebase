@@ -27,6 +27,7 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.vision.VisionIO.PoseObservationType;
 import java.util.LinkedList;
 import java.util.List;
@@ -118,7 +119,8 @@ public class Vision extends SubsystemBase {
                         || observation.pose().getX() < 0.0
                         || observation.pose().getX() > aprilTagLayout.getFieldLength()
                         || observation.pose().getY() < 0.0
-                        || observation.pose().getY() > aprilTagLayout.getFieldWidth();
+                        || observation.pose().getY() > aprilTagLayout.getFieldWidth()
+                        || Drive.bumpDetector.isBumping();
 
                 // Add pose to log
                 robotPoses.add(observation.pose());
