@@ -105,8 +105,8 @@ public class RobotContainer {
                 shooter = new Shooter(new ShooterIOReal());
                 shooterHood = new ShooterHood(new ShooterHoodIOKraken());
                 transport = new Transport(new TransportIOKraken());
-                autos = new Autos(drive,macros);
                 macros = new Macros(shooter, shooterHood, transport, intake);
+                autos = new Autos(drive,macros);
                 //intake = new Intake(new IntakeKrakenIO());
                 break;
             case SIM:

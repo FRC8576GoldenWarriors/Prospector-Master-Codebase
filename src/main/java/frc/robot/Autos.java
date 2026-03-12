@@ -4,6 +4,7 @@ package frc.robot;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -13,6 +14,7 @@ import com.pathplanner.lib.path.RotationTarget;
 import com.pathplanner.lib.util.FlippingUtil;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
@@ -21,8 +23,10 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Macros.RobotStates;
+import frc.robot.commands.DriveCommands;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.drive.Drive;
 
@@ -50,11 +54,16 @@ public class Autos {
 
     public Command testAutonThingy(){
         try{
-        PathPlannerPath path = PathPlannerPath.fromPathFile("Random");//getFlippedPath(PathPlannerPath.fromPathFile("Random"));
+        PathPlannerPath path =(PathPlannerPath.fromPathFile("Rand"));//.flipPath();//(DriverStation.getAlliance().get().equals(Alliance.Red))? PathPlannerPath.fromPathFile("Rand").flipPath():PathPlannerPath.fromPathFile("Rand");//getFlippedPath(PathPlannerPath.fromPathFile("Random"));
         //path.preventFlipping = true;
-        return Commands.sequence(
-           //Commands.run(()->drive.resetOdometry(path.getStartingHolonomicPose().get())),
-          AutoBuilder.followPath(path));
+        // if(DriverStation.getAlliance().get().equals(Alliance.Red)){
+        //     path = path.flipPath();
+        // }
+        Logger.recordOutput("Odometry/Starting Pose", path.getStartingHolonomicPose().get());
+        return new SequentialCommandGroup(
+           new InstantCommand(()->drive.resetOdometry(path.getStartingHolonomicPose().get())),
+          drive.driveToPose(new Pose2d(path.getAllPathPoints().get(path.getAllPathPoints().size()-1).position,path.getAllPathPoints().get(path.getAllPathPoints().size()-1).rotationTarget.rotation())),//AutoBuilder.followPath(path));
+          macros.setWantedState(RobotStates.RunContinous));
         }catch(Exception e){
             e.printStackTrace();
             return Commands.none();
@@ -78,7 +87,7 @@ public class Autos {
     }
     return new PathPlannerPath(null, null, null, null);
     }
-    
+
     public Command getCommand(){
         return autoChooser.get();
     }

@@ -70,7 +70,7 @@ public class ShooterIOReal implements ShooterIO {
     StatusSignal<AngularVelocity> rightStatus = rightMotor.getVelocity();
 
     StatusSignal<Current> leftMotorStatorCurrent = leftMotor.getStatorCurrent();
-    
+
     StatusSignal<Current> leftMotorSupplyCurrent = leftMotor.getSupplyCurrent();
 
     StatusSignal.refreshAll(List.of(leftMotorStatorCurrent,leftMotorSupplyCurrent));

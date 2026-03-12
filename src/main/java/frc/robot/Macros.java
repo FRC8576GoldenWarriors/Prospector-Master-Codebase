@@ -135,7 +135,11 @@ public class Macros extends SubsystemBase {
 
   public void runContinous(){
    m_shooter.setWantedState(ShooterStates.Tuning);
-    if(m_shooter.isRevved()){
+   m_ShooterHood.setWantedState(ShooterHoodStates.Test);
+   if(m_Intake.getState()==IntakeStates.Idle){
+   m_Intake.setWantedPosition(IntakeStates.IntakeDown);
+   }
+    if(m_shooter.isRevved()&&m_ShooterHood.atSetpoint()){
     //m_ShooterHood.setWantedState(ShooterHoodStates.Shoot);
      m_Transport.setWantedState(TransportStates.TransportIn);
     }else{

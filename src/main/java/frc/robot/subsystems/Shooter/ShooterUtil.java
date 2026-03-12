@@ -74,10 +74,15 @@ public class ShooterUtil {
         return angleMap.get(limelightDistanceMeters);
     }
 
-    // public double getTof(double limelightDistanceX, double limelightDistanceY,double chassisVelX, double chassisVelY){
+    // public Pair<AngularVelocity, Double> getSOTFCalc(double limelightDistanceX, double limelightDistanceY,double chassisVelX, double chassisVelY){
     //     double tof = tofMap.get(Math.hypot(limelightDistanceX, limelightDistanceY));
     //     for(int i =0;i<10;i++){
-            
+    //         limelightDistanceX+=chassisVelX*tof;
+    //         limelightDistanceY+=chassisVelY*tof;
+    //         tof = tofMap.get(Math.hypot(limelightDistanceX, limelightDistanceY));
     //     }
+    //     return Pair.of(getRPS(Math.hypot(limelightDistanceX, limelightDistanceY)), getAngle(Math.hypot(limelightDistanceX, limelightDistanceY)));
+
     // }
+    // public statci void main - Lalitha
 }
