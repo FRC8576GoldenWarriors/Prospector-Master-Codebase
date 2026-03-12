@@ -49,12 +49,12 @@ public class Autos {
 
     public Command testAutonThingy(){
         try{
-        PathPlannerPath path = (PathPlannerPath.fromPathFile("Rand"));
+        PathPlannerPath path = PathPlannerPath.fromPathFile("Random");//getFlippedPath(PathPlannerPath.fromPathFile("Random"));
         //path.preventFlipping = true;
         return Commands.sequence(
-        new InstantCommand(()->drive.resetOdometry(path.getStartingHolonomicPose().get())),
-          AutoBuilder.followPath(path));
-          //macros.setWantedState(RobotStates.Shoot));
+           // Commands.run(()->drive.resetOdometry(path.getStartingHolonomicPose().get())),
+          //AutoBuilder.followPath(path));
+          macros.setWantedState(RobotStates.Shoot));
          // Commands.parallel(macros.setWantedState(RobotStates.Shoot),DriveCommands.joystickDriveTagCentric(drive, ()->0, ()->0, ()->drive.getPose())));
         }catch(Exception e){
             e.printStackTrace();
@@ -79,6 +79,7 @@ public class Autos {
     }
     return new PathPlannerPath(null, null, null, null);
     }
+    
     public Command getCommand(){
         return autoChooser.get();
     }
