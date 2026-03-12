@@ -4,6 +4,7 @@ import edu.wpi.first.units.measure.*;
 
 import static edu.wpi.first.units.Units.*;
 
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
 import edu.wpi.first.math.interpolation.Interpolator;
 import edu.wpi.first.math.interpolation.InverseInterpolator;
@@ -13,6 +14,7 @@ import edu.wpi.first.math.interpolation.InverseInterpolator;
 public class ShooterUtil {
     InterpolatingTreeMap<Double, Double> speedMap = new InterpolatingTreeMap<>(InverseInterpolator.forDouble(), Interpolator.forDouble());
     InterpolatingTreeMap<Double, Double> angleMap = new InterpolatingTreeMap<>(InverseInterpolator.forDouble(), Interpolator.forDouble());
+    InterpolatingDoubleTreeMap tofMap = new InterpolatingDoubleTreeMap();
 
     public ShooterUtil(){
         speedMap.put(2.7+0.55, 33.0);
@@ -36,6 +38,10 @@ public class ShooterUtil {
         angleMap.put(3.37+.55, 0.07);
         angleMap.put(1.7+.55, 0.04);
         angleMap.put(2.22+.55, 0.07);
+
+        tofMap.put(3.11, 1.05);
+        tofMap.put(1.9, null);
+        tofMap.put(4.27, null);
     }
     // public static AngularVelocity calculateShotVelocity(double limelightDistanceMeters, double hoodAngleDegrees) {
     //     //Variables
@@ -67,4 +73,11 @@ public class ShooterUtil {
     public double getAngle(double limelightDistanceMeters){
         return angleMap.get(limelightDistanceMeters);
     }
+
+    // public double getTof(double limelightDistanceX, double limelightDistanceY,double chassisVelX, double chassisVelY){
+    //     double tof = tofMap.get(Math.hypot(limelightDistanceX, limelightDistanceY));
+    //     for(int i =0;i<10;i++){
+            
+    //     }
+    // }
 }

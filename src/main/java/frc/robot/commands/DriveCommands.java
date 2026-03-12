@@ -132,7 +132,9 @@ public class DriveCommands {
                             isFlipped ? drive.getRotation().plus(new Rotation2d(Math.PI)) : drive.getRotation());
                     Logger.recordOutput("Drivetrain/Turn Speeds", speeds.omegaRadiansPerSecond);
                     drive.runAdvancedVelocity(speeds);
-                },
+                 },//else{
+                //         //joystickDriveAtAngle(drive, xSupplier, ySupplier, ()->drive.getRotation());
+                // }},
                 drive);
     }
 
@@ -270,8 +272,14 @@ public class DriveCommands {
                                 );
                                 Translation2d closestHub = botTranslation.nearest(hubs);
 
-                                double relX = botTranslation.getX() - closestHub.getX();
-                                double relY = botTranslation.getY() - closestHub.getY();
+                                //Start Here
+                                // ChassisSpeeds robotSpeeds = drive.getChassisSpeeds();
+                                // x_Prediction = (robotSpeeds.vxMetersPerSecond * getTof());
+                                // y_Prediction = (robotSpeeds.vyMetersPerSecond * getTof());
+
+
+                                double relX = (botTranslation.getX()) - closestHub.getX();
+                                double relY = (botTranslation.getY()) - closestHub.getY();
 
                                 double angle = Math.atan(relY/relX);
                                 if(DriverStation.getAlliance().get().equals(Alliance.Red))

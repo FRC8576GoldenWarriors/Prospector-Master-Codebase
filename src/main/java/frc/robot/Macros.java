@@ -134,12 +134,14 @@ public class Macros extends SubsystemBase {
   }
 
   public void runContinous(){
-    m_shooter.setWantedState(ShooterStates.Tuning);
+   m_shooter.setWantedState(ShooterStates.Tuning);
     if(m_shooter.isRevved()){
     //m_ShooterHood.setWantedState(ShooterHoodStates.Shoot);
-    m_Transport.setWantedState(TransportStates.TransportIn);
+     m_Transport.setWantedState(TransportStates.TransportIn);
+    }else{
+      m_Transport.setWantedState(TransportStates.Idle);
     }
-    //m_Transport.setWantedState(TransportStates.TransportIn);
+    m_Transport.setWantedState(TransportStates.TransportIn);
     if(!(m_Intake.getState()==IntakeStates.Agitate)&&m_Intake.nearSetpoint()){
       m_Intake.setWantedPosition(IntakeStates.Agitate);
     }

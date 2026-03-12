@@ -14,6 +14,8 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 import static edu.wpi.first.units.Units.*;
 
+import java.util.List;
+
 
 public class ShooterIOReal implements ShooterIO {
   private final TalonFX leftMotor;
@@ -55,6 +57,7 @@ public class ShooterIOReal implements ShooterIO {
     // config.Slot0.kP = ShooterConstants.kPLeft;
     // config.Slot0.kV = ShooterConstants.kVRight;
     // config.Slot0.kA = ShooterConstants.kARight;
+    config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
     rightMotor.getConfigurator().apply(config);
     //rightMotor.setControl(new Follower(leftMotor.getDeviceID(), MotorAlignmentValue.Aligned));
     //leftConfig = config.clone().withMotorOutput(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Brake));
@@ -66,9 +69,14 @@ public class ShooterIOReal implements ShooterIO {
     StatusSignal<AngularVelocity> leftStatus = leftMotor.getVelocity();
     StatusSignal<AngularVelocity> rightStatus = rightMotor.getVelocity();
 
+    StatusSignal<Current> leftMotorStatorCurrent = leftMotor.getStatorCurrent();
+    
+    StatusSignal<Current> leftMotorSupplyCurrent = leftMotor.getSupplyCurrent();
+
+    StatusSignal.refreshAll(List.of(leftMotorStatorCurrent,leftMotorSupplyCurrent));
     inputs.leftMotorVoltage = leftMotor.getMotorVoltage().getValue();
-    inputs.leftMotorStatorCurrent = leftMotor.getStatorCurrent().getValue();
-    inputs.leftMotorSupplyCurrent = leftMotor.getSupplyCurrent().getValue();
+    inputs.leftMotorStatorCurrent = leftMotorStatorCurrent.getValue();//leftMotor.getStatorCurrent().getValue();
+    inputs.leftMotorSupplyCurrent = leftMotorSupplyCurrent.getValue();//leftMotor.getSupplyCurrent().getValue();
     inputs.leftMotorSpeed = leftStatus.getValue();
     inputs.leftMotorConnected = leftMotor.isConnected();
     inputs.leftEncoderPosition = leftMotor.getPosition().getValue().in(Rotations);

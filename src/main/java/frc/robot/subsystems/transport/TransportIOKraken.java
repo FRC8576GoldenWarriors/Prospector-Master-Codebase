@@ -67,7 +67,8 @@ public class TransportIOKraken implements TransportIO {
         inputs.transportMotorSupplyCurrent = supplyCurrentStatusSignal.getValue();
 
         inputs.transportAngularVelocity = transportMotor.getVelocity().getValue();
-
+        inputs.transportMotorVoltage = transportMotor.getMotorVoltage().getValue();
+        
 
     }
 

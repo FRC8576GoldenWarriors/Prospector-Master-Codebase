@@ -6,6 +6,7 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.BangBangController;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.units.measure.*;
 import static edu.wpi.first.units.Units.*;
 
@@ -25,10 +26,11 @@ public class Shooter extends SubsystemBase {
   private Alert rightMotorAlert = new Alert("The Right Motor is disconnected", AlertType.kError);
 
   private LoggedNetworkNumber kPNumber = new LoggedNetworkNumber("Tuning/Shooter kP",ShooterConstants.kP);
+  private SimpleMotorFeedforward ff;
   private double pastkP = kPNumber.get();
   private double currentkP = kPNumber.get();
     private LoggedNetworkNumber targetRPS = new LoggedNetworkNumber("Tuning/Shooter Target RPS",35);
-  private BangBangController bangBangController = new BangBangController(0.05);
+  private BangBangController bangBangController = new BangBangController(0.05/2);
   private double target = targetRPS.get();
   public enum ShooterStates {
     IDLE,
@@ -98,7 +100,7 @@ public class Shooter extends SubsystemBase {
           setShooter(wantedRPS);
           break;
         case Tuning:
-          wantedRPS = RotationsPerSecond.of(50);
+          wantedRPS = RotationsPerSecond.of(50);//50);
           setShooter(wantedRPS);
 
         case VOLTAGE_CONTROL_POSITIVE:
