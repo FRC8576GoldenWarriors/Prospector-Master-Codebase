@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.Macros.RobotStates;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.drive.Drive;
 
@@ -52,10 +53,8 @@ public class Autos {
         PathPlannerPath path = PathPlannerPath.fromPathFile("Random");//getFlippedPath(PathPlannerPath.fromPathFile("Random"));
         //path.preventFlipping = true;
         return Commands.sequence(
-           // Commands.run(()->drive.resetOdometry(path.getStartingHolonomicPose().get())),
-          //AutoBuilder.followPath(path));
-          macros.setWantedState(RobotStates.Shoot));
-         // Commands.parallel(macros.setWantedState(RobotStates.Shoot),DriveCommands.joystickDriveTagCentric(drive, ()->0, ()->0, ()->drive.getPose())));
+           //Commands.run(()->drive.resetOdometry(path.getStartingHolonomicPose().get())),
+          AutoBuilder.followPath(path));
         }catch(Exception e){
             e.printStackTrace();
             return Commands.none();
