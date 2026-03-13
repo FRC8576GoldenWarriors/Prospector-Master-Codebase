@@ -54,15 +54,15 @@ public class Autos {
 
     public Command testAutonThingy(){
         try{
-        PathPlannerPath path =(PathPlannerPath.fromPathFile("Rand"));//.flipPath();//(DriverStation.getAlliance().get().equals(Alliance.Red))? PathPlannerPath.fromPathFile("Rand").flipPath():PathPlannerPath.fromPathFile("Rand");//getFlippedPath(PathPlannerPath.fromPathFile("Random"));
+        PathPlannerPath path =(PathPlannerPath.fromPathFile("Rand")).flipPath();//.flipPath();//(DriverStation.getAlliance().get().equals(Alliance.Red))? PathPlannerPath.fromPathFile("Rand").flipPath():PathPlannerPath.fromPathFile("Rand");//getFlippedPath(PathPlannerPath.fromPathFile("Random"));
         //path.preventFlipping = true;
         // if(DriverStation.getAlliance().get().equals(Alliance.Red)){
         //     path = path.flipPath();
         // }
-        Logger.recordOutput("Odometry/Starting Pose", path.getStartingHolonomicPose().get());
+        Logger.recordOutput("Odometry/Starting Pose", new Pose2d(path.getStartingHolonomicPose().get().getTranslation(),path.getStartingHolonomicPose().get().getRotation()));
         return new SequentialCommandGroup(
-           new InstantCommand(()->drive.resetOdometry(path.getStartingHolonomicPose().get())),
-          drive.driveToPose(new Pose2d(path.getAllPathPoints().get(path.getAllPathPoints().size()-1).position,path.getAllPathPoints().get(path.getAllPathPoints().size()-1).rotationTarget.rotation())),//AutoBuilder.followPath(path));
+           new InstantCommand(()->drive.resetOdometry(new Pose2d(path.getStartingHolonomicPose().get().getTranslation(),path.getStartingHolonomicPose().get().getRotation()))),
+          drive.driveToPose(new Pose2d(path.getAllPathPoints().get(path.getAllPathPoints().size()-1).position,(path.getAllPathPoints().get(path.getAllPathPoints().size()-1).rotationTarget.rotation().plus(Rotation2d.k180deg)))),//AutoBuilder.followPath(path));
           macros.setWantedState(RobotStates.RunContinous));
         }catch(Exception e){
             e.printStackTrace();

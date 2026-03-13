@@ -142,7 +142,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
                 this::getPose,//this::getPose,
                 this::resetOdometry,
                 this::getChassisSpeeds,
-                this::runVelocity,
+                this::runAutonVelocity,
                 new PPHolonomicDriveController(new PIDConstants(7.5, 0.0, 0.0), new PIDConstants(5.0, 0.0, 0.0)),
                 this.pathConfig,
                 () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
@@ -297,6 +297,30 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
         // Log optimized setpoints (runSetpoint mutates each state)
         Logger.recordOutput("SwerveStates/SetpointsOptimized", setpointStates);
     }
+
+        public void runAutonVelocity(ChassisSpeeds speeds) {
+        // Calculate module setpoints
+        if(DriverStation.getAlliance().orElse(Alliance.Blue)==Alliance.Red){
+            speeds = new ChassisSpeeds(-speeds.vxMetersPerSecond,-speeds.vyMetersPerSecond,speeds.omegaRadiansPerSecond);
+        }
+        Logger.recordOutput("SwerveStates/Chassis Speeds", speeds);
+        speeds = ChassisSpeeds.discretize(speeds, 0.02);
+        SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(speeds);
+        SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, maxSpeedMetersPerSec);
+
+        // Log unoptimized setpoints
+        Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
+        Logger.recordOutput("SwerveChassisSpeeds/Setpoints", speeds);
+
+        // Send setpoints to modules
+        for (int i = 0; i < 4; i++) {
+            modules[i].runSetpoint(setpointStates[i]);
+        }
+
+        // Log optimized setpoints (runSetpoint mutates each state)
+        Logger.recordOutput("SwerveStates/SetpointsOptimized", setpointStates);
+    }
+
 
     public void runAdvancedVelocity(ChassisSpeeds speeds) {
         runAdvancedVelocity(speeds, new Translation2d());
