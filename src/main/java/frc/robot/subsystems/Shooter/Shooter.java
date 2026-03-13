@@ -76,9 +76,9 @@ public class Shooter extends SubsystemBase {
     Logger.recordOutput("Shooter/WantedState", currentState);
     currentkP = kPNumber.get();
     wantedRPS = RotationsPerSecond.of(targetRPS.get());//(ShooterUtil.calculateShotVelocity(RobotContainer.drive.getDistanceFromHub(),(Units.rotationsToDegrees(RobotContainer.shooterHood.getAngle())+22)/4)).times((1.15));//
-    Logger.recordOutput("Shooter/leftMotorSpeedErrorRPS", Math.abs(inputs.leftMotorSpeed.in(RotationsPerSecond) - wantedRPS.in(RotationsPerSecond)));
-    Logger.recordOutput("Shooter/rightMotorSpeedErrorRPS", Math.abs(inputs.rightMotorSpeed.in(RotationsPerSecond) - wantedRPS.in(RotationsPerSecond)));
-
+    // Logger.recordOutput("Shooter/leftMotorSpeedErrorRPS", Math.abs(inputs.leftMotorSpeed.in(RotationsPerSecond) - wantedRPS.in(RotationsPerSecond)));
+    // Logger.recordOutput("Shooter/rightMotorSpeedErrorRPS", Math.abs(inputs.rightMotorSpeed.in(RotationsPerSecond) - wantedRPS.in(RotationsPerSecond)));
+    Logger.recordOutput("ShooterUtil/Calculated RPS", RobotContainer.shooterUtil.getRPS(RobotContainer.drive.getDistanceFromHub()));
 
       if(DriverStation.isDisabled()) {
           currentState = ShooterStates.IDLE;

@@ -55,7 +55,7 @@ public class Autos {
     }
 
     public Command testAutonThingy(){
-        return runPath("Rand").andThen( macros.setWantedState(RobotStates.RunContinous));
+        return runPath("Rand").andThen(macros.setWantedState(RobotStates.RunContinous).until(()->RobotContainer.transport.noFuelDetected())).andThen(macros.setWantedState(RobotStates.IntakeOn));//.andThen(macros.setWantedState(RobotStates.Idle));
         // PathPlannerPath path =(PathPlannerPath.fromPathFile("Rand")).flipPath();//.flipPath();//(DriverStation.getAlliance().get().equals(Alliance.Red))? PathPlannerPath.fromPathFile("Rand").flipPath():PathPlannerPath.fromPathFile("Rand");//getFlippedPath(PathPlannerPath.fromPathFile("Random"));
         // //path.preventFlipping = true;
         // // if(DriverStation.getAlliance().get().equals(Alliance.Red)){

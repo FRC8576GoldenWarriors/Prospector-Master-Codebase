@@ -72,9 +72,10 @@ public class RobotContainer {
     private SwerveDriveSimulation driveSimulation = null;
 
     // Controller
-    public static final CommandXboxController controller = new CommandXboxController(0);
+    public static final CommandXboxController driveController = new CommandXboxController(0);
+    public static final CommandXboxController opController = new CommandXboxController(1);
 
-    public Trigger resetHeadingTrigger = new Trigger(() -> controller.start().getAsBoolean());
+    public Trigger resetHeadingTrigger = new Trigger(() -> driveController.start().getAsBoolean());
     // Dashboard inputs
     private final Autos autos;
 
@@ -98,7 +99,7 @@ public class RobotContainer {
                 drive::getChassisSpeeds,
                 new VisionIOLimelight(VisionConstants.camera0Name, drive::getRotation),
                 new VisionIOLimelight(VisionConstants.camera1Name, drive::getRotation),
-                //new VisionIOLimelight(VisionConstants.camera2Name, drive::getRotation),
+                new VisionIOLimelight(VisionConstants.camera2Name, drive::getRotation),
                 new VisionIOLimelight(VisionConstants.camera3Name, drive::getRotation));
                 //shooter = new Shooter(0);
                 intake = new Intake(new IntakeKrakenIO());
@@ -167,8 +168,22 @@ public class RobotContainer {
         // drive.setDefaultCommand(DriveCommands.joystickDrive(
         //        drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> -controller.getRightX()));
         drive.setDefaultCommand(DriveCommands.joystickAdvancedDrive(
-               drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> -controller.getRightX()));
+               drive, () -> -driveController.getLeftY(), () -> -driveController.getLeftX(), () -> -driveController.getRightX()));
 
+        driveController.leftTrigger().whileTrue(DriveCommands.joystickDriveTagCentric(drive, () -> -driveController.getLeftY(), () -> -driveController.getLeftX(), () -> drive.getPose()));
+        driveController.rightTrigger().onTrue(macros.setWantedState(RobotStates.Shoot));
+        driveController.rightBumper().onTrue(macros.setWantedState(RobotStates.IntakeOn));
+        //driveController.leftBumper().onTrue(macros.setWantedState(RobotStates.IntakeOff));
+        driveController.leftBumper().whileTrue(DriveCommands.joystickDriveAt45(drive, () -> -driveController.getLeftY(), () -> -driveController.getLeftX(), () -> drive.getPose()));
+        driveController.b().onTrue(macros.setWantedState(RobotStates.Rest));
+
+        opController.y().onTrue(new InstantCommand(()->shooterUtil.fudgeSpeed(0.5)));
+        opController.a().onTrue(new InstantCommand(()->shooterUtil.fudgeSpeed(-0.5)));
+        opController.start().onTrue(macros.setWantedState(RobotStates.IntakeOff));
+        opController.povUp().onTrue(new InstantCommand(()->shooterUtil.angleFudge(0.005)));
+        opController.povDown().onTrue(new InstantCommand(()->shooterUtil.angleFudge(-0.005)));
+        opController.leftBumper().onTrue(new InstantCommand(()->shooterUtil.resetAngleFudge()));
+        opController.rightBumper().onTrue(new InstantCommand(()->shooterUtil.resetSpeedFudge()));
         // Lock to 0° when A button is held
         // controller
         //         .a()
@@ -184,10 +199,9 @@ public class RobotContainer {
         //controller.x().onTrue(intake.setWantedState(IntakeStates.Rest));
         //controller.b().onTrue(new InstantCommand(()->transport.setWantedState(TransportStates.TransportIn),transport));
 
-        controller.y().onTrue(macros.setWantedState(RobotStates.RunContinous));
-        controller.a().onTrue(macros.setWantedState(RobotStates.IntakeOn));
-         controller.b().onTrue(macros.setWantedState(RobotStates.Rest));
-        controller.leftTrigger().whileTrue(DriveCommands.joystickDriveTagCentric(drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> drive.getPose()));
+        // controller.y().onTrue(macros.setWantedState(RobotStates.RunContinous));
+        // controller.a().onTrue(macros.setWantedState(RobotStates.IntakeOn));
+        //  controller.b().onTrue(macros.setWantedState(RobotStates.Rest));
          //controller.x().onTrue(macros.setWantedState(RobotStates.IntakeOff));
          //controller.x().onTrue(new InstantCommand(()->transport.setWantedState(TransportStates.TransportIn),transport));
 
@@ -217,13 +231,13 @@ public class RobotContainer {
                                 .getSimulatedDriveTrainPose()) // reset odometry to actual robot pose during simulation
                 : () -> drive.resetOdometry(
                         new Pose2d(drive.getPose().getTranslation(), new Rotation2d())); // zero gyro
-        controller.start().onTrue(Commands.runOnce(resetGyro, drive).ignoringDisable(true));
+        driveController.start().onTrue(Commands.runOnce(resetGyro, drive).ignoringDisable(true));
 
         // Example Coral Placement Code
         // TODO: delete these code for your own project
         if (Constants.currentMode == Constants.Mode.SIM) {
             // L4 placement
-            controller.y().onTrue(Commands.runOnce(() -> SimulatedArena.getInstance()
+            driveController.y().onTrue(Commands.runOnce(() -> SimulatedArena.getInstance()
                     .addGamePieceProjectile(new ReefscapeCoralOnFly(
                             driveSimulation.getSimulatedDriveTrainPose().getTranslation(),
                             new Translation2d(0.4, 0),
@@ -233,7 +247,7 @@ public class RobotContainer {
                             MetersPerSecond.of(1.5),
                             Degrees.of(-80)))));
             // L3 placement
-            controller.b().onTrue(Commands.runOnce(() -> SimulatedArena.getInstance()
+            driveController.b().onTrue(Commands.runOnce(() -> SimulatedArena.getInstance()
                     .addGamePieceProjectile(new ReefscapeCoralOnFly(
                             driveSimulation.getSimulatedDriveTrainPose().getTranslation(),
                             new Translation2d(0.4, 0),

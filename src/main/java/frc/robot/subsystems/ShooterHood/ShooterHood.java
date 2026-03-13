@@ -73,6 +73,7 @@ public class ShooterHood extends SubsystemBase {
     kP = kPNumber.get();
 
     Logger.processInputs("ShooterHood", inputs);
+    Logger.recordOutput("ShooterUtil/Calculated Output", RobotContainer.shooterUtil.getAngle(RobotContainer.drive.getDistanceFromHub()));
     Logger.recordOutput("ShooterHood/Current Position", currentAnglePosition);
     wantedAnglePosition =hoodAngleRotations.get(); //(ShooterHoodUtil.calculateHoodAngleDegrees(RobotContainer.drive.getDistanceFromHub())-22)*4;//
     if(!DriverStation.isDisabled()) {
@@ -108,9 +109,9 @@ public class ShooterHood extends SubsystemBase {
                 break;
 
             case HoodVoltageControl:
-                if (RobotContainer.controller.povUp().getAsBoolean()) {
+                if (RobotContainer.driveController.povUp().getAsBoolean()) {
                     io.setSpeed(0.05);
-                } else if (RobotContainer.controller.povDown().getAsBoolean()) {
+                } else if (RobotContainer.driveController.povDown().getAsBoolean()) {
                     io.setSpeed(-0.05);
                 } else {
                     setWantedState(ShooterHoodStates.Idle);

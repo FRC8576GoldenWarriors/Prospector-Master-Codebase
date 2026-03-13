@@ -112,9 +112,10 @@ public class Macros extends SubsystemBase {
     }
   }
   public void intakeOff(){
-    m_Transport.setWantedState(TransportStates.TransportIn);//m_Intake.setWantedPosition(IntakeStates.Rest);
+    m_Intake.setWantedPosition(IntakeStates.Rest);
   }
   public void shoot(){
+    if(RobotContainer.driveController.rightTrigger().getAsBoolean()){
     m_shooter.setWantedState(ShooterStates.SHOOT);
     if(m_shooter.isRevved()&&m_ShooterHood.atSetpoint()){
     //m_ShooterHood.setWantedState(ShooterHoodStates.Shoot);
@@ -122,6 +123,9 @@ public class Macros extends SubsystemBase {
     }else{
       m_Transport.setWantedState(TransportStates.Idle);
     }
+    if(m_Intake.getState()==IntakeStates.Idle){
+   m_Intake.setWantedPosition(IntakeStates.IntakeDown);
+   }
     if(!(m_Intake.getState()==IntakeStates.Agitate)&&m_Intake.nearSetpoint()){
       m_Intake.setWantedPosition(IntakeStates.Agitate);
     }
@@ -130,6 +134,9 @@ public class Macros extends SubsystemBase {
     }
 
     m_ShooterHood.setWantedState(ShooterHoodStates.Shoot);//UNCOMMENT TO TEST HOOD
+  }else{
+    wantedState = RobotStates.Idle;
+  }
    // m_Intake.setWantedPosition(IntakeStates.Intake);
   }
 

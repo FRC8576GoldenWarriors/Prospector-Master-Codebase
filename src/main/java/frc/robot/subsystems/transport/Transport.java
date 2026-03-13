@@ -7,9 +7,12 @@ package frc.robot.subsystems.transport;
 import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
+
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
+import edu.wpi.first.math.filter.Debouncer.DebounceType;
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -73,7 +76,9 @@ public class Transport extends SubsystemBase {
    }
   }
 
-  public boolean isFuelDetected() {
-    return inputs.leftFuelDetected || inputs.rightFuelDetected;
+  @AutoLogOutput (key = "Transport/No Fuel Detected")
+  public boolean noFuelDetected() {
+    Debouncer wait = new Debouncer(1,DebounceType.kFalling);
+    return (!inputs.leftFuelDetected && !inputs.rightFuelDetected);
   }
 }

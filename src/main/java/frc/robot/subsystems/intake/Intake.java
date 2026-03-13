@@ -132,9 +132,9 @@ public class Intake extends SubsystemBase {
           break;
 
         case PivotVC:
-          if (RobotContainer.controller.povUp().getAsBoolean()) {
+          if (RobotContainer.driveController.povUp().getAsBoolean()) {
             io.setPivotSpeed(0.05);
-            } else if (RobotContainer.controller.povDown().getAsBoolean()) {
+            } else if (RobotContainer.driveController.povDown().getAsBoolean()) {
               io.setPivotSpeed(-0.05);
             } else {
                 wantedState = IntakeStates.Idle;
@@ -142,9 +142,9 @@ public class Intake extends SubsystemBase {
         break;
 
         case RollerVC:
-          if (RobotContainer.controller.rightBumper().getAsBoolean()) {
+          if (RobotContainer.driveController.rightBumper().getAsBoolean()) {
             io.setRollerSpeed(0.1);
-            } else if (RobotContainer.controller.leftBumper().getAsBoolean()) {
+            } else if (RobotContainer.driveController.leftBumper().getAsBoolean()) {
               io.setRollerSpeed(-0.1);
             } else {
                 wantedState = IntakeStates.Idle;

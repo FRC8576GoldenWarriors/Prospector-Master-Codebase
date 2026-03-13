@@ -4,6 +4,10 @@ import edu.wpi.first.units.measure.*;
 
 import static edu.wpi.first.units.Units.*;
 
+
+import org.littletonrobotics.junction.AutoLogOutput;
+
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
 import edu.wpi.first.math.interpolation.Interpolator;
@@ -14,6 +18,9 @@ import edu.wpi.first.math.interpolation.InverseInterpolator;
 public class ShooterUtil {
     InterpolatingTreeMap<Double, Double> speedMap = new InterpolatingTreeMap<>(InverseInterpolator.forDouble(), Interpolator.forDouble());
     InterpolatingTreeMap<Double, Double> angleMap = new InterpolatingTreeMap<>(InverseInterpolator.forDouble(), Interpolator.forDouble());
+
+    private double speedFudge = 0;
+    private double angleFudge = 0;
     InterpolatingDoubleTreeMap tofMap = new InterpolatingDoubleTreeMap();
 
     public ShooterUtil(){
@@ -66,12 +73,29 @@ public class ShooterUtil {
     //     Logger.recordOutput("VbestRPS", RPSBest);
     //     return RotationsPerSecond.of(RPSBest);
     // }
-    public AngularVelocity getRPS(double limelightDistanceMeters){
-        return RotationsPerSecond.of(speedMap.get(limelightDistanceMeters));
+
+    public void fudgeSpeed(double speedFactor){
+        speedFudge += speedFactor;
+    }
+    public void angleFudge(double angleFactor){
+        angleFudge +=angleFactor;
     }
 
+    public void resetSpeedFudge(){
+        speedFudge = 0;
+    }
+    public void resetAngleFudge(){
+        angleFudge = 0;
+    }
+    @AutoLogOutput (key = "ShooterUtil/Calculated RPS")
+    public AngularVelocity getRPS(double limelightDistanceMeters){
+        //Logger.recordOutput("ShooterUtil/Calculated RPS", RotationsPerSecond.of(MathUtil.clamp(speedMap.get(limelightDistanceMeters)+speedFudge, 0, 87)));
+        return RotationsPerSecond.of(MathUtil.clamp(speedMap.get(limelightDistanceMeters)+speedFudge, 0, 87));
+    }
+    @AutoLogOutput (key = "ShooterUtil/Calculated Angle")
     public double getAngle(double limelightDistanceMeters){
-        return angleMap.get(limelightDistanceMeters);
+        //Logger.recordOutput("ShooterUtil/Calculated RPS", RotationsPerSecond.of(MathUtil.clamp(speedMap.get(limelightDistanceMeters)+speedFudge, 0, 87)));
+        return MathUtil.clamp(angleMap.get(limelightDistanceMeters)+angleFudge, 0, 0.37);
     }
 
     // public Pair<AngularVelocity, Double> getSOTFCalc(double limelightDistanceX, double limelightDistanceY,double chassisVelX, double chassisVelY){

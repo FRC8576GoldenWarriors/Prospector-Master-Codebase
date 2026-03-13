@@ -92,9 +92,9 @@ public class Climber extends SubsystemBase {
           break;
 
         case VoltageControl:
-          if (RobotContainer.controller.rightBumper().getAsBoolean()) {
+          if (RobotContainer.driveController.rightBumper().getAsBoolean()) {
             io.setPivotSpeed(0.1);
-            } else if (RobotContainer.controller.leftBumper().getAsBoolean()) {
+            } else if (RobotContainer.driveController.leftBumper().getAsBoolean()) {
               io.setPivotSpeed(-0.1);
             } else {
                 wantedState = ClimberStates.Idle;
