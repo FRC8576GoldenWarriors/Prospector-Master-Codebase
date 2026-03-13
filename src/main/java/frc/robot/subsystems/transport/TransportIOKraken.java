@@ -16,7 +16,6 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.wpilibj.DigitalInput;
 
 public class TransportIOKraken implements TransportIO {
-
     private final TalonFX transportMotor;
     private final TalonFXConfiguration transportMotorConfiguration;
     private final DigitalInput leftTransportPhotoElectric;
@@ -60,8 +59,8 @@ public class TransportIOKraken implements TransportIO {
         StatusSignal.refreshAll(statorCurrentStatusSignal, supplyCurrentStatusSignal);
         inputs.transportMotorIsConnected = transportMotor.isConnected();
 
-        inputs.leftFuelDetected = leftTransportPhotoElectric.get();
-        inputs.rightFuelDetected = rightTransportPhotoElectric.get();
+        inputs.leftFuelDetected = !leftTransportPhotoElectric.get();
+        inputs.rightFuelDetected = !rightTransportPhotoElectric.get();
 
         inputs.transportMotorStatorCurrent = statorCurrentStatusSignal.getValue();
         inputs.transportMotorSupplyCurrent = supplyCurrentStatusSignal.getValue();

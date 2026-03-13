@@ -12,7 +12,7 @@ import edu.wpi.first.units.measure.Current;
 public class TransportConstants {
 
     public static final int transportMotorID = 20;
-    public static final int leftTransportPhotoelectricID = 2;
+    public static final int leftTransportPhotoelectricID = 5;
     public static final int rightTransportPhotoelectricID = 6;
 
     // Untuned

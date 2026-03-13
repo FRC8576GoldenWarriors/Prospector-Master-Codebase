@@ -33,10 +33,12 @@ import frc.robot.subsystems.drive.Drive;
 public class Autos {
     private Drive drive;
     private Macros macros;
+    private boolean flipped;
     private final LoggedDashboardChooser<Command> autoChooser;
-    public Autos(Drive drive, Macros macros){
+    public Autos(Drive drive, Macros macros, boolean flipped){
         this.drive = drive;
         this.macros = macros;
+        this.flipped = flipped;
         autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
         // Set up SysId routines
@@ -53,21 +55,16 @@ public class Autos {
     }
 
     public Command testAutonThingy(){
-        try{
-        PathPlannerPath path =(PathPlannerPath.fromPathFile("Rand")).flipPath();//.flipPath();//(DriverStation.getAlliance().get().equals(Alliance.Red))? PathPlannerPath.fromPathFile("Rand").flipPath():PathPlannerPath.fromPathFile("Rand");//getFlippedPath(PathPlannerPath.fromPathFile("Random"));
-        //path.preventFlipping = true;
-        // if(DriverStation.getAlliance().get().equals(Alliance.Red)){
-        //     path = path.flipPath();
-        // }
-        Logger.recordOutput("Odometry/Starting Pose", new Pose2d(path.getStartingHolonomicPose().get().getTranslation(),path.getStartingHolonomicPose().get().getRotation()));
-        return new SequentialCommandGroup(
-           new InstantCommand(()->drive.resetOdometry(new Pose2d(path.getStartingHolonomicPose().get().getTranslation(),path.getStartingHolonomicPose().get().getRotation()))),
-          drive.driveToPose(new Pose2d(path.getAllPathPoints().get(path.getAllPathPoints().size()-1).position,(path.getAllPathPoints().get(path.getAllPathPoints().size()-1).rotationTarget.rotation().plus(Rotation2d.k180deg)))),//AutoBuilder.followPath(path));
-          macros.setWantedState(RobotStates.RunContinous));
-        }catch(Exception e){
-            e.printStackTrace();
-            return Commands.none();
-        }
+        return runPath("Rand").andThen( macros.setWantedState(RobotStates.RunContinous));
+        // PathPlannerPath path =(PathPlannerPath.fromPathFile("Rand")).flipPath();//.flipPath();//(DriverStation.getAlliance().get().equals(Alliance.Red))? PathPlannerPath.fromPathFile("Rand").flipPath():PathPlannerPath.fromPathFile("Rand");//getFlippedPath(PathPlannerPath.fromPathFile("Random"));
+        // //path.preventFlipping = true;
+        // // if(DriverStation.getAlliance().get().equals(Alliance.Red)){
+        // //     path = path.flipPath();
+        // // }
+        // Logger.recordOutput("Odometry/Starting Pose", new Pose2d(path.getStartingHolonomicPose().get().getTranslation(),path.getStartingHolonomicPose().get().getRotation()));
+        // return new SequentialCommandGroup(
+        //    new InstantCommand(()->drive.resetOdometry(new Pose2d(path.getStartingHolonomicPose().get().getTranslation(),path.getStartingHolonomicPose().get().getRotation()))),
+        //   drive.driveToPose(new Pose2d(path.getAllPathPoints().get(path.getAllPathPoints().size()-1).position,(path.getAllPathPoints().get(path.getAllPathPoints().size()-1).rotationTarget.rotation().plus(Rotation2d.k180deg)))),//AutoBuilder.followPath(path));
     }
 
     public PathPlannerPath flipPathWithoutHeading(PathPlannerPath originalPath){
@@ -86,6 +83,36 @@ public class Autos {
         return PathPlannerPath.fromPathPoints(endPoints, originalPath.getGlobalConstraints(), originalPath.getGoalEndState());
     }
     return new PathPlannerPath(null, null, null, null);
+    }
+
+    public SequentialCommandGroup runPath(String pathName){
+        if(flipped){
+            try{
+            PathPlannerPath path =(PathPlannerPath.fromPathFile(pathName)).flipPath();
+            Logger.recordOutput("Odometry/Starting Pose", new Pose2d(path.getStartingHolonomicPose().get().getTranslation(),path.getStartingHolonomicPose().get().getRotation()));
+            return new SequentialCommandGroup(
+           new InstantCommand(()->drive.resetOdometry(new Pose2d(path.getStartingHolonomicPose().get().getTranslation(),path.getStartingHolonomicPose().get().getRotation()))),
+          drive.driveToPose(new Pose2d(path.getAllPathPoints().get(path.getAllPathPoints().size()-1).position,(path.getAllPathPoints().get(path.getAllPathPoints().size()-1).rotationTarget.rotation().plus(Rotation2d.k180deg)))));
+            }catch(Exception e){
+                e.printStackTrace();
+                return (SequentialCommandGroup) Commands.none();
+            }
+        }else{
+            try{
+        PathPlannerPath path =(PathPlannerPath.fromPathFile(pathName));//.flipPath();//(DriverStation.getAlliance().get().equals(Alliance.Red))? PathPlannerPath.fromPathFile("Rand").flipPath():PathPlannerPath.fromPathFile("Rand");//getFlippedPath(PathPlannerPath.fromPathFile("Random"));
+        //path.preventFlipping = true;
+        // if(DriverStation.getAlliance().get().equals(Alliance.Red)){
+        //     path = path.flipPath();
+        // }
+        Logger.recordOutput("Odometry/Starting Pose", path.getStartingHolonomicPose().get());
+        return new SequentialCommandGroup(
+           new InstantCommand(()->drive.resetOdometry(path.getStartingHolonomicPose().get())),
+          drive.driveToPose(new Pose2d(path.getAllPathPoints().get(path.getAllPathPoints().size()-1).position,path.getAllPathPoints().get(path.getAllPathPoints().size()-1).rotationTarget.rotation())));
+        }catch(Exception e){
+            e.printStackTrace();
+            return (SequentialCommandGroup) Commands.none();
+        }
+        }
     }
 
     public Command getCommand(){

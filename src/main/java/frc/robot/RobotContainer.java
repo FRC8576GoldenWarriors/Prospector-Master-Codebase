@@ -106,7 +106,7 @@ public class RobotContainer {
                 shooterHood = new ShooterHood(new ShooterHoodIOKraken());
                 transport = new Transport(new TransportIOKraken());
                 macros = new Macros(shooter, shooterHood, transport, intake);
-                autos = new Autos(drive,macros);
+                autos = new Autos(drive,macros,DriverStation.getAlliance().orElse(Alliance.Blue)==Alliance.Red);
                 //intake = new Intake(new IntakeKrakenIO());
                 break;
             case SIM:
@@ -133,7 +133,7 @@ public class RobotContainer {
                 new VisionIOPhotonVisionSim(
                         camera1Name, robotToCamera1.minus(Pose3d.kZero), driveSimulation::getSimulatedDriveTrainPose));
                 //shooter = null;
-                autos = new Autos(drive,macros);
+                autos = new Autos(drive,macros,DriverStation.getAlliance().orElse(Alliance.Blue)==Alliance.Red);
                 break;
             default:
                 // Replayed robot, disable IO implementations
