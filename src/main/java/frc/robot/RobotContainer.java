@@ -179,6 +179,7 @@ public class RobotContainer {
 
         opController.y().onTrue(new InstantCommand(()->shooterUtil.fudgeSpeed(0.5)));
         opController.a().onTrue(new InstantCommand(()->shooterUtil.fudgeSpeed(-0.5)));
+        opController.b().onTrue(macros.setWantedState(RobotStates.TransportOut));
         opController.start().onTrue(macros.setWantedState(RobotStates.IntakeOff));
         opController.povUp().onTrue(new InstantCommand(()->shooterUtil.angleFudge(0.005)));
         opController.povDown().onTrue(new InstantCommand(()->shooterUtil.angleFudge(-0.005)));

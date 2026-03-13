@@ -37,7 +37,8 @@ public class Macros extends SubsystemBase {
     ClimbDown,
     IntakeOff,
     Rest,
-    RunContinous
+    RunContinous,
+    TransportOut
     //Testing
   }
 
@@ -75,6 +76,9 @@ public class Macros extends SubsystemBase {
         case RunContinous:
           runContinous();
           break;
+        case TransportOut:
+          transportOut();
+          break;
         default:
             break;
      }
@@ -110,6 +114,12 @@ public class Macros extends SubsystemBase {
     }else{
       m_Intake.setWantedPosition(IntakeStates.Intake);
     }
+  }
+  public void transportOut(){
+    m_shooter.setWantedState(ShooterStates.IDLE);
+    m_ShooterHood.setWantedState(ShooterHoodStates.Idle);
+    m_Transport.setWantedState(TransportStates.TransportOut);
+    m_Intake.setWantedPosition(IntakeStates.Idle);
   }
   public void intakeOff(){
     m_Intake.setWantedPosition(IntakeStates.Rest);
