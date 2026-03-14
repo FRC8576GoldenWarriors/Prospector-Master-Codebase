@@ -122,7 +122,7 @@ public class ShooterIOReal implements ShooterIO {
     // DutyCycleOut speedRequest = new DutyCycleOut(speed);
     // speedRequest.IgnoreHardwareLimits = true;
     // speedRequest.IgnoreSoftwareLimits = true;
-    leftMotor.setVoltage(speed*12);//setControl(speedRequest);
-    rightMotor.setVoltage(speed*12);//setControl(speedRequest);
+    leftMotor.set(speed);//setControl(speedRequest);
+    rightMotor.set(speed);//setControl(speedRequest);
   }
 }

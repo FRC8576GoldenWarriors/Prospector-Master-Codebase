@@ -61,7 +61,7 @@ public class DriveCommands {
 
     public static final ProfiledPIDController angleController = new ProfiledPIDController(
                 ANGLE_KP, 0.0, ANGLE_KD, new TrapezoidProfile.Constraints(ANGLE_MAX_VELOCITY, ANGLE_MAX_ACCELERATION));
-                
+
     private DriveCommands() {}
 
     private static Translation2d getLinearVelocityFromJoysticks(double x, double y) {

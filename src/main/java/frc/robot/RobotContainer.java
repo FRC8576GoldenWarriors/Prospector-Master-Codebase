@@ -64,7 +64,7 @@ public class RobotContainer {
     public static ShooterHood shooterHood;
     public static Transport transport;
     public static Macros macros;
-    public static ShooterUtil shooterUtil = new ShooterUtil();
+     public static ShooterUtil shooterUtil = new ShooterUtil();
 
     //public static Macros macros;
 
@@ -146,9 +146,9 @@ public class RobotContainer {
                         new ModuleIO() {},
                         new ModuleIO() {},
                         (pose) -> {});
-                vision = new Vision(drive, drive::getChassisSpeeds, new VisionIO() {}, new VisionIO() {});
+                 vision = new Vision(drive, drive::getChassisSpeeds, new VisionIO() {}, new VisionIO() {});
                 autos = null;
-               // shooter = null;
+               shooter = null;
                 break;
         }
 
@@ -173,14 +173,14 @@ public class RobotContainer {
         driveController.leftTrigger().whileTrue(DriveCommands.joystickDriveTagCentric(drive, () -> -driveController.getLeftY(), () -> -driveController.getLeftX(), () -> drive.getPose()));
         driveController.rightTrigger().onTrue(macros.setWantedState(RobotStates.Shoot));
         driveController.rightBumper().onTrue(macros.setWantedState(RobotStates.IntakeOn));
-        //driveController.leftBumper().onTrue(macros.setWantedState(RobotStates.IntakeOff));
-        driveController.leftBumper().whileTrue(DriveCommands.joystickDriveAt45(drive, () -> -driveController.getLeftY(), () -> -driveController.getLeftX(), () -> drive.getPose()));
+        driveController.leftBumper().onTrue(macros.setWantedState(RobotStates.IntakeOff));
+        driveController.x().whileTrue(DriveCommands.joystickDriveAt45(drive, () -> -driveController.getLeftY(), () -> -driveController.getLeftX(), () -> drive.getPose()));
         driveController.b().onTrue(macros.setWantedState(RobotStates.Rest));
 
         opController.y().onTrue(new InstantCommand(()->shooterUtil.fudgeSpeed(0.5)));
         opController.a().onTrue(new InstantCommand(()->shooterUtil.fudgeSpeed(-0.5)));
         opController.b().onTrue(macros.setWantedState(RobotStates.TransportOut));
-        opController.start().onTrue(macros.setWantedState(RobotStates.IntakeOff));
+        opController.rightTrigger().onTrue(macros.setWantedState(RobotStates.IntakeOff));
         opController.povUp().onTrue(new InstantCommand(()->shooterUtil.angleFudge(0.005)));
         opController.povDown().onTrue(new InstantCommand(()->shooterUtil.angleFudge(-0.005)));
         opController.leftBumper().onTrue(new InstantCommand(()->shooterUtil.resetAngleFudge()));

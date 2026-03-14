@@ -1,6 +1,7 @@
 package frc.robot.subsystems.ShooterHood;
 
 import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
@@ -52,6 +53,7 @@ public class ShooterHood extends SubsystemBase {
         this.io = io;
         PID = new ProfiledPIDController(ShooterHoodConstants.kp, ShooterHoodConstants.ki, ShooterHoodConstants.kd, ShooterHoodConstants.profile);
         FF = new ArmFeedforward(ShooterHoodConstants.ks, ShooterHoodConstants.kg, ShooterHoodConstants.ks);
+        PID.reset(inputs.encoderValue_Radians.in(Rotations),0);
     }
 
     public void setWantedState(ShooterHoodStates state) {
@@ -137,9 +139,10 @@ public class ShooterHood extends SubsystemBase {
 
   }
   public void resetPID(){
-    PID.reset(inputs.encoderValue_Radians.in(Rotations), inputs.speed.magnitude());
+    PID.reset(inputs.encoderValue_Radians.in(Rotations), inputs.speed.in(RotationsPerSecond));
   }
 
+  @AutoLogOutput (key = "ShooterHood/At Setpoint")
   public boolean atSetpoint(){
     return (inputs.encoderValue_Radians.in(Rotations))>(PID.getGoal().position-0.05)&&(inputs.encoderValue_Radians.in(Rotations))<(PID.getGoal().position+0.05);
   }

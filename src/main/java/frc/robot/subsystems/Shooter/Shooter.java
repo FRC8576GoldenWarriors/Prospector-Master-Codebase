@@ -29,8 +29,8 @@ public class Shooter extends SubsystemBase {
   private SimpleMotorFeedforward ff;
   private double pastkP = kPNumber.get();
   private double currentkP = kPNumber.get();
-    private LoggedNetworkNumber targetRPS = new LoggedNetworkNumber("Tuning/Shooter Target RPS",35);
-  private BangBangController bangBangController = new BangBangController(0.05/2);
+  private LoggedNetworkNumber targetRPS = new LoggedNetworkNumber("Tuning/Shooter Target RPS",35);
+  private BangBangController bangBangController = new BangBangController(0.00);
   private double target = targetRPS.get();
   public enum ShooterStates {
     IDLE,
@@ -62,6 +62,7 @@ public class Shooter extends SubsystemBase {
       this
     )
   );
+  ff = new SimpleMotorFeedforward(ShooterConstants.kS, ShooterConstants.kV);
   }
 
   public void setWantedState(ShooterStates state) {
@@ -100,7 +101,7 @@ public class Shooter extends SubsystemBase {
           setShooter(wantedRPS);
           break;
         case Tuning:
-          wantedRPS = RotationsPerSecond.of(50);//50);
+          wantedRPS = RotationsPerSecond.of(25);//50);
           setShooter(wantedRPS);
 
         case VOLTAGE_CONTROL_POSITIVE:
@@ -136,17 +137,17 @@ public class Shooter extends SubsystemBase {
 
   @AutoLogOutput(key = "Shooter/IsRevved")
   public boolean isRevved(){
-    return MathUtil.isNear(wantedRPS.in(RotationsPerSecond),(inputs.leftMotorSpeed.in(RotationsPerSecond)+inputs.rightMotorSpeed.in(RotationsPerSecond))/2,4);//1
+    return MathUtil.isNear(wantedRPS.in(RotationsPerSecond),(inputs.leftMotorSpeed.in(RotationsPerSecond)+inputs.rightMotorSpeed.in(RotationsPerSecond))/2,12);//1
     //return (inputs.leftMotorSpeed.in(RotationsPerSecond)>targetRPS.get()-10)&&(inputs.leftMotorSpeed.in(RotationsPerSecond)<targetRPS.get()+10);//0.5
   }
 
    public void setShooter(AngularVelocity wantedRPS){
-    double bangBangCalculation = bangBangController.calculate(inputs.leftMotorSpeed.in(RotationsPerSecond),wantedRPS.in(RotationsPerSecond));
-    // if(bangBangCalculation==0){
-    //   io.setShooterVelocity(wantedRPS, wantedRPS);
-    // }else{
+    double bangBangCalculation = bangBangController.calculate((inputs.leftMotorSpeed.in(RotationsPerSecond)+inputs.rightMotorSpeed.in(RotationsPerSecond))/2,wantedRPS.in(RotationsPerSecond));
+    if(bangBangCalculation==0){
+      io.setShooterVoltage(Volts.of(ff.calculate(wantedRPS.in(RotationsPerSecond))), Volts.of(ff.calculate(wantedRPS.in(RotationsPerSecond))));
+    }else{
       io.setShooterSpeeds(bangBangCalculation);
-    //}
+    }
     Logger.recordOutput("Shooter/BB Controller", bangBangCalculation);
    }
 }
