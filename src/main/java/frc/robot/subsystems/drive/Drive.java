@@ -66,6 +66,7 @@ import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
+import java.util.stream.DoubleStream;
 
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
@@ -142,7 +143,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
                 this::getPose,//this::getPose,
                 this::resetOdometry,
                 this::getChassisSpeeds,
-                this::runAutonVelocity,
+                this::runVelocity,//this::runAutonVelocity,
                 new PPHolonomicDriveController(new PIDConstants(7.5, 0.0, 0.0), new PIDConstants(5.0, 0.0, 0.0)),
                 this.pathConfig,
                 () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
@@ -220,17 +221,17 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
             }
 
             //TODO: Uncomment Later
-            // if (anySkidding) {
-            //     // If any of the modules are skidding calculate the mean value of their skid velocity
-            //     double averageXSkid = DoubleStream.of(this.skidAmountX).average().orElse(0.0);
-            //     double averageYSkid = DoubleStream.of(this.skidAmountY).average().orElse(0.0);
+            if (anySkidding) {
+                // If any of the modules are skidding calculate the mean value of their skid velocity
+                double averageXSkid = DoubleStream.of(this.skidAmountX).average().orElse(0.0);
+                double averageYSkid = DoubleStream.of(this.skidAmountY).average().orElse(0.0);
 
-            //     Logger.recordOutput("averageXSkid", averageXSkid);
-            //     Logger.recordOutput("averageYSkid", averageYSkid);
+                Logger.recordOutput("averageXSkid", averageXSkid);
+                Logger.recordOutput("averageYSkid", averageYSkid);
 
-            //     xDeviation += Math.sqrt(averageXSkid/3);
-            //     yDeviation += Math.sqrt(averageYSkid/3);
-            // }
+                xDeviation += Math.sqrt(averageXSkid/3);
+                yDeviation += Math.sqrt(averageYSkid/3);
+            }
 
             // Bump
 
@@ -265,6 +266,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
 
             // Apply update
             // if(!anyBumping)
+            Logger.recordOutput("Drive/Module Positions", modulePositions);
                 poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
         }
 
@@ -493,7 +495,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
         odometryLock.lock();
         try {
             resetSimulationPoseCallBack.accept(pose);
-            poseEstimator.resetPosition(pose.getRotation(), getModulePositions(), pose);
+            poseEstimator.resetPosition(gyroInputs.yawPosition, getModulePositions(), pose);
         } finally {
             odometryLock.unlock();
         }
