@@ -127,7 +127,7 @@ public class Macros extends SubsystemBase {
   public void shoot(){
     if(RobotContainer.driveController.rightTrigger().getAsBoolean()){
     if(m_ShooterHood.atSetpoint()){
-      m_shooter.setWantedState(ShooterStates.Tuning);
+      m_shooter.setWantedState(ShooterStates.SHOOT);
     }
     if(m_shooter.isRevved()&&m_ShooterHood.atSetpoint()){
     //m_ShooterHood.setWantedState(ShooterHoodStates.Shoot);
@@ -145,7 +145,7 @@ public class Macros extends SubsystemBase {
       m_Intake.setWantedPosition(IntakeStates.IntakeDown);
     }
 
-    m_ShooterHood.setWantedState(ShooterHoodStates.Test);//UNCOMMENT TO TEST HOOD
+    m_ShooterHood.setWantedState(ShooterHoodStates.Shoot);//UNCOMMENT TO TEST HOOD
   }else{
     wantedState = RobotStates.Idle;
   }

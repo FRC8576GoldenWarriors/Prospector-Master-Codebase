@@ -19,7 +19,7 @@ public class ShooterUtil {
     InterpolatingTreeMap<Double, Double> speedMap = new InterpolatingTreeMap<>(InverseInterpolator.forDouble(), Interpolator.forDouble());
     InterpolatingTreeMap<Double, Double> angleMap = new InterpolatingTreeMap<>(InverseInterpolator.forDouble(), Interpolator.forDouble());
 
-    private double speedFudge = -3;
+    private double speedFudge = 0.5;
     private double angleFudge = 0;
     InterpolatingDoubleTreeMap tofMap = new InterpolatingDoubleTreeMap();
 

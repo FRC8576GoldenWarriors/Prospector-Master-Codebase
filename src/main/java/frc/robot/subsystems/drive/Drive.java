@@ -252,6 +252,10 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
             poseEstimator.setStateStdDevs(VecBuilder.fill(xDeviation, yDeviation,
                 thetaDeviation));
 
+            Logger.recordOutput("Odometry/Drive/xDeviation", xDeviation);
+            Logger.recordOutput("Odometry/Drive/yDeviation", yDeviation);
+            Logger.recordOutput("Odometry/Drive/thetaDeviation", thetaDeviation);
+
             // Update gyro angle
             if (gyroInputs.connected) {
                 // Use the real gyro angle

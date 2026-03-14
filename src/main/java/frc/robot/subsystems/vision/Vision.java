@@ -147,6 +147,9 @@ public class Vision extends SubsystemBase {
                     linearStdDev *= cameraStdDevFactors[cameraIndex];
                     angularStdDev *= cameraStdDevFactors[cameraIndex];
                 }
+                Logger.recordOutput("Odometry/Vision/xDeviation", linearStdDev);
+                Logger.recordOutput("Odometry/Vision/yDeviation", linearStdDev);
+                Logger.recordOutput("Odometry/Vision/thetaDeviation", angularStdDev);
 
                 // Send vision observation
                 consumer.accept(
