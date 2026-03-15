@@ -265,7 +265,7 @@ public class DriveCommands {
         // Construct command
         return Commands.run(
                         () -> {
-                                if(drivePose.get().getX()  > (VisionConstants.aprilTagLayout.getFieldLength()-4.61) || drivePose.get().getX() < 4.61){
+                                if((drivePose.get().getX()  > (VisionConstants.aprilTagLayout.getFieldLength()-4.61)&&DriverStation.getAlliance().orElse(Alliance.Blue)==Alliance.Red) ||(drivePose.get().getX() < 4.61&&DriverStation.getAlliance().orElse(Alliance.Blue)==Alliance.Blue)){
                                 Translation2d botTranslation = drivePose.get().getTranslation();
 
                                 List<Translation2d> hubs = List.of(
