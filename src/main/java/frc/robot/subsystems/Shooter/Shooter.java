@@ -103,7 +103,7 @@ public class Shooter extends SubsystemBase {
           setShooter(wantedRPS);
           break;
         case Tuning:
-          wantedRPS = RotationsPerSecond.of(87);//50);
+          wantedRPS = RotationsPerSecond.of(25);//50);
           setShooter(wantedRPS);
 
         case VOLTAGE_CONTROL_POSITIVE:

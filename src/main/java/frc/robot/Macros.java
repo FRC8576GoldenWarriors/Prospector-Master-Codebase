@@ -129,15 +129,16 @@ public class Macros extends SubsystemBase {
   public void shoot(){
     if(RobotContainer.driveController.rightTrigger().getAsBoolean()){
       if((RobotContainer.drive.getPose().getX()  > (VisionConstants.aprilTagLayout.getFieldLength()-4.61)&&DriverStation.getAlliance().orElse(Alliance.Blue)==Alliance.Red) ||(RobotContainer.drive.getPose().getX() < 4.61&&DriverStation.getAlliance().orElse(Alliance.Blue)==Alliance.Blue)){
-    if(m_ShooterHood.atSetpoint()){
+        if(m_ShooterHood.atSetpoint()){
       m_shooter.setWantedState(ShooterStates.SHOOT);
     }
     if(m_shooter.isRevved()&&m_ShooterHood.atSetpoint()){
     //m_ShooterHood.setWantedState(ShooterHoodStates.Shoot);
     m_Transport.setWantedState(TransportStates.TransportIn);
-    }else{
-      m_Transport.setWantedState(TransportStates.Idle);
-    }
+     }
+     //else{
+    //   m_Transport.setWantedState(TransportStates.Idle);
+    // }
     if(m_Intake.getState()==IntakeStates.Idle){
    m_Intake.setWantedPosition(IntakeStates.IntakeDown);
    }
@@ -149,6 +150,26 @@ public class Macros extends SubsystemBase {
     }
 
     m_ShooterHood.setWantedState(ShooterHoodStates.Shoot);
+  //   if(m_ShooterHood.atSetpoint()){
+  //     m_shooter.setWantedState(ShooterStates.SHOOT);
+  //   }
+  //   if(m_shooter.isRevved()&&m_ShooterHood.atSetpoint()){
+  //   //m_ShooterHood.setWantedState(ShooterHoodStates.Shoot);
+  //   m_Transport.setWantedState(TransportStates.TransportIn);
+  //   }else{
+  //     m_Transport.setWantedState(TransportStates.Idle);
+  //   }
+  //   if(m_Intake.getState()==IntakeStates.Idle){
+  //  m_Intake.setWantedPosition(IntakeStates.IntakeDown);
+  //  }
+  //   if(!(m_Intake.getState()==IntakeStates.Agitate)&&m_Intake.nearSetpoint()){
+  //     m_Intake.setWantedPosition(IntakeStates.Agitate);
+  //   }
+  //   else if(m_Intake.getState()==IntakeStates.Agitate&&m_Intake.nearSetpoint()){
+  //     m_Intake.setWantedPosition(IntakeStates.IntakeDown);
+  //   }
+
+  //   m_ShooterHood.setWantedState(ShooterHoodStates.Shoot);
   }else{
     if(m_ShooterHood.atSetpoint()){
       m_shooter.setWantedState(ShooterStates.SHOOT);
@@ -182,10 +203,10 @@ public class Macros extends SubsystemBase {
     if(m_ShooterHood.atSetpoint()){
       m_shooter.setWantedState(ShooterStates.Tuning);
     }
-    // if(m_shooter.isRevved()&&m_ShooterHood.atSetpoint()){
-    // //m_ShooterHood.setWantedState(ShooterHoodStates.Shoot);
-    // m_Transport.setWantedState(TransportStates.TransportIn);
-    //  }
+    if(m_shooter.isRevved()&&m_ShooterHood.atSetpoint()){
+    //m_ShooterHood.setWantedState(ShooterHoodStates.Shoot);
+    m_Transport.setWantedState(TransportStates.TransportIn);
+     }
      //else{
     //   m_Transport.setWantedState(TransportStates.Idle);
     // }
