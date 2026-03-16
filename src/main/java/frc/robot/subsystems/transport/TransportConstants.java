@@ -19,16 +19,16 @@ public class TransportConstants {
     public static final double kP = 10;//0.11;
     public static final double kI = 0;//0.5;
     public static final double kD = 0;//.001;
-    public static final double kV = 0.12;
+    public static final double kV = 0.16;
 
-    public static final double velocityTarget =60;//25;//40;
+    public static final double velocityTarget =100;//25;//40;
     public static final double velocityTargetSlower = 25;
 
 
     public static final InvertedValue transportMotorInversion = InvertedValue.Clockwise_Positive;
     public static final NeutralModeValue transportMotorNeutralMode = NeutralModeValue.Brake;
 
-    public static final Current transportMotorCurrentLimit = Amps.of(40);
+    public static final Current transportMotorCurrentLimit = Amps.of(60);
     public static final boolean enableTransportMotorCurrentLimit = true;
 
     public static final AngularVelocity transportInSpeed = RPM.of(2000);

@@ -34,8 +34,8 @@ public class TransportIOKraken implements TransportIO {
             .withInverted(TransportConstants.transportMotorInversion))
         .withCurrentLimits(
             new CurrentLimitsConfigs()
-            .withStatorCurrentLimit(TransportConstants.transportMotorCurrentLimit)
-            .withStatorCurrentLimitEnable(TransportConstants.enableTransportMotorCurrentLimit)
+            .withSupplyCurrentLimit(TransportConstants.transportMotorCurrentLimit)
+            .withSupplyCurrentLimitEnable(TransportConstants.enableTransportMotorCurrentLimit)
         );
 
         Slot0Configs slot0Configs = transportMotorConfiguration.Slot0;

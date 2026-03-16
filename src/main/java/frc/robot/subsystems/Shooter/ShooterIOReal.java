@@ -73,7 +73,7 @@ public class ShooterIOReal implements ShooterIO {
 
     StatusSignal<Current> leftMotorSupplyCurrent = leftMotor.getSupplyCurrent();
 
-    StatusSignal.refreshAll(List.of(leftMotorStatorCurrent,leftMotorSupplyCurrent));
+    StatusSignal.refreshAll(List.of(leftMotorStatorCurrent,leftMotorSupplyCurrent,leftStatus,rightStatus));
     inputs.leftMotorVoltage = leftMotor.getMotorVoltage().getValue();
     inputs.leftMotorStatorCurrent = leftMotorStatorCurrent.getValue();//leftMotor.getStatorCurrent().getValue();
     inputs.leftMotorSupplyCurrent = leftMotorSupplyCurrent.getValue();//leftMotor.getSupplyCurrent().getValue();

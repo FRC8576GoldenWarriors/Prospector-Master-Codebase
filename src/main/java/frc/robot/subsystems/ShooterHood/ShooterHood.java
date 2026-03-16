@@ -1,7 +1,6 @@
 package frc.robot.subsystems.ShooterHood;
 
 import static edu.wpi.first.units.Units.Rotations;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
@@ -121,7 +120,7 @@ public class ShooterHood extends SubsystemBase {
                 }
                 break;
             case Test:
-                wantedAnglePosition = 0.2;//RobotContainer.shooterUtil.getAngle(RobotContainer.drive.getDistanceFromHub()); //Units.degreesToRotations((ShooterHoodUtil.calculateHoodAngleDegrees(RobotContainer.drive.getDistanceFromHub())-22)*4);
+                wantedAnglePosition = 0.15;//RobotContainer.shooterUtil.getAngle(RobotContainer.drive.getDistanceFromHub()); //Units.degreesToRotations((ShooterHoodUtil.calculateHoodAngleDegrees(RobotContainer.drive.getDistanceFromHub())-22)*4);
                 PIDVoltage = PID.calculate(currentAnglePosition,wantedAnglePosition);
                 FFVoltage = FF.calculate(wantedAnglePosition, 1.0);
                 inputVoltage = PIDVoltage + FFVoltage;
@@ -148,7 +147,7 @@ public class ShooterHood extends SubsystemBase {
 
   }
   public void resetPID(){
-    PID.reset(inputs.encoderValue_Radians.in(Rotations), inputs.speed.in(RotationsPerSecond));
+    PID.reset(inputs.encoderValue_Radians.in(Rotations), 0);
   }
 
   @AutoLogOutput (key = "ShooterHood/At Setpoint")

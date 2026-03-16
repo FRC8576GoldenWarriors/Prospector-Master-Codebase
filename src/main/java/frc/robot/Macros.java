@@ -182,12 +182,13 @@ public class Macros extends SubsystemBase {
     if(m_ShooterHood.atSetpoint()){
       m_shooter.setWantedState(ShooterStates.Tuning);
     }
-    if(m_shooter.isRevved()&&m_ShooterHood.atSetpoint()){
-    //m_ShooterHood.setWantedState(ShooterHoodStates.Shoot);
-    m_Transport.setWantedState(TransportStates.TransportIn);
-    }else{
-      m_Transport.setWantedState(TransportStates.Idle);
-    }
+    // if(m_shooter.isRevved()&&m_ShooterHood.atSetpoint()){
+    // //m_ShooterHood.setWantedState(ShooterHoodStates.Shoot);
+    // m_Transport.setWantedState(TransportStates.TransportIn);
+    //  }
+     //else{
+    //   m_Transport.setWantedState(TransportStates.Idle);
+    // }
     if(m_Intake.getState()==IntakeStates.Idle){
    m_Intake.setWantedPosition(IntakeStates.IntakeDown);
    }
@@ -198,7 +199,7 @@ public class Macros extends SubsystemBase {
       m_Intake.setWantedPosition(IntakeStates.IntakeDown);
     }
 
-    m_ShooterHood.setWantedState(ShooterHoodStates.Passing);
+    m_ShooterHood.setWantedState(ShooterHoodStates.Test);
   //  m_shooter.setWantedState(ShooterStates.Tuning);
     //m_ShooterHood.setWantedState(ShooterHoodStates.Test);
   //  if(m_Intake.getState()==IntakeStates.Idle){

@@ -81,6 +81,8 @@ public class Shooter extends SubsystemBase {
     // Logger.recordOutput("Shooter/rightMotorSpeedErrorRPS", Math.abs(inputs.rightMotorSpeed.in(RotationsPerSecond) - wantedRPS.in(RotationsPerSecond)));
     Logger.recordOutput("ShooterUtil/Calculated RPS", RobotContainer.shooterUtil.getRPS(RobotContainer.drive.getDistanceFromHub()));
 
+    Logger.recordOutput("Shooter/Right RPS", inputs.rightMotorSpeed.in(RotationsPerSecond));
+    Logger.recordOutput("Shooter/Left RPS", inputs.leftMotorSpeed.in(RotationsPerSecond));
       if(DriverStation.isDisabled()) {
           currentState = ShooterStates.IDLE;
           }else{
@@ -101,7 +103,7 @@ public class Shooter extends SubsystemBase {
           setShooter(wantedRPS);
           break;
         case Tuning:
-          wantedRPS = RotationsPerSecond.of(82);//50);
+          wantedRPS = RotationsPerSecond.of(87);//50);
           setShooter(wantedRPS);
 
         case VOLTAGE_CONTROL_POSITIVE:
@@ -137,12 +139,12 @@ public class Shooter extends SubsystemBase {
 
   @AutoLogOutput(key = "Shooter/IsRevved")
   public boolean isRevved(){
-    return MathUtil.isNear(wantedRPS.in(RotationsPerSecond),(inputs.leftMotorSpeed.in(RotationsPerSecond)+inputs.rightMotorSpeed.in(RotationsPerSecond))/2,6);//1
+    return MathUtil.isNear(wantedRPS.in(RotationsPerSecond),(inputs.leftMotorSpeed.in(RotationsPerSecond)+(inputs.rightMotorSpeed.in(RotationsPerSecond)))/2,6);//6//1
     //return (inputs.leftMotorSpeed.in(RotationsPerSecond)>targetRPS.get()-10)&&(inputs.leftMotorSpeed.in(RotationsPerSecond)<targetRPS.get()+10);//0.5
   }
 
    public void setShooter(AngularVelocity wantedRPS){
-    double bangBangCalculation = bangBangController.calculate((inputs.leftMotorSpeed.in(RotationsPerSecond)+inputs.rightMotorSpeed.in(RotationsPerSecond))/2,wantedRPS.in(RotationsPerSecond));
+    double bangBangCalculation = bangBangController.calculate((inputs.leftMotorSpeed.in(RotationsPerSecond)+(inputs.rightMotorSpeed.in(RotationsPerSecond)))/2,wantedRPS.in(RotationsPerSecond));
     if(bangBangCalculation==0){
       io.setShooterVoltage(Volts.of(ff.calculate(wantedRPS.in(RotationsPerSecond))), Volts.of(ff.calculate(wantedRPS.in(RotationsPerSecond))));
     }else{

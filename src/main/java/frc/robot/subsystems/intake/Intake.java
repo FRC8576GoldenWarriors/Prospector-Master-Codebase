@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems.intake;
 
+import static edu.wpi.first.units.Units.Amps;
+
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
@@ -11,6 +13,8 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Alert.AlertType;
@@ -171,10 +175,11 @@ public void resetPID() {
 }
 @AutoLogOutput (key = "Intake/Near Setpoint")
 public boolean nearSetpoint(){
-  return MathUtil.isNear(PID.getGoal().position, inputs.leftEncoderRotations, 0.1);
+  Debouncer debounce = new Debouncer(0.1,DebounceType.kRising);
+  return MathUtil.isNear(PID.getGoal().position, inputs.leftEncoderRotations, 0.12)||debounce.calculate(inputs.pivotSupplyCurrent.in(Amps)>=9);
 }
 public boolean nearSetpointAgitate(){
-  return MathUtil.isNear(PID.getGoal().position, inputs.leftEncoderRotations, 0.1);
+  return MathUtil.isNear(PID.getGoal().position, inputs.leftEncoderRotations, 0.1)||(inputs.pivotSupplyCurrent.in(Amps)>10);
 }
 public IntakeStates getState(){
   return wantedState;

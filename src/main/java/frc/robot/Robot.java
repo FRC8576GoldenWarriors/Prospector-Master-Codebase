@@ -31,6 +31,7 @@ import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter.AdvantageScopeOpenBehavior;
 import org.littletonrobotics.urcl.URCL;
+import frc.robot.util.AlertLogger;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to each mode, as
@@ -130,6 +131,7 @@ public class Robot extends LoggedRobot {
             hubActive = false;
         }
         SmartDashboard.putBoolean("Is Hub Active", hubActive);
+        AlertLogger.periodic();
         //SmartDashboard.putRaw("Field",new Field2d().getObject("Rebuilt"));
     }
 
