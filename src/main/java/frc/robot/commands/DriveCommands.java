@@ -57,6 +57,7 @@ public class DriveCommands {
     private static final double TRANSLATION_KP = 7.5;
     private static final double TRANSLATION_KI = 0.0;
     private static final double TRANSLATION_KD = 0.0;
+    private static final double TRANSLATION_TOLERANCE_METERS = 0.01;
     private static final double ANGLE_MAX_VELOCITY = 8.0;
     private static final double ANGLE_MAX_ACCELERATION = 20.0;
     private static final double FF_START_DELAY = 2.0; // Secs
@@ -66,7 +67,7 @@ public class DriveCommands {
 
     public static final ProfiledPIDController angleController = new ProfiledPIDController(
                 ANGLE_KP, 0.0, ANGLE_KD, new TrapezoidProfile.Constraints(ANGLE_MAX_VELOCITY, ANGLE_MAX_ACCELERATION));
-        public static final PIDController translationController = new PIDController(TRANSLATION_KP, TRANSLATION_KI, TRANSLATION_KD);
+    public static final PIDController translationController = new PIDController(TRANSLATION_KP, TRANSLATION_KI, TRANSLATION_KD);
 
     private DriveCommands() {}
 
@@ -355,6 +356,7 @@ public class DriveCommands {
     }
 
     public static Command manualAlign(Drive drive, Supplier<Pose2d> drivePose) {
+        translationController.setTolerance(TRANSLATION_TOLERANCE_METERS);
         return Commands.run(
                         () -> {
                                 if((drivePose.get().getX()  > (VisionConstants.aprilTagLayout.getFieldLength()-4.61)&&DriverStation.getAlliance().orElse(Alliance.Blue)==Alliance.Red) ||(drivePose.get().getX() < 4.61&&DriverStation.getAlliance().orElse(Alliance.Blue)==Alliance.Blue)){
@@ -389,13 +391,18 @@ public class DriveCommands {
                                     drive.getRotation().getRadians(),
                                     angle);
 
+                            double vx = translationOutput * Math.cos(angle);
+                            double vy = translationOutput * Math.sin(angle);
+                            ChassisSpeeds speeds = new ChassisSpeeds(
+                                    vx,
+                                    vy, //* Math.abs(omega) * Math.abs(linearVelocity.getX()) * turnCorrection.get(),
+                                    omega);
+
                             // Convert to field relative speeds & send command
                             boolean isFlipped = DriverStation.getAlliance().isPresent()
                                     && DriverStation.getAlliance().get() == Alliance.Red;
-                                ChassisSpeeds speeds = ChassisSpeeds.fromRobotRelativeSpeeds(
-                                        translationOutput,
-                                        0,
-                                        omega * drive.getMaxAngularSpeedRadPerSec(),
+                                speeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+                                        speeds,
                                         isFlipped
                                                 ? drive.getRotation().plus(new Rotation2d(Math.PI))
                                                 : drive.getRotation());
