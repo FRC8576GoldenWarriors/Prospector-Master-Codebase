@@ -60,6 +60,12 @@ public class IntakeKrakenIO implements IntakeIO{
 
         pivotMotor.getConfigurator().apply(pivotConfig);
         rollerMotor.getConfigurator().apply(rollerConfig);
+        
+        
+        pivotMotor.getStatorCurrent().setUpdateFrequency(50);
+        pivotMotor.getVelocity().setUpdateFrequency(50);
+        rollerMotor.getStatorCurrent().setUpdateFrequency(50);
+        rollerMotor.getPosition().setUpdateFrequency(50);
     }
 
 

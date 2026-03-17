@@ -61,7 +61,10 @@ public class ShooterIOReal implements ShooterIO {
     rightMotor.getConfigurator().apply(config);
     //rightMotor.setControl(new Follower(leftMotor.getDeviceID(), MotorAlignmentValue.Aligned));
     //leftConfig = config.clone().withMotorOutput(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Brake));
-
+    rightMotor.getStatorCurrent().setUpdateFrequency(50);
+    leftMotor.getStatorCurrent().setUpdateFrequency(50);
+    rightMotor.getPosition().setUpdateFrequency(50);
+    leftMotor.getPosition().setUpdateFrequency(50);
   }
 
   @Override
@@ -70,7 +73,6 @@ public class ShooterIOReal implements ShooterIO {
     StatusSignal<AngularVelocity> rightStatus = rightMotor.getVelocity();
 
     StatusSignal<Current> leftMotorStatorCurrent = leftMotor.getStatorCurrent();
-
     StatusSignal<Current> leftMotorSupplyCurrent = leftMotor.getSupplyCurrent();
 
     StatusSignal.refreshAll(List.of(leftMotorStatorCurrent,leftMotorSupplyCurrent,leftStatus,rightStatus));

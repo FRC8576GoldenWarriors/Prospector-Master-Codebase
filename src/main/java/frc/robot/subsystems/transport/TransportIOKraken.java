@@ -52,6 +52,8 @@ public class TransportIOKraken implements TransportIO {
         rightTransportPhotoElectric = new DigitalInput(TransportConstants.rightTransportPhotoelectricID);
 
         transportMotor.getConfigurator().apply(transportMotorConfiguration);
+
+          transportMotor.getStatorCurrent().setUpdateFrequency(50);
     }
 
     @Override
