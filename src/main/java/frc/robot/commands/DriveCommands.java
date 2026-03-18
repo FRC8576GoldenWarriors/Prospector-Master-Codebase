@@ -14,6 +14,7 @@
 package frc.robot.commands;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -28,6 +29,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.RobotContainer;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.DriveConstants;
 import frc.robot.subsystems.vision.VisionConstants;
@@ -52,6 +54,10 @@ public class DriveCommands {
     private static final double DEADBAND = 0.1;
     private static final double ANGLE_KP = 5.0;
     private static final double ANGLE_KD = 0.4;
+    private static final double TRANSLATION_KP = 7.5;
+    private static final double TRANSLATION_KI = 0.0;
+    private static final double TRANSLATION_KD = 0.0;
+    private static final double TRANSLATION_TOLERANCE_METERS = 0.01;
     private static final double ANGLE_MAX_VELOCITY = 8.0;
     private static final double ANGLE_MAX_ACCELERATION = 20.0;
     private static final double FF_START_DELAY = 2.0; // Secs
@@ -61,6 +67,7 @@ public class DriveCommands {
 
     public static final ProfiledPIDController angleController = new ProfiledPIDController(
                 ANGLE_KP, 0.0, ANGLE_KD, new TrapezoidProfile.Constraints(ANGLE_MAX_VELOCITY, ANGLE_MAX_ACCELERATION));
+    public static final PIDController translationController = new PIDController(TRANSLATION_KP, TRANSLATION_KI, TRANSLATION_KD);
 
     private DriveCommands() {}
 
@@ -345,6 +352,65 @@ public class DriveCommands {
                         },
                         drive).beforeStarting(() -> angleController.reset(drive.getRotation().getRadians()));// Reset PID controller when command starts
 
+
+    }
+
+    public static Command manualAlign(Drive drive, Supplier<Pose2d> drivePose) {
+        translationController.setTolerance(TRANSLATION_TOLERANCE_METERS);
+        return Commands.run(
+                        () -> {
+                                if((drivePose.get().getX()  > (VisionConstants.aprilTagLayout.getFieldLength()-4.61)&&DriverStation.getAlliance().orElse(Alliance.Blue)==Alliance.Red) ||(drivePose.get().getX() < 4.61&&DriverStation.getAlliance().orElse(Alliance.Blue)==Alliance.Blue)){
+                                Translation2d botTranslation = drivePose.get().getTranslation();
+
+                                List<Translation2d> hubs = List.of(
+                                        new Translation2d(Units.inchesToMeters(181.56), Units.inchesToMeters(158.32)),
+                                        new Translation2d(Units.inchesToMeters(468.56), Units.inchesToMeters(158.32))
+                                );
+                                Translation2d closestHub = botTranslation.nearest(hubs);
+                                double nearestDistance = RobotContainer.shooterUtil.getNearestDistance(botTranslation.getDistance(closestHub));
+                                double translationOutput = translationController.calculate(botTranslation.getDistance(closestHub), nearestDistance);
+
+                                //Start Here
+                                // ChassisSpeeds robotSpeeds = drive.getChassisSpeeds();
+                                // x_Prediction = (robotSpeeds.vxMetersPerSecond * getTof());
+                                // y_Prediction = (robotSpeeds.vyMetersPerSecond * getTof());
+
+
+                                double relX = (botTranslation.getX()) - closestHub.getX();
+                                double relY = (botTranslation.getY()) - closestHub.getY();
+
+                                double angle = Math.atan(relY/relX);
+                                if(DriverStation.getAlliance().get().equals(Alliance.Red))
+                                        angle += Math.PI;
+
+
+                            // Get linear velocity
+
+                            // Calculate angular speed
+                            double omega = angleController.calculate(
+                                    drive.getRotation().getRadians(),
+                                    angle);
+
+                            double vx = translationOutput * Math.cos(angle);
+                            double vy = translationOutput * Math.sin(angle);
+                            ChassisSpeeds speeds = new ChassisSpeeds(
+                                    vx,
+                                    vy, //* Math.abs(omega) * Math.abs(linearVelocity.getX()) * turnCorrection.get(),
+                                    omega);
+
+                            // Convert to field relative speeds & send command
+                            boolean isFlipped = DriverStation.getAlliance().isPresent()
+                                    && DriverStation.getAlliance().get() == Alliance.Red;
+                                speeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+                                        speeds,
+                                        isFlipped
+                                                ? drive.getRotation().plus(new Rotation2d(Math.PI))
+                                                : drive.getRotation());
+                            drive.runVelocity(speeds);
+                        }
+                        },
+                        drive).beforeStarting(() -> {angleController.reset(drive.getRotation().getRadians());
+                        translationController.reset();});
 
     }
 
