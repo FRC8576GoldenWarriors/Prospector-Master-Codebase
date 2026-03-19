@@ -53,6 +53,8 @@ public class Intake extends SubsystemBase {
   private double kGDouble = kG.get();
     private double pastkG = kG.get();
 
+  Debouncer debounce = new Debouncer(0.1,DebounceType.kRising);
+
   private Alert pivotMotorAlert = new Alert("The Pivot Motor is disconnected", AlertType.kError);
   private Alert rollerMotorAlert = new Alert("The Roller Motor is disconnected", AlertType.kError);
   private Alert leftEncoderAlert = new Alert("The Left Encoder is disconnected", AlertType.kError);
@@ -175,7 +177,6 @@ public void resetPID() {
 }
 @AutoLogOutput (key = "Intake/Near Setpoint")
 public boolean nearSetpoint(){
-  Debouncer debounce = new Debouncer(0.1,DebounceType.kRising);
   return MathUtil.isNear(PID.getGoal().position, inputs.leftEncoderRotations, 0.12)||debounce.calculate(inputs.pivotSupplyCurrent.in(Amps)>=9);
 }
 public boolean nearSetpointAgitate(){

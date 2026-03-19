@@ -171,7 +171,7 @@ public class RobotContainer {
                drive, () -> -driveController.getLeftY(), () -> -driveController.getLeftX(), () -> -driveController.getRightX()));
 
         driveController.leftTrigger().whileTrue(DriveCommands.joystickDriveTagCentric(drive, () -> -driveController.getLeftY(), () -> -driveController.getLeftX(), () -> drive.getPose()));
-        driveController.rightTrigger().onTrue(macros.setWantedState(RobotStates.RunContinous));
+        driveController.rightTrigger().onTrue(macros.setWantedState(RobotStates.Shoot));
         driveController.rightBumper().onTrue(macros.setWantedState(RobotStates.IntakeOn));
         driveController.leftBumper().onTrue(macros.setWantedState(RobotStates.IntakeOff));
         driveController.x().whileTrue(DriveCommands.joystickDriveAt45(drive, () -> -driveController.getLeftY(), () -> -driveController.getLeftX(), () -> drive.getPose()));
@@ -179,11 +179,12 @@ public class RobotContainer {
 
         opController.y().onTrue(new InstantCommand(()->shooterUtil.fudgeSpeed(0.5)));
         opController.a().onTrue(new InstantCommand(()->shooterUtil.fudgeSpeed(-0.5)));
-        opController.b().onTrue(macros.setWantedState(RobotStates.TransportOut));
+        opController.b().onTrue(macros.setWantedState(RobotStates.TransportIn));
+        opController.x().onTrue(macros.setWantedState(RobotStates.TransportOut));
         opController.leftTrigger().onTrue(macros.setWantedState(RobotStates.IntakeOff));
         opController.rightTrigger().onTrue(macros.setWantedState(RobotStates.IntakeOn));
-        opController.povUp().onTrue(new InstantCommand(()->shooterUtil.angleFudge(0.005)));
-        opController.povDown().onTrue(new InstantCommand(()->shooterUtil.angleFudge(-0.005)));
+        opController.povUp().onTrue(new InstantCommand(()->shooterUtil.angleFudge(0.01)));
+        opController.povDown().onTrue(new InstantCommand(()->shooterUtil.angleFudge(-0.01)));
         opController.leftBumper().onTrue(new InstantCommand(()->shooterUtil.resetAngleFudge()));
         opController.rightBumper().onTrue(new InstantCommand(()->shooterUtil.resetSpeedFudge()));
         // Lock to 0° when A button is held

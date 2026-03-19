@@ -19,32 +19,41 @@ public class ShooterUtil {
     InterpolatingTreeMap<Double, Double> speedMap = new InterpolatingTreeMap<>(InverseInterpolator.forDouble(), Interpolator.forDouble());
     InterpolatingTreeMap<Double, Double> angleMap = new InterpolatingTreeMap<>(InverseInterpolator.forDouble(), Interpolator.forDouble());
 
-    private double speedFudge = 1;
-    private double angleFudge = 0;
+    private double speedFudge = 2.5;//8.5;//2.5;
+    private double angleFudge = 0;//0.06;
     InterpolatingDoubleTreeMap tofMap = new InterpolatingDoubleTreeMap();
 
     public ShooterUtil(){
-        speedMap.put(2.7+0.55, 33.0);
-        speedMap.put(2.5+0.55, 35.0);
-        speedMap.put(1.02+.55, 28.0);
-        speedMap.put(1.9+.55, 32.0);
-        speedMap.put(4.0+.55, 40.0);
-        speedMap.put(5.43+.55, 43.0);
-        speedMap.put(3.8+.55, 36.0);
-        speedMap.put(3.37+.55, 36.5);
-        speedMap.put(1.7+.55, 32.0);
-        speedMap.put(2.22+.55, 32.0);
+        speedMap.put(1.76, 31.12);
+        speedMap.put(2.25, 34.5);
+        //Iffy points
+        speedMap.put(4.28, 37.0);
+        speedMap.put(2.4, 34.5);
+        // speedMap.put(2.7+0.55, 33.0);
+        // speedMap.put(2.5+0.55, 35.0);
+        // speedMap.put(1.02+.55, 28.0);
+        // speedMap.put(1.9+.55, 32.0);
+        // speedMap.put(4.0+.55, 40.0);
+        // speedMap.put(5.43+.55, 43.0);
+        // speedMap.put(3.8+.55, 36.0);
+        // speedMap.put(3.37+.55, 36.5);
+        // speedMap.put(1.7+.55, 32.0);
+        // speedMap.put(2.22+.55, 32.0);
 
-        angleMap.put(2.7+.55, 0.1);
-        angleMap.put(2.5+.55, 0.03);
-        angleMap.put(1.02+.55, 0.0);
-        angleMap.put(1.9+.55, 0.02);
-        angleMap.put(4.0+.55, 0.1);
-        angleMap.put(5.43+.55,0.15);
-        angleMap.put(3.8+.55, 0.1);
-        angleMap.put(3.37+.55, 0.07);
-        angleMap.put(1.7+.55, 0.04);
-        angleMap.put(2.22+.55, 0.07);
+        angleMap.put(1.76,0.0113);
+        angleMap.put(2.25, 0.07);
+        //Iffy points
+        angleMap.put(2.4, 0.07);
+        // angleMap.put(2.7+.55, 0.1);
+        // angleMap.put(2.5+.55, 0.03);
+        // angleMap.put(1.02+.55, 0.0);
+        // angleMap.put(1.9+.55, 0.02);
+        // angleMap.put(4.0+.55, 0.1);
+        // angleMap.put(5.43+.55,0.15);
+        // angleMap.put(3.8+.55, 0.1);
+        // angleMap.put(3.37+.55, 0.07);
+        // angleMap.put(1.7+.55, 0.04);
+        // angleMap.put(2.22+.55, 0.07);
 
         tofMap.put(3.11, 1.05);
         tofMap.put(1.9, null);
