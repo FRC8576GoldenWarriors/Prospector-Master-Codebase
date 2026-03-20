@@ -280,8 +280,7 @@ public class Macros extends SubsystemBase {
   }
   public SequentialCommandGroup setWantedState(RobotStates wantedState){
     return new SequentialCommandGroup(
-        Commands.parallel(new InstantCommand(()->m_Intake.resetPID(), m_Intake),
-        new InstantCommand(()->m_ShooterHood.resetPID(), m_ShooterHood)
+        Commands.parallel(new InstantCommand(()->m_Intake.resetPID(), m_Intake)
         ), new InstantCommand(()->this.setWantedStatePrivate(wantedState), this));
     }
 
