@@ -43,7 +43,8 @@ public class Macros extends SubsystemBase {
     RunContinous,
     TransportOut,
     TransportIn,
-    AutonShoot
+    AutonShoot,
+    IntakeOut
     //Testing
   }
 
@@ -90,6 +91,8 @@ public class Macros extends SubsystemBase {
           break;
         case AutonShoot:
           autonShoot();
+        case IntakeOut:
+          intakeOut();
         default:
             break;
      }
@@ -211,7 +214,12 @@ public class Macros extends SubsystemBase {
   }
    // m_Intake.setWantedPosition(IntakeStates.Intake);
   }
+
+  public void intakeOut(){
+    m_Intake.setWantedPosition(IntakeStates.IntakeOut);
+  }
   public void autonShoot(){
+    if(DriverStation.isAutonomous()){
     if(m_ShooterHood.atSetpoint()){
       m_shooter.setWantedState(ShooterStates.SHOOT);
     }
@@ -233,6 +241,9 @@ public class Macros extends SubsystemBase {
     }
 
     m_ShooterHood.setWantedState(ShooterHoodStates.Shoot);
+  }else{
+    wantedState = RobotStates.Idle;
+  }
   }
 
   public void runContinous(){

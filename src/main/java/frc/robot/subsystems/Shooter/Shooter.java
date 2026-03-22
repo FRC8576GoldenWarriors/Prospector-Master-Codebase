@@ -7,6 +7,8 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.BangBangController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.units.measure.*;
 import static edu.wpi.first.units.Units.*;
 
@@ -24,6 +26,7 @@ public class Shooter extends SubsystemBase {
   private SysIdRoutine sysId;
   private Alert leftMotorAlert = new Alert("The Left Motor is disconnected", AlertType.kError);
   private Alert rightMotorAlert = new Alert("The Right Motor is disconnected", AlertType.kError);
+  private Debouncer isRevvedDebouncer = new Debouncer(0.12, DebounceType.kRising);
 
   private LoggedNetworkNumber kPNumber = new LoggedNetworkNumber("Tuning/Shooter kP",ShooterConstants.kP);
   private SimpleMotorFeedforward ff;

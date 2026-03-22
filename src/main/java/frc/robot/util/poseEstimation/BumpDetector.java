@@ -18,8 +18,8 @@ import edu.wpi.first.wpilibj.Timer;
 
 public class BumpDetector {
 
-    private final Angle pitchThreshold = Degrees.of(4);
-    private final Angle rollThreshold = Degrees.of(4);
+    private final Angle pitchThreshold = Degrees.of(11);//4
+    private final Angle rollThreshold = Degrees.of(5);//4
     private final Angle pitchOffset = Degrees.of(0.527334);//-0.527334//1.845703+0.69);
     private final Angle rollOffset = Degrees.of(0);//-7.338867+3.258);
     private final Time debouncerTimeThreshold = Seconds.of(0.4);

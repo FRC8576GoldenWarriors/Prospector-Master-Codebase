@@ -254,13 +254,14 @@ public class DriveCommands {
             Drive drive, DoubleSupplier xSupplier, DoubleSupplier ySupplier, Supplier<Pose2d> drivePose) {
 
         // Create PID controller
-        angleController.setTolerance(Units.degreesToRadians(10));
+        angleController.setTolerance(Units.degreesToRadians(5));
         angleController.enableContinuousInput(-Math.PI, Math.PI);
 
 
         Logger.recordOutput("In Red Zone", drivePose.get().getX()  > (0));
         Logger.recordOutput("GetX", drivePose.get());
-
+        Logger.recordOutput("Drive/Tag centric aligned", angleController.atGoal());
+        Logger.recordOutput("Drive/Alignment Goal", angleController.getGoal().position);
 
         // Construct command
         return Commands.run(

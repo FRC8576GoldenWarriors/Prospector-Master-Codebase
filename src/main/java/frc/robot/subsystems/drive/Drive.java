@@ -45,6 +45,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -63,6 +64,7 @@ import frc.robot.util.poseEstimation.EnhancedSwervePoseEstimator;
 import frc.robot.util.LocalADStarAK;
 import java.util.Arrays;
 import java.util.Set;
+import java.util.Stack;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
@@ -77,6 +79,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
     private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
     public static BumpDetector bumpDetector;
     private final CollisionDetector collisionDetector;
+    private final Stack<Rotation2d> gyroStack;
     private final Module[] modules = new Module[4]; // FL, FR, BL, BR
     private final SysIdRoutine sysId;
     private final Alert gyroDisconnectedAlert =
@@ -166,6 +169,8 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
 
         setpointGenerator = new SwerveSetpointGenerator(this.pathConfig, Units.rotationsPerMinuteToRadiansPerSecond(maxSpeedRPM));
         previousSetpoint = new SwerveSetpoint(getChassisSpeeds(), getModuleStates(), DriveFeedforwards.zeros(4));
+        gyroStack = new Stack<>();
+        gyroStack.push((gyroInputs.yawPosition));
     }
 
     @Override
@@ -545,6 +550,10 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
 
     public double getVelocity(){
         return gyroInputs.xVelocityRadPerSec+gyroInputs.yVelocityRadPerSec+(gyroInputs.yawVelocityRadPerSec);//(gyroInputs.zVelocityRadPerSec/1.5);
+    }
+
+    public AngularVelocity getYawVelocity() {
+        return RadiansPerSecond.of(gyroInputs.yawVelocityRadPerSec);
     }
 
     public boolean[] calculateSkidding() {

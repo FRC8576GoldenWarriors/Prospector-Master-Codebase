@@ -31,6 +31,8 @@ import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter.AdvantageScopeOpenBehavior;
 import org.littletonrobotics.urcl.URCL;
+
+import frc.robot.Macros.RobotStates;
 import frc.robot.util.AlertLogger;
 
 /**
@@ -177,6 +179,7 @@ public class Robot extends LoggedRobot {
         if (autonomousCommand != null) {
             autonomousCommand.cancel();
         }
+        RobotContainer.macros.setWantedState(RobotStates.Idle);
     }
 
     /** This function is called periodically during operator control. */

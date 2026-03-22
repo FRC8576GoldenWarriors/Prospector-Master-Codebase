@@ -111,7 +111,7 @@ public ModuleIOSpark(int module) {
                                 invertedDriveValue = false;
                                 break;
                                  case 1:
-                                 invertedDriveValue = true;
+                                 invertedDriveValue = false;
                                  break;
                                 case 2:
                                 invertedDriveValue = true;

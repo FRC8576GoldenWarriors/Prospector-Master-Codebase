@@ -97,10 +97,10 @@ public class RobotContainer {
                 this.vision = new Vision(
                 drive,
                 drive::getChassisSpeeds,
-                new VisionIOLimelight(VisionConstants.camera0Name, drive::getRotation),
-                new VisionIOLimelight(VisionConstants.camera1Name, drive::getRotation),
-                new VisionIOLimelight(VisionConstants.camera2Name, drive::getRotation),
-                new VisionIOLimelight(VisionConstants.camera3Name, drive::getRotation));
+                new VisionIOLimelight(VisionConstants.camera0Name, drive::getRotation, drive::getYawVelocity),
+                new VisionIOLimelight(VisionConstants.camera1Name, drive::getRotation, drive::getYawVelocity),
+                new VisionIOLimelight(VisionConstants.camera2Name, drive::getRotation, drive::getYawVelocity),
+                new VisionIOLimelight(VisionConstants.camera3Name, drive::getRotation, drive::getYawVelocity));
                 //shooter = new Shooter(0);
                 intake = new Intake(new IntakeKrakenIO());
                 shooter = new Shooter(new ShooterIOReal());
@@ -171,7 +171,7 @@ public class RobotContainer {
                drive, () -> -driveController.getLeftY(), () -> -driveController.getLeftX(), () -> -driveController.getRightX()));
 
         driveController.leftTrigger().whileTrue(DriveCommands.joystickDriveTagCentric(drive, () -> -driveController.getLeftY(), () -> -driveController.getLeftX(), () -> drive.getPose()));
-        driveController.rightTrigger().onTrue(macros.setWantedState(RobotStates.RunContinous));
+        driveController.rightTrigger().onTrue(macros.setWantedState(RobotStates.Shoot));
         driveController.rightBumper().onTrue(macros.setWantedState(RobotStates.IntakeOn));
         driveController.leftBumper().onTrue(macros.setWantedState(RobotStates.IntakeOff));
         driveController.x().whileTrue(DriveCommands.joystickDriveAt45(drive, () -> -driveController.getLeftY(), () -> -driveController.getLeftX(), () -> drive.getPose()));
@@ -185,6 +185,7 @@ public class RobotContainer {
         opController.rightTrigger().onTrue(macros.setWantedState(RobotStates.IntakeOn));
         opController.povUp().onTrue(new InstantCommand(()->shooterUtil.angleFudge(0.01)));
         opController.povDown().onTrue(new InstantCommand(()->shooterUtil.angleFudge(-0.01)));
+        opController.povLeft().onTrue(macros.setWantedState(RobotStates.IntakeOut));
         opController.leftBumper().onTrue(new InstantCommand(()->shooterUtil.resetAngleFudge()));
         opController.rightBumper().onTrue(new InstantCommand(()->shooterUtil.resetSpeedFudge()));
         // Lock to 0° when A button is held

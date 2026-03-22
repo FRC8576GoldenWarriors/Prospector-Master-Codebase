@@ -34,7 +34,8 @@ public class Intake extends SubsystemBase {
     IntakeDown,
     Agitate,
     PivotVC,
-    RollerVC
+    RollerVC,
+    IntakeOut
   }
   private IntakeIOInputsAutoLogged inputs = new IntakeIOInputsAutoLogged();
 
@@ -155,7 +156,15 @@ public class Intake extends SubsystemBase {
                 wantedState = IntakeStates.Idle;
             }
           break;
+        case IntakeOut:
+          PIDVoltage  = PID.calculate(currentPosition, IntakeConstants.Software.intakeDown);
+          FFVoltage = FF.calculate(IntakeConstants.Software.intakeDown, 0.5);
+          inputVoltage = PIDVoltage + FFVoltage;
+          wantedSpeed = IntakeConstants.Software.rollerSpeed*(-0.75);
 
+          io.setPivotVoltage(inputVoltage);
+          io.setRollerSpeed(wantedSpeed);
+          break;
       }
      }else{
         wantedState = IntakeStates.Idle;
