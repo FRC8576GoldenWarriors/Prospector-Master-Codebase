@@ -33,8 +33,8 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 public class DriveConstants {
     public static final double maxSpeedMetersPerSec = 4.3; // 5.3; // 4.8;
     public static final double odometryFrequency = 250.0; // Hz
-    public static final double trackWidth = Units.inchesToMeters(27);
-    public static final double wheelBase = Units.inchesToMeters(27);
+    public static final double trackWidth = Units.inchesToMeters(21.75);
+    public static final double wheelBase = Units.inchesToMeters(21.75);
     public static final LoggedNetworkNumber angularVelocityCoefficient = new LoggedNetworkNumber("Drive/angularVelocityCoefficient", 0.175);
     public static final boolean useChasisDiscretize = false;
     public static final boolean useAngularVelocitySkewCorrection = true;
