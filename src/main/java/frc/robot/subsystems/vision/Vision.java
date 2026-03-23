@@ -28,6 +28,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.vision.VisionIO.IMUMode;
 import frc.robot.subsystems.vision.VisionIO.PoseObservationType;
 import java.util.LinkedList;
 import java.util.List;
@@ -46,6 +47,8 @@ public class Vision extends SubsystemBase {
         this.consumer = consumer;
         this.io = io;
         this.driveSpeedsSupplier = driveSpeedsSupplier;
+
+        setLimelightImuMode(IMUMode.SeedInternalIMU);
 
         // Initialize inputs
         this.inputs = new VisionIOInputsAutoLogged[io.length];
@@ -72,6 +75,13 @@ public class Vision extends SubsystemBase {
 
     @Override
     public void periodic() {
+
+        if(DriverStation.isDisabled()) {
+            setLimelightImuMode(IMUMode.SeedInternalIMU);
+        } else {
+            setLimelightImuMode(IMUMode.UseInternalWithExternal);
+        }
+
         for (int i = 0; i < io.length; i++) {
             io[i].updateInputs(inputs[i]);
             Logger.processInputs("Vision/Camera" + Integer.toString(i), inputs[i]);
@@ -187,6 +197,26 @@ public class Vision extends SubsystemBase {
                 "Vision/Summary/RobotPosesRejected",
                 allRobotPosesRejected.toArray(new Pose3d[allRobotPosesRejected.size()]));
     }
+
+    public void setLimelightImuMode(IMUMode imuMode) {
+        for(VisionIO ios : io) {
+            ios.setImuMode(imuMode);
+        }
+    }
+
+    public void flushLimelights() {
+        for(VisionIO ios : io) {
+            ios.flushLimelight();
+        }
+    }
+
+    public void setRobotOrientations(double angle) {
+        for(VisionIO ios : io) {
+            ios.setRobotOrientation(angle);
+        }
+    }
+
+
 
     @FunctionalInterface
     public interface VisionConsumer {

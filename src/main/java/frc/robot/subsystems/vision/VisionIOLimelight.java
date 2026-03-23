@@ -55,12 +55,15 @@ public class VisionIOLimelight implements VisionIO {
     private final DoubleArraySubscriber captureRewindSubscriber;
     private final DoubleArrayPublisher captureRewindPublisher;
 
+    private final DoublePublisher imuModePublisher;
+
     private boolean rewindEnabled = false;
     private boolean isRewinding = false;
 
     private double rewindCaptureDurationSeconds = 165.0;
 
     private final String name;
+
     /**
      * Creates a new VisionIOLimelight.
      *
@@ -83,6 +86,7 @@ public class VisionIOLimelight implements VisionIO {
         rewindEnablePublisher = table.getDoubleTopic("rewind_enable_set").publish();
         captureRewindSubscriber = table.getDoubleArrayTopic("capture_rewind").subscribe(new double[] {});
         captureRewindPublisher = table.getDoubleArrayTopic("capture_rewind").publish();
+        imuModePublisher = table.getDoubleTopic("imumode_set").publish();
         this.name = name;
     }
 
@@ -111,7 +115,7 @@ public class VisionIOLimelight implements VisionIO {
         // Update target observation
         inputs.latestTargetObservation = new TargetObservation(
                 Rotation2d.fromDegrees(txSubscriber.get()), Rotation2d.fromDegrees(tySubscriber.get()));
-
+        
         // Update orientation for MegaTag 2
         orientationPublisher.accept(new double[] {rotationSupplier.get().getDegrees(), 0.0, 0.0, 0.0, 0.0, 0.0});
         NetworkTableInstance.getDefault().flush(); // Increases network traffic but recommended by Limelight
@@ -192,20 +196,26 @@ public class VisionIOLimelight implements VisionIO {
         }
         inputs.name = name;
 
+
         double[] corners = tagCornersSubscriber.get();
+
+        if(corners.length >= 8) {
         
-        double[] xCorners = {corners[0], corners[2], corners[4], corners[6]};
-        double[] yCorners = {corners[1], corners[3], corners[5], corners[7]};
+            double[] xCorners = {corners[0], corners[2], corners[4], corners[6]};
+            double[] yCorners = {corners[1], corners[3], corners[5], corners[7]};
 
-        double[] cropWindow = {
-            Arrays.stream(xCorners).min().getAsDouble(),
-            Arrays.stream(xCorners).max().getAsDouble(),
-            Arrays.stream(yCorners).min().getAsDouble(),
-            Arrays.stream(yCorners).max().getAsDouble()
-        };
+            double[] cropWindow = {
+                Arrays.stream(xCorners).min().getAsDouble(),
+                Arrays.stream(xCorners).max().getAsDouble(),
+                Arrays.stream(yCorners).min().getAsDouble(),
+                Arrays.stream(yCorners).max().getAsDouble()
+            };
 
-        inputs.cropWindow = cropWindow;
-        setCrop(cropWindow);
+            inputs.cropWindow = cropWindow;
+            setCrop(cropWindow);
+        } else {
+            setCrop(new double[] {-1, 1, -1, 1}); //reset crop
+        }
     }
 
     public static double[] findTimestampedValue(TimestampedDoubleArray[] arr, long timestamp) {
@@ -219,8 +229,29 @@ public class VisionIOLimelight implements VisionIO {
         return values;
     }
 
+    public void setImuMode(IMUMode imuMode) {
+        int imuModeValue;
+        switch (imuMode) {
+           case UseExternalIMU -> imuModeValue = 0;
+           case SeedInternalIMU -> imuModeValue = 1;
+           case UseInternalIMU -> imuModeValue = 2;
+           case UseInternalWithMT1 -> imuModeValue = 3;
+           case UseInternalWithExternal -> imuModeValue = 4;
+           default -> imuModeValue = 1;
+        }
+        imuModePublisher.accept(imuModeValue);
+    }
+
     public void setCrop(double[] cropWindow) {
         cropPublisher.accept(cropWindow);
+    }
+
+    public void setRobotOrientation(double angle) {
+        LimelightHelpers.SetRobotOrientation_NoFlush(name, angle, 0, 0, 0, 0, 0);
+    }
+
+    public void flushLimelight() {
+        NetworkTableInstance.getDefault().flush();
     }
 
 

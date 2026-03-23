@@ -48,5 +48,19 @@ public interface VisionIO {
         PHOTONVISION
     }
 
+    enum IMUMode {
+        UseExternalIMU,
+        SeedInternalIMU,
+        UseInternalIMU,
+        UseInternalWithMT1,
+        UseInternalWithExternal
+    }
+
+    default void setImuMode(IMUMode imuMode) {}
+
+    default void flushLimelight() {}
+
+    default void setRobotOrientation(double angle) {}
+
     default void updateInputs(VisionIOInputs inputs) {}
 }
