@@ -176,6 +176,7 @@ public class RobotContainer {
         driveController.leftBumper().onTrue(macros.setWantedState(RobotStates.IntakeOff));
         driveController.x().whileTrue(DriveCommands.joystickDriveAt45(drive, () -> -driveController.getLeftY(), () -> -driveController.getLeftX(), () -> drive.getPose()));
         driveController.b().onTrue(macros.setWantedState(RobotStates.Rest));
+        driveController.povRight().onTrue(macros.setWantedState(RobotStates.IntakeOut));
 
         opController.y().onTrue(new InstantCommand(()->shooterUtil.fudgeSpeed(0.5)));
         opController.a().onTrue(new InstantCommand(()->shooterUtil.fudgeSpeed(-0.5)));

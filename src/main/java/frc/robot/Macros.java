@@ -216,7 +216,11 @@ public class Macros extends SubsystemBase {
   }
 
   public void intakeOut(){
+    if(RobotContainer.driveController.povRight().getAsBoolean()||RobotContainer.opController.leftTrigger().getAsBoolean()){
     m_Intake.setWantedPosition(IntakeStates.IntakeOut);
+    }else{
+      wantedState = RobotStates.Idle;
+    }
   }
   public void autonShoot(){
     if(DriverStation.isAutonomous()){
