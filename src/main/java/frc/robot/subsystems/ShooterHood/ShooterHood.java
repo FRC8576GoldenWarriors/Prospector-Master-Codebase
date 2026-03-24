@@ -7,7 +7,7 @@ import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 import edu.wpi.first.math.controller.ArmFeedforward;
-import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
@@ -19,7 +19,7 @@ public class ShooterHood extends SubsystemBase {
 
     private final ShooterHoodIO io;
     private final ShooterHoodInputsAutoLogged inputs = new ShooterHoodInputsAutoLogged();
-    public ProfiledPIDController PID;
+    public PIDController PID;
     public ArmFeedforward FF;
     private double PIDVoltage;
     private double FFVoltage;
@@ -51,9 +51,9 @@ public class ShooterHood extends SubsystemBase {
     private double pastkP = kPNumber.get();
     public ShooterHood(ShooterHoodIO io) {
         this.io = io;
-        PID = new ProfiledPIDController(ShooterHoodConstants.kp, ShooterHoodConstants.ki, ShooterHoodConstants.kd, ShooterHoodConstants.profile);
-        FF = new ArmFeedforward(ShooterHoodConstants.ks, ShooterHoodConstants.kg, ShooterHoodConstants.ks);
-        PID.reset(inputs.encoderValue_Radians.in(Rotations),0);
+        PID = new PIDController(ShooterHoodConstants.kp, ShooterHoodConstants.ki, ShooterHoodConstants.kd);
+        FF = new ArmFeedforward(ShooterHoodConstants.ks, ShooterHoodConstants.kg, ShooterHoodConstants.kv,ShooterHoodConstants.ka);
+        //PID.reset(inputs.encoderValue_Radians.in(Rotations),0);
     }
 
     public void setWantedState(ShooterHoodStates state) {
@@ -120,7 +120,7 @@ public class ShooterHood extends SubsystemBase {
                 }
                 break;
             case Test:
-                wantedAnglePosition = 0;//0.15;//RobotContainer.shooterUtil.getAngle(RobotContainer.drive.getDistanceFromHub()); //Units.degreesToRotations((ShooterHoodUtil.calculateHoodAngleDegrees(RobotContainer.drive.getDistanceFromHub())-22)*4);
+                wantedAnglePosition = 0.15;//0.15;//RobotContainer.shooterUtil.getAngle(RobotContainer.drive.getDistanceFromHub()); //Units.degreesToRotations((ShooterHoodUtil.calculateHoodAngleDegrees(RobotContainer.drive.getDistanceFromHub())-22)*4);
                 PIDVoltage = PID.calculate(currentAnglePosition,wantedAnglePosition);
                 FFVoltage = FF.calculate(wantedAnglePosition, 1.0);
                 inputVoltage = PIDVoltage + FFVoltage;
@@ -147,12 +147,12 @@ public class ShooterHood extends SubsystemBase {
 
   }
   public void resetPID(){
-    PID.reset(inputs.encoderValue_Radians.in(Rotations), 0);
+    //PID.reset(inputs.encoderValue_Radians.in(Rotations), 0);
   }
 
   @AutoLogOutput (key = "ShooterHood/At Setpoint")
   public boolean atSetpoint(){
-    return (inputs.encoderValue_Radians.in(Rotations))>(PID.getGoal().position-0.05)&&(inputs.encoderValue_Radians.in(Rotations))<(PID.getGoal().position+0.05);
+    return (inputs.encoderValue_Radians.in(Rotations))>(PID.getSetpoint()-0.05)&&(inputs.encoderValue_Radians.in(Rotations))<(PID.getSetpoint()+0.05);
   }
 
   public double getAngle(){

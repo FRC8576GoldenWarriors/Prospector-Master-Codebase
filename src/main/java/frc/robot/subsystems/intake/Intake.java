@@ -34,7 +34,8 @@ public class Intake extends SubsystemBase {
     IntakeDown,
     Agitate,
     PivotVC,
-    RollerVC
+    RollerVC,
+    IntakeOut
   }
   private IntakeIOInputsAutoLogged inputs = new IntakeIOInputsAutoLogged();
 
@@ -52,6 +53,8 @@ public class Intake extends SubsystemBase {
   private LoggedNetworkNumber kG = new LoggedNetworkNumber("Tuning/kG",IntakeConstants.Software.kG);
   private double kGDouble = kG.get();
     private double pastkG = kG.get();
+
+  Debouncer debounce = new Debouncer(0.1,DebounceType.kRising);
 
   private Alert pivotMotorAlert = new Alert("The Pivot Motor is disconnected", AlertType.kError);
   private Alert rollerMotorAlert = new Alert("The Roller Motor is disconnected", AlertType.kError);
@@ -153,7 +156,15 @@ public class Intake extends SubsystemBase {
                 wantedState = IntakeStates.Idle;
             }
           break;
+        case IntakeOut:
+          PIDVoltage  = PID.calculate(currentPosition, IntakeConstants.Software.intakeDown);
+          FFVoltage = FF.calculate(IntakeConstants.Software.intakeDown, 0.5);
+          inputVoltage = PIDVoltage + FFVoltage;
+          wantedSpeed = IntakeConstants.Software.rollerSpeed*(-0.75);
 
+          io.setPivotVoltage(inputVoltage);
+          io.setRollerSpeed(wantedSpeed);
+          break;
       }
      }else{
         wantedState = IntakeStates.Idle;
@@ -175,7 +186,6 @@ public void resetPID() {
 }
 @AutoLogOutput (key = "Intake/Near Setpoint")
 public boolean nearSetpoint(){
-  Debouncer debounce = new Debouncer(0.1,DebounceType.kRising);
   return MathUtil.isNear(PID.getGoal().position, inputs.leftEncoderRotations, 0.12)||debounce.calculate(inputs.pivotSupplyCurrent.in(Amps)>=9);
 }
 public boolean nearSetpointAgitate(){

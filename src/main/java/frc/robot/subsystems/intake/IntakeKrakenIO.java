@@ -45,7 +45,7 @@ public class IntakeKrakenIO implements IntakeIO{
         rollerConfig = leadConfig.clone().withMotorOutput(
             leadConfig.MotorOutput.clone()
             .withInverted(IntakeConstants.Hardware.rollerInvertedValue)
-            ).withCurrentLimits(new CurrentLimitsConfigs().withStatorCurrentLimit(60).withStatorCurrentLimitEnable(true));
+            ).withCurrentLimits(new CurrentLimitsConfigs().withSupplyCurrentLimit(60).withSupplyCurrentLimitEnable(true).withStatorCurrentLimitEnable(false));//.withStatorCurrentLimit(60).withStatorCurrentLimitEnable(true));
 
         pivotConfig = leadConfig.clone().withMotorOutput(
             leadConfig.MotorOutput.clone()

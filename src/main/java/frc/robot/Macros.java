@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.wpilibj.DriverStation;
@@ -40,11 +41,15 @@ public class Macros extends SubsystemBase {
     IntakeOff,
     Rest,
     RunContinous,
-    TransportOut
+    TransportOut,
+    TransportIn,
+    AutonShoot,
+    IntakeOut
     //Testing
   }
 
 
+  @AutoLogOutput (key="Robot/Direct State Log")
   private RobotStates wantedState = RobotStates.Idle;
 
   /** Creates a new Macros. */
@@ -58,7 +63,7 @@ public class Macros extends SubsystemBase {
 
   @Override
   public void periodic() {
-    if(DriverStation.isEnabled()){
+    if(DriverStation.isEnabled()||DriverStation.isAutonomous()){
      switch(wantedState){
         case Idle:
             Idle();
@@ -81,6 +86,13 @@ public class Macros extends SubsystemBase {
         case TransportOut:
           transportOut();
           break;
+        case TransportIn:
+          transportIn();
+          break;
+        case AutonShoot:
+          autonShoot();
+        case IntakeOut:
+          intakeOut();
         default:
             break;
      }
@@ -95,8 +107,9 @@ public class Macros extends SubsystemBase {
 
 
 
-  private void setWantedStatePrivate(RobotStates s){
+  public void setWantedStatePrivate(RobotStates s){
     wantedState = s;
+    Logger.recordOutput("Robot/Private Wanted State", s);
   }
   public void Idle(){
     m_shooter.setWantedState(ShooterStates.IDLE);
@@ -122,6 +135,9 @@ public class Macros extends SubsystemBase {
     // m_ShooterHood.setWantedState(ShooterHoodStates.Idle);
     m_Transport.setWantedState(TransportStates.TransportOut);
     //m_Intake.setWantedPosition(IntakeStates.Idle);
+  }
+  public void transportIn(){
+    m_Transport.setWantedState(TransportStates.TransportIn);
   }
   public void intakeOff(){
     m_Intake.setWantedPosition(IntakeStates.Rest);
@@ -199,6 +215,37 @@ public class Macros extends SubsystemBase {
    // m_Intake.setWantedPosition(IntakeStates.Intake);
   }
 
+  public void intakeOut(){
+    m_Intake.setWantedPosition(IntakeStates.IntakeOut);
+  }
+  public void autonShoot(){
+    if(DriverStation.isAutonomous()){
+    if(m_ShooterHood.atSetpoint()){
+      m_shooter.setWantedState(ShooterStates.SHOOT);
+    }
+    if(m_shooter.isRevved()&&m_ShooterHood.atSetpoint()){
+    //m_ShooterHood.setWantedState(ShooterHoodStates.Shoot);
+    m_Transport.setWantedState(TransportStates.TransportIn);
+     }
+     //else{
+    //   m_Transport.setWantedState(TransportStates.Idle);
+    // }
+    if(m_Intake.getState()==IntakeStates.Idle){
+   m_Intake.setWantedPosition(IntakeStates.IntakeDown);
+   }
+    if(!(m_Intake.getState()==IntakeStates.Agitate)&&m_Intake.nearSetpoint()){
+      m_Intake.setWantedPosition(IntakeStates.Agitate);
+    }
+    else if(m_Intake.getState()==IntakeStates.Agitate&&m_Intake.nearSetpoint()){
+      m_Intake.setWantedPosition(IntakeStates.IntakeDown);
+    }
+
+    m_ShooterHood.setWantedState(ShooterHoodStates.Shoot);
+  }else{
+    wantedState = RobotStates.Idle;
+  }
+  }
+
   public void runContinous(){
     if(m_ShooterHood.atSetpoint()){
       m_shooter.setWantedState(ShooterStates.Tuning);
@@ -244,8 +291,7 @@ public class Macros extends SubsystemBase {
   }
   public SequentialCommandGroup setWantedState(RobotStates wantedState){
     return new SequentialCommandGroup(
-        Commands.parallel(new InstantCommand(()->m_Intake.resetPID(), m_Intake),
-        new InstantCommand(()->m_ShooterHood.resetPID(), m_ShooterHood)
+        Commands.parallel(new InstantCommand(()->m_Intake.resetPID(), m_Intake)
         ), new InstantCommand(()->this.setWantedStatePrivate(wantedState), this));
     }
 

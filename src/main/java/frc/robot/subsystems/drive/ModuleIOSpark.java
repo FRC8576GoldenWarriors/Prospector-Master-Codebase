@@ -105,6 +105,21 @@ public ModuleIOSpark(int module) {
                     case 3 -> backRightCancoderId;
                     default -> 0;
                 });
+        boolean invertedDriveValue = false;
+        switch(module){
+                                case 0:
+                                invertedDriveValue = false;
+                                break;
+                                 case 1:
+                                 invertedDriveValue = false;
+                                 break;
+                                case 2:
+                                invertedDriveValue = true;
+                                break;
+                                case 3:
+                                invertedDriveValue = true;
+                                break;
+                        }
 
         // Configure drive motor
         var driveConfig = new SparkFlexConfig();
@@ -112,7 +127,7 @@ public ModuleIOSpark(int module) {
                 .idleMode(IdleMode.kBrake)
                 .smartCurrentLimit(driveMotorCurrentLimit)
                 .voltageCompensation(12.0)
-                .inverted( false);
+                .inverted(invertedDriveValue);
         driveConfig
                 .encoder
                 .positionConversionFactor(driveEncoderPositionFactor)
@@ -142,7 +157,7 @@ public ModuleIOSpark(int module) {
         // Configure turn motor
         var turnConfig = new SparkMaxConfig();
         turnConfig
-                .inverted(turnInverted)
+                .inverted(turnEncoderInverted)
                 .idleMode(IdleMode.kBrake)
                 .smartCurrentLimit(turnMotorCurrentLimit)
                 .voltageCompensation(12.0);

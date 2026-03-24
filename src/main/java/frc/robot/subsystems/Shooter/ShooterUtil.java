@@ -22,32 +22,75 @@ public class ShooterUtil {
     InterpolatingTreeMap<Double, Double> angleMap = new InterpolatingTreeMap<>(InverseInterpolator.forDouble(), Interpolator.forDouble());
     List<Double> distanceList = new ArrayList<>();
 
-    private double speedFudge = 1;
-    private double angleFudge = 0;
+    private double speedFudge = 0;//8.5;//2.5;
+    private double angleFudge = 0;//0.06;
     InterpolatingDoubleTreeMap tofMap = new InterpolatingDoubleTreeMap();
 
     public ShooterUtil(){
-        speedMap.put(2.7+0.55, 33.0);
-        speedMap.put(2.5+0.55, 35.0);
-        speedMap.put(1.02+.55, 28.0);
-        speedMap.put(1.9+.55, 32.0);
-        speedMap.put(4.0+.55, 40.0);
-        speedMap.put(5.43+.55, 43.0);
-        speedMap.put(3.8+.55, 36.0);
-        speedMap.put(3.37+.55, 36.5);
-        speedMap.put(1.7+.55, 32.0);
-        speedMap.put(2.22+.55, 32.0);
+        speedMap.put(1.16, 32.62);
+        speedMap.put(1.75, 33.12);
+        speedMap.put(2.05, 33.12);
+        speedMap.put(2.21, 33.82);
+        speedMap.put(2.61, 35.65);
+        speedMap.put(3.29, 38.12);
+        speedMap.put(3.24, 37.93);
+        speedMap.put(2.037, 36.02);
+        speedMap.put(1.45, 30.87);
+        //Video Points Day 1
+        speedMap.put(1.828,33.91);
+        speedMap.put(1.866, 34.29);
+        speedMap.put(2.244, 33.976);
+        speedMap.put(2.33, 34.36);
+        speedMap.put(2.66, 35.84);
 
-        angleMap.put(2.7+.55, 0.1);
-        angleMap.put(2.5+.55, 0.03);
-        angleMap.put(1.02+.55, 0.0);
-        angleMap.put(1.9+.55, 0.02);
-        angleMap.put(4.0+.55, 0.1);
-        angleMap.put(5.43+.55,0.15);
-        angleMap.put(3.8+.55, 0.1);
-        angleMap.put(3.37+.55, 0.07);
-        angleMap.put(1.7+.55, 0.04);
-        angleMap.put(2.22+.55, 0.07);
+
+        // speedMap.put(1.76, 31.12);
+        // speedMap.put(2.25, 34.5);
+        // //Iffy points
+        // speedMap.put(4.28, 37.0);
+        // speedMap.put(2.4, 34.5);
+        // speedMap.put(2.7+0.55, 33.0);
+        // speedMap.put(2.5+0.55, 35.0);
+        // speedMap.put(1.02+.55, 28.0);
+        // speedMap.put(1.9+.55, 32.0);
+        // speedMap.put(4.0+.55, 40.0);
+        // speedMap.put(5.43+.55, 43.0);
+        // speedMap.put(3.8+.55, 36.0);
+        // speedMap.put(3.37+.55, 36.5);
+        // speedMap.put(1.7+.55, 32.0);
+        // speedMap.put(2.22+.55, 32.0);
+
+        angleMap.put(1.16, 0.011);
+        angleMap.put(1.75, 0.047);
+        angleMap.put(2.05, 0.047);
+        angleMap.put(2.61, 0.097);
+        angleMap.put(3.29, 0.117);
+        angleMap.put(3.24, 0.135);
+        angleMap.put(2.037, 0.067);
+        angleMap.put(2.21, 0.0814);
+        angleMap.put(1.45, 0.029);
+        //Video points day 1
+        angleMap.put(1.828,0.052);
+        angleMap.put(1.866, 0.055);
+        angleMap.put(2.244, 0.083);
+        angleMap.put(2.33, 0.086);
+        angleMap.put(2.66, 0.10018);
+
+
+        // angleMap.put(1.76,0.0113);
+        // angleMap.put(2.25, 0.07);
+        // //Iffy points
+        // angleMap.put(2.4, 0.07);
+        // angleMap.put(2.7+.55, 0.1);
+        // angleMap.put(2.5+.55, 0.03);
+        // angleMap.put(1.02+.55, 0.0);
+        // angleMap.put(1.9+.55, 0.02);
+        // angleMap.put(4.0+.55, 0.1);
+        // angleMap.put(5.43+.55,0.15);
+        // angleMap.put(3.8+.55, 0.1);
+        // angleMap.put(3.37+.55, 0.07);
+        // angleMap.put(1.7+.55, 0.04);
+        // angleMap.put(2.22+.55, 0.07);
 
         distanceList.add(2.7+.55);
         distanceList.add(2.5+.55);
