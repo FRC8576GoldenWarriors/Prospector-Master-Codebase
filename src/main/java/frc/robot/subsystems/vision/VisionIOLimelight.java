@@ -23,8 +23,11 @@ import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.TimestampedDoubleArray;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
+
+import static edu.wpi.first.units.Units.DegreesPerSecond;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -110,14 +113,14 @@ public class VisionIOLimelight implements VisionIO {
             entries[1] = Math.min(rewindCaptureDurationSeconds, 165);
             captureRewindPublisher.accept(entries);
         }
-        
+
         // Update connection status based on whether an update has been seen in the last 250ms
         inputs.connected = ((RobotController.getFPGATime() - latencySubscriber.getLastChange()) / 1000) < 250;
 
         // Update target observation
         inputs.latestTargetObservation = new TargetObservation(
                 Rotation2d.fromDegrees(txSubscriber.get()), Rotation2d.fromDegrees(tySubscriber.get()));
-        
+
         // Update orientation for MegaTag 2
         orientationPublisher.accept(new double[] {rotationSupplier.get().getDegrees(), rotationVelocitySupplier.get().in(DegreesPerSecond), 0.0, 0.0, 0.0, 0.0});
         NetworkTableInstance.getDefault().flush(); // Increases network traffic but recommended by Limelight
@@ -202,7 +205,7 @@ public class VisionIOLimelight implements VisionIO {
         double[] corners = tagCornersSubscriber.get();
 
         if(corners.length >= 8) {
-        
+
             double[] xCorners = {corners[0], corners[2], corners[4], corners[6]};
             double[] yCorners = {corners[1], corners[3], corners[5], corners[7]};
 

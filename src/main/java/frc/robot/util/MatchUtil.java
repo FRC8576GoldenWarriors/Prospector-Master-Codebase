@@ -27,7 +27,7 @@ public class MatchUtil extends SubsystemBase{
 
     @AutoLogOutput(key = "MatchUtil/CurrentGameState")
     private GameState currentGameState;
-    
+
 
     public MatchUtil() {
         gameMessage = DriverStation.getGameSpecificMessage();
