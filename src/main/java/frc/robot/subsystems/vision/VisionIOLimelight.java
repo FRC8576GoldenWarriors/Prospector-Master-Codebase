@@ -19,14 +19,17 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.DoubleArrayPublisher;
 import edu.wpi.first.networktables.DoubleArraySubscriber;
+import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.TimestampedDoubleArray;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 
 import static edu.wpi.first.units.Units.DegreesPerSecond;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -40,12 +43,31 @@ public class VisionIOLimelight implements VisionIO {
     private final DoubleArrayPublisher orientationPublisher;
 
     private final DoubleSubscriber latencySubscriber;
+
     private final DoubleSubscriber txSubscriber;
     private final DoubleSubscriber tySubscriber;
+
     private final DoubleArraySubscriber megatag1Subscriber;
     private final DoubleArraySubscriber megatag2Subscriber;
     private final DoubleArraySubscriber standardDeviationSubscriber;
+
+    private final DoubleArraySubscriber tagCornersSubscriber;
+    private final DoubleArrayPublisher cropPublisher;
+
+    private final DoublePublisher rewindEnablePublisher;
+
+    private final DoubleArraySubscriber captureRewindSubscriber;
+    private final DoubleArrayPublisher captureRewindPublisher;
+
+    private final DoublePublisher imuModePublisher;
+
+    private boolean rewindEnabled = false;
+    private boolean isRewinding = false;
+
+    private double rewindCaptureDurationSeconds = 165.0;
+
     private final String name;
+
     /**
      * Creates a new VisionIOLimelight.
      *
@@ -58,17 +80,40 @@ public class VisionIOLimelight implements VisionIO {
         this.rotationVelocitySupplier = rotationVelocitySupplier;
         orientationPublisher =
                 table.getDoubleArrayTopic("robot_orientation_set").publish();
+        cropPublisher = table.getDoubleArrayTopic("crop").publish();
         latencySubscriber = table.getDoubleTopic("tl").subscribe(0.0);
         txSubscriber = table.getDoubleTopic("tx").subscribe(0.0);
         tySubscriber = table.getDoubleTopic("ty").subscribe(0.0);
         megatag1Subscriber = table.getDoubleArrayTopic("botpose_wpiblue").subscribe(new double[] {});
         megatag2Subscriber = table.getDoubleArrayTopic("botpose_orb_wpiblue").subscribe(new double[] {});
         standardDeviationSubscriber = table.getDoubleArrayTopic("stddevs").subscribe(new double[] {});
+        tagCornersSubscriber = table.getDoubleArrayTopic("tcornxy").subscribe(new double[] {});
+        rewindEnablePublisher = table.getDoubleTopic("rewind_enable_set").publish();
+        captureRewindSubscriber = table.getDoubleArrayTopic("capture_rewind").subscribe(new double[] {});
+        captureRewindPublisher = table.getDoubleArrayTopic("capture_rewind").publish();
+        imuModePublisher = table.getDoubleTopic("imumode_set").publish();
         this.name = name;
     }
 
     @Override
     public void updateInputs(VisionIOInputs inputs) {
+        if(!rewindEnabled && DriverStation.isFMSAttached() && DriverStation.isAutonomous()) {
+            rewindEnablePublisher.accept(1.0);
+            rewindEnabled = true;
+        } else {
+            rewindEnablePublisher.accept(0.0);
+        }
+
+        if(rewindEnabled && !isRewinding && DriverStation.isFMSAttached() && DriverStation.isDisabled()) {
+            isRewinding = true;
+            double[] currentArray = captureRewindSubscriber.get();
+            double counter = (currentArray.length > 0) ? currentArray[0] : 0;
+            double[] entries = new double[2];
+            entries[0] = counter + 1;
+            entries[1] = Math.min(rewindCaptureDurationSeconds, 165);
+            captureRewindPublisher.accept(entries);
+        }
+
         // Update connection status based on whether an update has been seen in the last 250ms
         inputs.connected = ((RobotController.getFPGATime() - latencySubscriber.getLastChange()) / 1000) < 250;
 
@@ -79,6 +124,7 @@ public class VisionIOLimelight implements VisionIO {
         // Update orientation for MegaTag 2
         orientationPublisher.accept(new double[] {rotationSupplier.get().getDegrees(), rotationVelocitySupplier.get().in(DegreesPerSecond), 0.0, 0.0, 0.0, 0.0});
         NetworkTableInstance.getDefault().flush(); // Increases network traffic but recommended by Limelight
+
 
         // Read new pose observations from NetworkTables
         Set<Integer> tagIds = new HashSet<>();
@@ -154,6 +200,27 @@ public class VisionIOLimelight implements VisionIO {
             inputs.tagIds[i++] = id;
         }
         inputs.name = name;
+
+
+        double[] corners = tagCornersSubscriber.get();
+
+        if(corners.length >= 8) {
+
+            double[] xCorners = {corners[0], corners[2], corners[4], corners[6]};
+            double[] yCorners = {corners[1], corners[3], corners[5], corners[7]};
+
+            double[] cropWindow = {
+                Arrays.stream(xCorners).min().getAsDouble(),
+                Arrays.stream(xCorners).max().getAsDouble(),
+                Arrays.stream(yCorners).min().getAsDouble(),
+                Arrays.stream(yCorners).max().getAsDouble()
+            };
+
+            inputs.cropWindow = cropWindow;
+            setCrop(cropWindow);
+        } else {
+            setCrop(new double[] {-1, 1, -1, 1}); //reset crop
+        }
     }
 
     public static double[] findTimestampedValue(TimestampedDoubleArray[] arr, long timestamp) {
@@ -166,6 +233,32 @@ public class VisionIOLimelight implements VisionIO {
         }
         return values;
     }
+
+    public void setImuMode(IMUMode imuMode) {
+        int imuModeValue;
+        switch (imuMode) {
+           case UseExternalIMU -> imuModeValue = 0;
+           case SeedInternalIMU -> imuModeValue = 1;
+           case UseInternalIMU -> imuModeValue = 2;
+           case UseInternalWithMT1 -> imuModeValue = 3;
+           case UseInternalWithExternal -> imuModeValue = 4;
+           default -> imuModeValue = 1;
+        }
+        imuModePublisher.accept(imuModeValue);
+    }
+
+    public void setCrop(double[] cropWindow) {
+        cropPublisher.accept(cropWindow);
+    }
+
+    public void setRobotOrientation(double angle) {
+        LimelightHelpers.SetRobotOrientation_NoFlush(name, angle, 0, 0, 0, 0, 0);
+    }
+
+    public void flushLimelight() {
+        NetworkTableInstance.getDefault().flush();
+    }
+
 
     /** Parses the 3D pose from a Limelight botpose array. */
     private static Pose3d parsePose(double[] rawLLArray) {

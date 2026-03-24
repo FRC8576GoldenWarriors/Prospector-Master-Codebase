@@ -26,6 +26,7 @@ public interface VisionIO {
         public PoseObservation[] poseObservations = new PoseObservation[0];
         public int[] tagIds = new int[0];
         public String name = "";
+        public double[] cropWindow = new double[0];
     }
 
     /** Represents the angle to a simple target, not used for pose estimation. */
@@ -46,6 +47,20 @@ public interface VisionIO {
         MEGATAG_2,
         PHOTONVISION
     }
+
+    enum IMUMode {
+        UseExternalIMU,
+        SeedInternalIMU,
+        UseInternalIMU,
+        UseInternalWithMT1,
+        UseInternalWithExternal
+    }
+
+    default void setImuMode(IMUMode imuMode) {}
+
+    default void flushLimelight() {}
+
+    default void setRobotOrientation(double angle) {}
 
     default void updateInputs(VisionIOInputs inputs) {}
 }
