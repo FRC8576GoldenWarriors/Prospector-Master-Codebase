@@ -4,6 +4,8 @@ import edu.wpi.first.units.measure.*;
 
 import static edu.wpi.first.units.Units.*;
 
+import java.util.ArrayList;
+import java.util.List;
 
 import org.littletonrobotics.junction.AutoLogOutput;
 
@@ -18,6 +20,7 @@ import edu.wpi.first.math.interpolation.InverseInterpolator;
 public class ShooterUtil {
     InterpolatingTreeMap<Double, Double> speedMap = new InterpolatingTreeMap<>(InverseInterpolator.forDouble(), Interpolator.forDouble());
     InterpolatingTreeMap<Double, Double> angleMap = new InterpolatingTreeMap<>(InverseInterpolator.forDouble(), Interpolator.forDouble());
+    List<Double> distanceList = new ArrayList<>();
 
     private double speedFudge = 0;//8.5;//2.5;
     private double angleFudge = 0;//0.06;
@@ -89,6 +92,17 @@ public class ShooterUtil {
         // angleMap.put(1.7+.55, 0.04);
         // angleMap.put(2.22+.55, 0.07);
 
+        distanceList.add(2.7+.55);
+        distanceList.add(2.5+.55);
+        distanceList.add(1.02+.55);
+        distanceList.add(1.9+.55);
+        distanceList.add(4.0+.55);
+        distanceList.add(5.43+.55);
+        distanceList.add(3.8+.55);
+        distanceList.add(3.37+.55);
+        distanceList.add(1.7+.55);
+        distanceList.add(2.22+.55);
+
         tofMap.put(3.11, 1.05);
         tofMap.put(1.9, null);
         tofMap.put(4.27, null);
@@ -139,6 +153,13 @@ public class ShooterUtil {
     public double getAngle(double limelightDistanceMeters){
         //Logger.recordOutput("ShooterUtil/Calculated RPS", RotationsPerSecond.of(MathUtil.clamp(speedMap.get(limelightDistanceMeters)+speedFudge, 0, 87)));
         return MathUtil.clamp(angleMap.get(limelightDistanceMeters)+angleFudge, 0, 0.37);
+    }
+
+    public double getNearestDistance(double distance) {
+        var nearest = distanceList.stream()
+                .min((d1, d2) -> Double.compare(Math.abs(d1 - distance), Math.abs(d2 - distance)))
+                .orElse(0.0);
+        return nearest;
     }
 
     // public Pair<AngularVelocity, Double> getSOTFCalc(double limelightDistanceX, double limelightDistanceY,double chassisVelX, double chassisVelY){

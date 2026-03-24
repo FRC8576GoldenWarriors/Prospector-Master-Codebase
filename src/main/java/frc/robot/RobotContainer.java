@@ -43,6 +43,8 @@ import frc.robot.subsystems.intake.IntakeKrakenIO;
 import frc.robot.subsystems.transport.Transport;
 import frc.robot.subsystems.transport.TransportIOKraken;
 import frc.robot.subsystems.vision.*;
+import frc.robot.subsystems.vision.VisionIO.IMUMode;
+
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeCoralOnFly;
@@ -235,7 +237,11 @@ public class RobotContainer {
                                 .getSimulatedDriveTrainPose()) // reset odometry to actual robot pose during simulation
                 : () -> drive.resetOdometry(
                         new Pose2d(drive.getPose().getTranslation(), new Rotation2d())); // zero gyro
-        driveController.start().onTrue(Commands.runOnce(resetGyro, drive).ignoringDisable(true));
+        driveController.start().onTrue(Commands.runOnce(resetGyro, drive).ignoringDisable(true).alongWith(new InstantCommand(() -> {
+                vision.setLimelightImuMode(IMUMode.SeedInternalIMU);
+                vision.setRobotOrientations(drive.getPose().getRotation().getDegrees());
+                vision.flushLimelights();
+        })));
 
         // Example Coral Placement Code
         // TODO: delete these code for your own project
