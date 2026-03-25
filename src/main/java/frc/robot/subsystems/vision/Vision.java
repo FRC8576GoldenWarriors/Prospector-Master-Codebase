@@ -130,7 +130,8 @@ public class Vision extends SubsystemBase {
                         || observation.pose().getX() > aprilTagLayout.getFieldLength()
                         || observation.pose().getY() < 0.0
                         || observation.pose().getY() > aprilTagLayout.getFieldWidth()
-                        || Drive.bumpDetector.isBumping();
+                        || Drive.bumpDetector.isBumping()
+                        || driveSpeedsSupplier.get().omegaRadiansPerSecond>4*Math.PI;
 
                 // Add pose to log
                 robotPoses.add(observation.pose());

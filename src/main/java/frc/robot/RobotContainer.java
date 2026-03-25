@@ -31,6 +31,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Macros.RobotStates;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.DriveX;
 import frc.robot.subsystems.Shooter.Shooter;
 import frc.robot.subsystems.Shooter.ShooterIOReal;
 import frc.robot.subsystems.Shooter.ShooterUtil;
@@ -179,6 +180,7 @@ public class RobotContainer {
         driveController.x().whileTrue(DriveCommands.joystickDriveAt45(drive, () -> -driveController.getLeftY(), () -> -driveController.getLeftX(), () -> drive.getPose()));
         driveController.b().onTrue(macros.setWantedState(RobotStates.Rest));
         driveController.povRight().onTrue(macros.setWantedState(RobotStates.IntakeOut));
+        driveController.povLeft().onTrue(new DriveX(drive, 1).withTimeout(Seconds.of(20)));
 
         opController.y().onTrue(new InstantCommand(()->shooterUtil.fudgeSpeed(0.5)));
         opController.a().onTrue(new InstantCommand(()->shooterUtil.fudgeSpeed(-0.5)));
@@ -240,7 +242,7 @@ public class RobotContainer {
                         new Pose2d(drive.getPose().getTranslation(), new Rotation2d())); // zero gyro
         driveController.start().onTrue(Commands.runOnce(resetGyro, drive).ignoringDisable(true).alongWith(new InstantCommand(() -> {
                 vision.setLimelightImuMode(IMUMode.SeedInternalIMU);
-                vision.setRobotOrientations(drive.getPose().getRotation().getDegrees());
+                vision.setRobotOrientations((DriverStation.getAlliance().orElse(Alliance.Blue)==Alliance.Blue)?drive.getPose().getRotation().getDegrees():drive.getPose().getRotation().getDegrees()+180);
                 vision.flushLimelights();
         })));
 
@@ -283,6 +285,7 @@ public class RobotContainer {
         //             (DriverStation.getAlliance().get() == Alliance.Red) ? Rotation2d.k180deg : Rotation2d.kZero);
         //     drive.resetGyro(resetPose);
         // }));
+
         // controller.povDown().whileTrue(drive.driveToPose(new Pose2d(14.6,4.75,Rotation2d.k180deg)).andThen(new DriveX(drive,-0.1).until(()->drive.getDetected())));
         // controller.leftBumper().onTrue(new InstantCommand(() -> {shooter.setRPS(40);}));
         // controller.rightBumper().onTrue(new InstantCommand(() -> {shooter.setRPS(0);}));
