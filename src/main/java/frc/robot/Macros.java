@@ -22,6 +22,7 @@ import frc.robot.subsystems.intake.Intake.IntakeStates;
 import frc.robot.subsystems.transport.Transport;
 import frc.robot.subsystems.transport.Transport.TransportStates;
 import frc.robot.subsystems.vision.VisionConstants;
+import frc.robot.util.FieldUtil;
 
 
 @SuppressWarnings("unused")
@@ -144,7 +145,7 @@ public class Macros extends SubsystemBase {
   }
   public void shoot(){
     if(RobotContainer.driveController.rightTrigger().getAsBoolean()){
-      if((RobotContainer.drive.getPose().getX()  > (VisionConstants.aprilTagLayout.getFieldLength()-4.61)&&DriverStation.getAlliance().orElse(Alliance.Blue)==Alliance.Red) ||(RobotContainer.drive.getPose().getX() < 4.61&&DriverStation.getAlliance().orElse(Alliance.Blue)==Alliance.Blue)){
+      if(FieldUtil.isOnAllianceSide()){
         if(m_ShooterHood.atSetpoint()){
       m_shooter.setWantedState(ShooterStates.SHOOT);
     }
