@@ -2,9 +2,10 @@ package frc.robot.subsystems.LEDs;
 
 import static edu.wpi.first.units.Units.*;
 
+import org.littletonrobotics.junction.AutoLogOutput;
+
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.LEDPattern;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -28,6 +29,7 @@ public class LEDs extends SubsystemBase {
     Enabled,
   }
 
+  @AutoLogOutput (key = "LEDs/Wanted State")
   public LEDStates state = LEDStates.Disabled;
 
   public LEDs() {
@@ -94,7 +96,6 @@ public class LEDs extends SubsystemBase {
   @Override
   public void periodic() {
 
-    if(DriverStation.isEnabled()){
 
       switch (state) {
         case Disabled:
@@ -118,18 +119,10 @@ public class LEDs extends SubsystemBase {
         default:
           solid(LEDConstants.PatternConfig.YellowSolid);
           break;
-      }
 
 
 
-    }else{
-      state = LEDStates.Disabled;
     }
-
-
-
-
-
     led.setData(buffer);
 
   }

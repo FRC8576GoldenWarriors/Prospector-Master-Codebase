@@ -6,7 +6,7 @@ import edu.wpi.first.wpilibj.util.Color;
 public class LEDConstants {
   public static final class HardwareConstants {
     public static final int LED_PORT = 0;
-    public static final int LED_LENGTH = 8576;
+    public static final int LED_LENGTH = 7;
   }
 
   public static final class PatternConfig {
@@ -26,7 +26,7 @@ public class LEDConstants {
 
 
     // red strobing - disabled
-    public static final LEDPattern RebStrobing = LEDPattern.solid(Color.kRed);
+    public static final LEDPattern RebStrobing = LEDPattern.solid(new Color(255,0,0));
     public static final double RebStrobingSpeed = 2.0;
     //ENABLED
     public static final LEDPattern YellowSolid = LEDPattern.solid(Color.kYellow);

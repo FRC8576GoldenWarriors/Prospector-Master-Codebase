@@ -32,6 +32,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Macros.RobotStates;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.DriveX;
+import frc.robot.subsystems.LEDs.LEDs;
 import frc.robot.subsystems.Shooter.Shooter;
 import frc.robot.subsystems.Shooter.ShooterIOReal;
 import frc.robot.subsystems.Shooter.ShooterUtil;
@@ -77,7 +78,7 @@ public class RobotContainer {
     // Controller
     public static final CommandXboxController driveController = new CommandXboxController(0);
     public static final CommandXboxController opController = new CommandXboxController(1);
-
+    public static final LEDs leds = new LEDs();
     public Trigger resetHeadingTrigger = new Trigger(() -> driveController.start().getAsBoolean());
     // Dashboard inputs
     private final Autos autos;

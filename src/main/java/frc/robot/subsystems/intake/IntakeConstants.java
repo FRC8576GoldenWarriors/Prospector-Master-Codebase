@@ -18,7 +18,7 @@ public class IntakeConstants {
     }
 
     public class Software{
-        public static double leftZero = -0.77+0.01-0.533+0.01;//-0.29;//0.158-0.7;
+        public static double leftZero = -0.46;//-0.77+0.01-0.533+0.01-.518;//-0.29;//0.158-0.7;
         public static double rightZero =0.22;//0.2;// 0.168;
         public static boolean leftInverted = true;
         public static boolean rightInverted = false;
@@ -30,11 +30,11 @@ public class IntakeConstants {
         public static double kV = 0;
         public static double kA = 0;
 
-        public static double intakeUp = 0.366; //0.36;
+        public static double intakeUp = 0.33; //0.36;
 
 
         public static double intakeDown = 0.001;//0.09;//0.012;
-        public static double agitatePosition =  0.366;//0.22;
+        public static double agitatePosition =  0.33;//0.22;
 
         public static double rollerSpeed = 0.7;
         public static double intakeSoftStop = 0.4;
