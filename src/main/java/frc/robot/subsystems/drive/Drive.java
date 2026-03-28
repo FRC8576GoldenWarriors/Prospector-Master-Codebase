@@ -106,7 +106,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
             kinematics,
             rawGyroRotation,
             lastModulePositions,
-            (DriverStation.getAlliance().get() == Alliance.Blue) ? Pose2d.kZero : new Pose2d(Translation2d.kZero, Rotation2d.k180deg),
+            (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue) ? Pose2d.kZero : new Pose2d(Translation2d.kZero, Rotation2d.k180deg),
             VecBuilder.fill(DriveConstants.baseXDriveSTDEV, DriveConstants.baseYDriveSTDEV, DriveConstants.baseThetaDriveSTDEV),
             VecBuilder.fill(DriveConstants.baseXVisionSTDEV, DriveConstants.baseYVisionSTDEV, DriveConstants.baseThetaVisionSTDEV));
 
@@ -242,16 +242,18 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
                 Logger.recordOutput("averageXSkid", averageXSkid);
                 Logger.recordOutput("averageYSkid", averageYSkid);
 
-                xDeviation += Math.pow(averageXSkid, 2);
-                yDeviation += Math.pow(averageYSkid, 2);
+                // xDeviation += Math.pow(averageXSkid, 2);
+                // yDeviation += Math.pow(averageYSkid, 2);
+                xDeviation += averageXSkid;//Math.sqrt(Math.pow(averageXSkid, 2)+Math.pow(xDeviation,2));
+                yDeviation += averageYSkid; //Math.sqrt(Math.pow(averageYSkid, 2)+Math.pow(yDeviation,2));
             }
 
             // Bump
 
             Pair<Double, Double> bumpStandardDeviations = bumpDetector.getBumpSTDDevs();
 
-            xDeviation += bumpStandardDeviations.getFirst();
-            yDeviation += bumpStandardDeviations.getSecond();
+            // xDeviation += bumpStandardDeviations.getFirst();
+            // yDeviation += bumpStandardDeviations.getSecond();
 
             // TODO Collision
             //boolean anyCollision = collisionDetector.isColliding();
