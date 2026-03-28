@@ -55,6 +55,7 @@ public class DriveConstants {
     public static final Rotation2d backLeftZeroRotation =
             Rotation2d.fromRotations(0.471680);//-0.046875);//-0.049072);//0.459961);//-0.192871);//(0.478760); // 0.464355); // 0.453857);
     public static final Rotation2d backRightZeroRotation = Rotation2d.fromRotations(-0.206299);//0.306641);//0.308350);//0.449219 );//(0.176025); // 0.171875);
+    public static final double gyroTrimDegreesPerRotation = -4.45;
 
     // Device CAN IDs
     public static final int pigeonCanId = 0;

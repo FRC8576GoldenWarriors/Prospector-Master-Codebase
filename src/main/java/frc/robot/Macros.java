@@ -91,8 +91,10 @@ public class Macros extends SubsystemBase {
           break;
         case AutonShoot:
           autonShoot();
+          break;
         case IntakeOut:
           intakeOut();
+          break;
         default:
             break;
      }
@@ -223,7 +225,7 @@ public class Macros extends SubsystemBase {
     }
   }
   public void autonShoot(){
-    if(DriverStation.isAutonomous()){
+    //if(DriverStation.isAutonomous()){
     if(m_ShooterHood.atSetpoint()){
       m_shooter.setWantedState(ShooterStates.SHOOT);
     }
@@ -245,14 +247,15 @@ public class Macros extends SubsystemBase {
     }
 
     m_ShooterHood.setWantedState(ShooterHoodStates.Shoot);
-  }else{
-    wantedState = RobotStates.Idle;
-  }
+  //}
+  // else{
+  //   wantedState = RobotStates.Idle;
+  // }
   }
 
   public void runContinous(){
     if(m_ShooterHood.atSetpoint()){
-      m_shooter.setWantedState(ShooterStates.Tuning);
+      m_shooter.setWantedState(ShooterStates.SHOOT);
     }
     if(m_shooter.isRevved()&&m_ShooterHood.atSetpoint()){
     //m_ShooterHood.setWantedState(ShooterHoodStates.Shoot);
@@ -271,7 +274,7 @@ public class Macros extends SubsystemBase {
       m_Intake.setWantedPosition(IntakeStates.IntakeDown);
     }
 
-    m_ShooterHood.setWantedState(ShooterHoodStates.Passing);
+    m_ShooterHood.setWantedState(ShooterHoodStates.Shoot);
   //  m_shooter.setWantedState(ShooterStates.Tuning);
     //m_ShooterHood.setWantedState(ShooterHoodStates.Test);
   //  if(m_Intake.getState()==IntakeStates.Idle){

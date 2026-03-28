@@ -147,12 +147,15 @@ public class Vision extends SubsystemBase {
                 }
 
                 // Calculate standard deviations
-                double stdDevFactor = observation.averageTagDistance() / observation.tagCount();//2.21m for last test
+                double stdDevFactor = Math.pow(observation.averageTagDistance(), 1) / observation.tagCount();//2.21m for last test
                 double linearStdDev = linearStdDevBaseline * stdDevFactor;
                 double angularStdDev = angularStdDevBaseline * stdDevFactor;
                 if (observation.type() == PoseObservationType.MEGATAG_2) {
                     linearStdDev *= linearStdDevMegatag2Factor;
                     angularStdDev *= angularStdDevMegatag2Factor;
+                    // if(Drive.bumpDetector.isBumping()) {
+                    //     linearStdDev += Drive.bumpDetector.getBumpSTDDevs().getFirst();
+                    // }
                 }
                 if (cameraIndex < cameraStdDevFactors.length) {
                     linearStdDev *= cameraStdDevFactors[cameraIndex];
