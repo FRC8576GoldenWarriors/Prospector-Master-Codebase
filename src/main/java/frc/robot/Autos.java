@@ -55,9 +55,26 @@ public class Autos {
         autoChooser.addOption("Left Depot Auton", leftAuton());
         autoChooser.addOption("Right Leave Shoot", rightLeave());
         autoChooser.addOption("Middle Leave Shoot", testAutonThingy());
+        autoChooser.addOption("Right Double Dip", rightDoubleSteal());
         SmartDashboard.putData("Auto Chooser",autoChooser.getSendableChooser());
     }
-
+     public Command rightDoubleSteal(){
+        return runPath("OverBump", flipped,AutonConstants.startingRightPose)
+                .alongWith(macros.setWantedState(RobotStates.IntakeOn))
+                .andThen(runPath("IntakeBalls", flipped))
+                .andThen(runPath("BackToBump", flipped))
+                .andThen(runPath("BackOverBump", flipped))
+                .andThen(DriveCommands.joystickDriveTagCentric(drive,()->0,()->0,()->drive.getPose())
+                    .until(()->DriveCommands.angleController.atGoal()))
+                .andThen(new InstantCommand(()->macros.setWantedState(RobotStates.AutonShoot),macros))
+                .andThen(runPath("OverBump", flipped)
+                    .alongWith(macros.setWantedState(RobotStates.IntakeOn)))
+                .andThen(runPath("IntakeHub", flipped))
+                .andThen(runPath("HubOverBump", flipped))
+                .andThen(DriveCommands.joystickDriveTagCentric(drive,()->0,()->0,()->drive.getPose())
+                    .until(()->DriveCommands.angleController.atGoal()))
+                .andThen(new InstantCommand(()->macros.setWantedState(RobotStates.AutonShoot),macros));
+     }
     public Command rightLeave(){
         return runPath("OverBump", flipped,AutonConstants.startingRightPose).alongWith(macros.setWantedState(RobotStates.IntakeOn)).andThen(runPath("IntakeBalls", flipped)).andThen(runPath("FRIntakeBalls", flipped)).andThen(runPath("BackToBump", flipped)).andThen(runPath("BackOverBump", flipped).alongWith(macros.setWantedState(RobotStates.IntakeOff))).andThen(DriveCommands.joystickDriveTagCentric(drive,()->0,()->0,()->drive.getPose()).until(()->DriveCommands.angleController.atGoal())).andThen(macros.setWantedState(RobotStates.RunContinous));//runPath("RightLeave", flipped,AutonConstants.startingRightPose).andThen(DriveCommands.joystickDriveTagCentric(drive,()->0,()->0,()->drive.getPose()).until(()->DriveCommands.angleController.atGoal())).andThen(macros.setWantedState(RobotStates.AutonShoot));//runPath("OverBump",false,AutonConstants.startingRightPose).alongWith(macros.setWantedState(RobotStates.IntakeOn));//.andThen(runPath("IntakeBalls",false)).andThen(runPath("BackToBump",false)).andThen(runPath("BackOverBump",false)).andThen(DriveCommands.joystickDriveTagCentric(drive,()->0,()->0,()->drive.getPose()).until(()->DriveCommands.angleController.atGoal()).andThen(macros.setWantedState(RobotStates.AutonShoot)));
     }

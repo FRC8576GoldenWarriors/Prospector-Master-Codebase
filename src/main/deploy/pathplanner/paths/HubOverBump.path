@@ -1,0 +1,59 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 6.083366619115549,
+        "y": 3.912082738944366
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 6.290385164051354,
+        "y": 2.17830242510699
+      },
+      "isLocked": false,
+      "linkedName": "IntakeHubEnd"
+    },
+    {
+      "anchor": {
+        "x": 3.3403708987161194,
+        "y": 2.4758915834522113
+      },
+      "prevControl": {
+        "x": 4.9577032810271024,
+        "y": 2.4888302425106996
+      },
+      "nextControl": null,
+      "isLocked": true,
+      "linkedName": null
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.1577825159914731,
+      "rotationDegrees": 45.0
+    }
+  ],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 45.0
+  },
+  "reversed": false,
+  "folder": null,
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 99.46232220802561
+  },
+  "useDefaultConstraints": true
+}
