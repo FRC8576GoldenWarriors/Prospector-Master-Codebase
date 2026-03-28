@@ -31,7 +31,6 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Macros.RobotStates;
 import frc.robot.commands.DriveCommands;
-import frc.robot.commands.DriveX;
 import frc.robot.subsystems.LEDs.LEDs;
 import frc.robot.subsystems.Shooter.Shooter;
 import frc.robot.subsystems.Shooter.ShooterIOReal;
@@ -175,13 +174,17 @@ public class RobotContainer {
                drive, () -> -driveController.getLeftY(), () -> -driveController.getLeftX(), () -> -driveController.getRightX()));
 
         driveController.leftTrigger().whileTrue(DriveCommands.joystickDriveTagCentric(drive, () -> -driveController.getLeftY(), () -> -driveController.getLeftX(), () -> drive.getPose()));
-        driveController.rightTrigger().onTrue(macros.setWantedState(RobotStates.RunContinous));
+        driveController.rightTrigger().onTrue(macros.setWantedState(RobotStates.Shoot));
         driveController.rightBumper().onTrue(macros.setWantedState(RobotStates.IntakeOn));
         driveController.leftBumper().onTrue(macros.setWantedState(RobotStates.IntakeOff));
         driveController.x().whileTrue(DriveCommands.joystickDriveAt45(drive, () -> -driveController.getLeftY(), () -> -driveController.getLeftX(), () -> drive.getPose()));
         driveController.b().onTrue(macros.setWantedState(RobotStates.Rest));
         driveController.povRight().onTrue(macros.setWantedState(RobotStates.IntakeOut));
-        driveController.povLeft().onTrue(new DriveX(drive, 1).withTimeout(Seconds.of(20)));
+        //driveController.povLeft().onTrue(new DriveX(drive, 1).withTimeout(Seconds.of(3)));
+        // driveController.povUp().onTrue(new InstantCommand(() -> {
+        //         drive.resetRawSwervePose(new Pose2d());
+        // }));
+
 
         opController.y().onTrue(new InstantCommand(()->shooterUtil.fudgeSpeed(0.5)));
         opController.a().onTrue(new InstantCommand(()->shooterUtil.fudgeSpeed(-0.5)));

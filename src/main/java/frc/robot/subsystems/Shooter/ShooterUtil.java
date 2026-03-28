@@ -43,6 +43,9 @@ public class ShooterUtil {
         speedMap.put(2.33, 34.36);
         speedMap.put(2.66, 35.84);
 
+        //Spity 2 pretuning
+        speedMap.put(2.0, 26.73);
+        speedMap.put(4.408, 40.12);
 
         // speedMap.put(1.76, 31.12);
         // speedMap.put(2.25, 34.5);
@@ -75,6 +78,10 @@ public class ShooterUtil {
         angleMap.put(2.244, 0.083);
         angleMap.put(2.33, 0.086);
         angleMap.put(2.66, 0.10018);
+
+        //Spity 2 pretuning
+        angleMap.put(2.0, 0.065);
+        angleMap.put(4.408, 0.147);
 
 
         // angleMap.put(1.76,0.0113);

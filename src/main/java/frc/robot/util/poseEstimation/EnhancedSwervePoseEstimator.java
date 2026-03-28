@@ -10,6 +10,7 @@ import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.PoseEstimator;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -116,7 +117,11 @@ public class EnhancedSwervePoseEstimator {
             if (m_q.get(row, 0) == 0.0) {
                 m_visionK.set(row, row, 0.0);
             } else {
-                m_visionK.set(row, row, m_q.get(row, 0) / (m_q.get(row, 0) + Math.sqrt(m_q.get(row, 0) * r[row])));
+                // Old Kalman gain calculation:
+                // m_visionK.set(row, row, m_q.get(row, 0) / (m_q.get(row, 0) + Math.sqrt(m_q.get(row, 0) * r[row])));
+                // Standard Discrete Kalman Gain: K = Q / (Q + R)
+                // Assuming state uncertainty P has converged to Q over many high-frequency samples
+                m_visionK.set(row, row, m_q.get(row, 0) / (m_q.get(row, 0) + m_r.get(row, 0)));
             }
         }
     }
@@ -138,8 +143,7 @@ public class EnhancedSwervePoseEstimator {
             if (m_q.get(row, 0) == 0.0) {
                 m_visionK.set(row, row, 0.0);
             } else {
-                m_visionK.set(
-                        row, row, m_q.get(row, 0) / (m_q.get(row, 0) + Math.sqrt(m_q.get(row, 0) * m_r.get(row, 0))));
+                m_visionK.set(row, row, m_q.get(row, 0) / (m_q.get(row, 0) + m_r.get(row, 0)));
             }
         }
     }

@@ -192,7 +192,7 @@ public class Macros extends SubsystemBase {
     if(m_ShooterHood.atSetpoint()){
       m_shooter.setWantedState(ShooterStates.SHOOT);
     }
-    if(m_shooter.isRevved()&&m_ShooterHood.atSetpoint()){
+    if(m_shooter.passingRevved()&&m_ShooterHood.atSetpoint()){
     //m_ShooterHood.setWantedState(ShooterHoodStates.Shoot);
     m_Transport.setWantedState(TransportStates.TransportIn);
     }else{

@@ -146,6 +146,10 @@ public class Shooter extends SubsystemBase {
     //return (inputs.leftMotorSpeed.in(RotationsPerSecond)>targetRPS.get()-10)&&(inputs.leftMotorSpeed.in(RotationsPerSecond)<targetRPS.get()+10);//0.5
   }
 
+  public boolean passingRevved(){
+    return MathUtil.isNear(wantedRPS.in(RotationsPerSecond),(inputs.leftMotorSpeed.in(RotationsPerSecond)+(inputs.rightMotorSpeed.in(RotationsPerSecond)))/2,10);//6//1
+    //return (inputs.leftMotorSpeed.in(RotationsPerSecond)>targetRPS.get()-10)&&(inputs.leftMotorSpeed.in(RotationsPerSecond)<targetRPS.get()+10);//0.5
+  }
    public void setShooter(AngularVelocity wantedRPS){
     double bangBangCalculation = bangBangController.calculate((inputs.leftMotorSpeed.in(RotationsPerSecond)+(inputs.rightMotorSpeed.in(RotationsPerSecond)))/2,wantedRPS.in(RotationsPerSecond));
     if(bangBangCalculation==0){

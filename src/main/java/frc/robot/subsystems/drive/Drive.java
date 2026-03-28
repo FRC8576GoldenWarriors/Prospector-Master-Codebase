@@ -102,6 +102,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
                 new SwerveModulePosition(),
                 new SwerveModulePosition()
             };
+
     private final EnhancedSwervePoseEstimator poseEstimator = new EnhancedSwervePoseEstimator(
             kinematics,
             rawGyroRotation,
@@ -115,6 +116,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
     //     rawGyroRotation,
     //     lastModulePositions,
     //     (DriverStation.getAlliance().get() == Alliance.Blue) ? Pose2d.kZero : new Pose2d(Translation2d.kZero, Rotation2d.k180deg));
+
     private final Consumer<Pose2d> resetSimulationPoseCallBack;
 
     private final SwerveSetpointGenerator setpointGenerator;
@@ -205,7 +207,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
         // Update odometry
         double[] sampleTimestamps = modules[0].getOdometryTimestamps(); // All signals are sampled together
         int sampleCount = sampleTimestamps.length;
-        Logger.recordOutput("Sample amount", sampleCount);
+        //Logger.recordOutput("Sample amount", sampleCount);
         for (int i = 0; i < sampleCount; i++) {
             // Read wheel positions and deltas from each module
             SwerveModulePosition[] modulePositions = new SwerveModulePosition[4];
@@ -213,7 +215,6 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
             boolean[] isSkidding = this.calculateSkidding();
             for (int moduleIndex = 0; moduleIndex < 4; moduleIndex++) {
                 modulePositions[moduleIndex] = modules[moduleIndex].getOdometryPositions()[i];
-                Logger.recordOutput("Module Delta " + moduleIndex, modulePositions[moduleIndex].distanceMeters - lastModulePositions[moduleIndex].distanceMeters);
                 moduleDeltas[moduleIndex] = new SwerveModulePosition(
                         modulePositions[moduleIndex].distanceMeters - lastModulePositions[moduleIndex].distanceMeters,
                         modulePositions[moduleIndex].angle);
@@ -242,16 +243,16 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
                 Logger.recordOutput("averageXSkid", averageXSkid);
                 Logger.recordOutput("averageYSkid", averageYSkid);
 
-                xDeviation += Math.pow(averageXSkid, 2);
-                yDeviation += Math.pow(averageYSkid, 2);
+                xDeviation = Math.sqrt(Math.pow(xDeviation, 2) + Math.pow(averageXSkid, 2));
+                yDeviation = Math.sqrt(Math.pow(yDeviation, 2) + Math.pow(averageYSkid, 2));
             }
 
-            // Bump
+            //Bump
 
             Pair<Double, Double> bumpStandardDeviations = bumpDetector.getBumpSTDDevs();
 
-            xDeviation += bumpStandardDeviations.getFirst();
-            yDeviation += bumpStandardDeviations.getSecond();
+            xDeviation = Math.sqrt(Math.pow(xDeviation, 2) + Math.pow(bumpStandardDeviations.getFirst(), 2));
+            yDeviation = Math.sqrt(Math.pow(yDeviation, 2) + Math.pow(bumpStandardDeviations.getSecond(), 2));
 
             // TODO Collision
             //boolean anyCollision = collisionDetector.isColliding();
@@ -284,7 +285,8 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
             // Apply update
             // if(!anyBumping)
             Logger.recordOutput("Drive/Module Positions", modulePositions);
-                poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
+            poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
+           // odometry.update(rawGyroRotation, modulePositions);
         }
 
         // Update gyro alert
@@ -496,6 +498,11 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
         return poseEstimator.getEstimatedPosition();//return odometry.getEstimatedPosition();
     }
 
+    // @AutoLogOutput(key="Odometry/RawSwerveOdometry")
+    // public Pose2d getSwervePose() {
+    //     return odometry.getPoseMeters();
+    // }
+
     /** Returns the current odometry rotation. */
     public Rotation2d getRotation() {
         return getPose().getRotation();
@@ -514,10 +521,20 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
         try {
             resetSimulationPoseCallBack.accept(pose);
             poseEstimator.resetPosition(gyroInputs.yawPosition, getModulePositions(), pose);
+            //odometry.resetPosition(gyroInputs.yawPosition, getModulePositions(), new Pose2d());
         } finally {
             odometryLock.unlock();
         }
     }
+
+    // public void resetRawSwervePose(Pose2d pose) {
+    //     odometryLock.lock();
+    //     try {
+    //         odometry.resetPosition(gyroInputs.yawPosition, getModulePositions(), new Pose2d());
+    //     } finally {
+    //         odometryLock.unlock();
+    //     }
+    // }
 
     public void resetGyro(Pose2d pose) {
         odometryLock.lock();
@@ -538,7 +555,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
     /** Adds a new timestamped vision measurement. */
     @Override
     public void accept(Pose2d visionRobotPoseMeters, double timestampSeconds, Matrix<N3, N1> visionMeasurementStdDevs) {
-        // Protect estimator from concurrent updates
+        //Protect estimator from concurrent updates
         odometryLock.lock();
         try {
             poseEstimator.addVisionMeasurement(visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);

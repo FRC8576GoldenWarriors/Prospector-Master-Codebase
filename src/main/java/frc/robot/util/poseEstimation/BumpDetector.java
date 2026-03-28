@@ -69,9 +69,11 @@ public class BumpDetector {
     public Pair<Double, Double> getBumpSTDDevs(){
         double timeSinceBumpSeconds = timeSinceBump.get();
 
-        double xStdDev = (!timeSinceBump.isRunning()) ? 0.0 : Math.pow(Math.E, -(timeSinceBumpSeconds - 1));
-        double yStdDev = (!timeSinceBump.isRunning()) ? 0.0 : Math.pow(Math.E, -(timeSinceBumpSeconds - 1));
+        if (!timeSinceBump.isRunning() || timeSinceBumpSeconds > 7) {
+            return Pair.of(0.0, 0.0);
+        }
 
-        return Pair.of(xStdDev, yStdDev);
+        double stdDev = Math.pow(Math.E, -(timeSinceBumpSeconds - 1));
+        return Pair.of(stdDev, stdDev);
     }
 }

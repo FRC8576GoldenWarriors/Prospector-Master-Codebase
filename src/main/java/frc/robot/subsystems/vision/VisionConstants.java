@@ -18,6 +18,7 @@ import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Seconds;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
@@ -60,18 +61,20 @@ public class VisionConstants {
 
     // Standard deviation baselines, for 1 meter distance and 1 tag
     // (Adjusted automatically based on distance and # of tags)
-    public static double linearStdDevBaseline = 1;//800 // Meters
+    public static double linearStdDevBaseline= List.of(0.0931, 0.2991, 0.2431, 0.1059).stream().mapToDouble(Double::doubleValue).average().getAsDouble();//800 // Meters
     public static double angularStdDevBaseline = 0.06; // Radians
 
     // Standard deviation multipliers for each camera
     // (Adjust to trust some cameras more than others)
     public static double[] cameraStdDevFactors = new double[] {
-        1.0, // Camera 0
-        1.0 // Camera 1
+        0.0931, // Camera 0
+        0.2991, // Camera 1
+        0.2431, // Camera 2
+        0.1059 // Camera 3
     };
 
     // Multipliers to apply for MegaTag 2 observations
-    public static double linearStdDevMegatag2Factor = 0.1;//0.2; // More stable than full 3D solve
+    public static double linearStdDevMegatag2Factor = 0.01;//0.2; // More stable than full 3D solve
     public static double angularStdDevMegatag2Factor = Double.POSITIVE_INFINITY; // No rotation data available
 
     // Time for internal IMU to converge after reset, in seconds
