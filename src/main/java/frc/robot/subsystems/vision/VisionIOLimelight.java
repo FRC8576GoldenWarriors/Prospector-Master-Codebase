@@ -92,6 +92,7 @@ public class VisionIOLimelight implements VisionIO {
         captureRewindSubscriber = table.getDoubleArrayTopic("capture_rewind").subscribe(new double[] {});
         captureRewindPublisher = table.getDoubleArrayTopic("capture_rewind").publish();
         imuModePublisher = table.getDoubleTopic("imumode_set").publish();
+        //LimelightHelpers.SetIMUAssistAlpha(name, 0.1);
         this.name = name;
     }
 
@@ -244,6 +245,7 @@ public class VisionIOLimelight implements VisionIO {
            case UseInternalWithExternal -> imuModeValue = 4;
            default -> imuModeValue = 1;
         }
+        imuModeValue = 0; //default to external
         imuModePublisher.accept(imuModeValue);
     }
 

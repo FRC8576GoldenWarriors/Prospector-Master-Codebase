@@ -22,7 +22,7 @@ public class BumpDetector {
     private final Angle rollThreshold = Degrees.of(5);//4
     private final Angle pitchOffset = Degrees.of(0.527334);//-0.527334//1.845703+0.69);
     private final Angle rollOffset = Degrees.of(0);//-7.338867+3.258);
-    private final Time debouncerTimeThreshold = Seconds.of(0.4);
+    private final Time debouncerTimeThreshold = Seconds.of(0.4 - 0.2);
 
     private final StatusSignal<Angle> pitchSignal;
     private final StatusSignal<Angle> rollSignal;
@@ -69,9 +69,11 @@ public class BumpDetector {
     public Pair<Double, Double> getBumpSTDDevs(){
         double timeSinceBumpSeconds = timeSinceBump.get();
 
-        double xStdDev = (!timeSinceBump.isRunning()) ? 0.0 : Math.pow(Math.E, -(timeSinceBumpSeconds - 1));
-        double yStdDev = (!timeSinceBump.isRunning()) ? 0.0 : Math.pow(Math.E, -(timeSinceBumpSeconds - 1));
+        if (!timeSinceBump.isRunning() || timeSinceBumpSeconds > 7) {
+            return Pair.of(0.0, 0.0);
+        }
 
-        return Pair.of(xStdDev, yStdDev);
+        double stdDev = Math.pow(Math.E, -(timeSinceBumpSeconds - 1));
+        return Pair.of(stdDev, stdDev);
     }
 }

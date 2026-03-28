@@ -20,6 +20,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
+
 import org.littletonrobotics.junction.Logger;
 
 public class Module {
@@ -52,6 +53,7 @@ public class Module {
             Rotation2d angle = inputs.odometryTurnPositions[i];
             odometryPositions[i] = new SwerveModulePosition(positionMeters, angle);
         }
+        //Logger.recordOutput("Drive Module "+index+"/Odometry Positions", odometryPositions);
 
         // Update alerts
         driveDisconnectedAlert.set(!inputs.driveConnected);

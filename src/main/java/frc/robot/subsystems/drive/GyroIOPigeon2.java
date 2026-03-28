@@ -53,6 +53,9 @@ public class GyroIOPigeon2 implements GyroIO {
         pigeon.optimizeBusUtilization();
         yawTimestampQueue = SparkOdometryThread.getInstance().makeTimestampQueue();
         yawPositionQueue = SparkOdometryThread.getInstance().registerSignal(yaw::getValueAsDouble);
+        Pigeon2Configuration config = new Pigeon2Configuration();
+        config.GyroTrim.GyroScalarZ = DriveConstants.gyroTrimDegreesPerRotation;
+        pigeon.getConfigurator().apply(config);
     }
 
     public void resetHeading(double headingDegrees) {

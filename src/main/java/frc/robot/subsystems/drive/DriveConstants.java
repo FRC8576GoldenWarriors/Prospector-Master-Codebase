@@ -35,7 +35,7 @@ public class DriveConstants {
     public static final double odometryFrequency = 250.0; // Hz
     public static final double trackWidth = Units.inchesToMeters(21.75);
     public static final double wheelBase = Units.inchesToMeters(21.75);
-    public static final LoggedNetworkNumber angularVelocityCoefficient = new LoggedNetworkNumber("Drive/angularVelocityCoefficient", 0.175);
+    public static final LoggedNetworkNumber angularVelocityCoefficient = new LoggedNetworkNumber("Drive/angularVelocityCoefficient", 0.1);
     public static final boolean useChasisDiscretize = false;
     public static final boolean useAngularVelocitySkewCorrection = true;
     public static final double driveBaseRadius = Math.sqrt((Math.pow(trackWidth, 2) + Math.pow(wheelBase, 2)))
@@ -55,6 +55,7 @@ public class DriveConstants {
     public static final Rotation2d backLeftZeroRotation =
             Rotation2d.fromRotations(0.471680);//-0.046875);//-0.049072);//0.459961);//-0.192871);//(0.478760); // 0.464355); // 0.453857);
     public static final Rotation2d backRightZeroRotation = Rotation2d.fromRotations(-0.206299);//0.306641);//0.308350);//0.449219 );//(0.176025); // 0.171875);
+    public static final double gyroTrimDegreesPerRotation = -4.45;
 
     // Device CAN IDs
     public static final int pigeonCanId = 0;
@@ -157,8 +158,8 @@ public class DriveConstants {
     public static final double skidThresholdX = 0.1;//0.035;//0.03;
     public static final double skidThresholdY = 0.1;//0.029;//0.029
 
-    public static final double baseXDriveSTDEV = 0.09;
-    public static final double baseYDriveSTDEV = 0.025;
+    public static final double baseXDriveSTDEV = 0.0666;
+    public static final double baseYDriveSTDEV = 0.1162;
     public static final double baseThetaDriveSTDEV = Units.degreesToRadians(0.001);
 
     public static final double baseXVisionSTDEV = 0.1;

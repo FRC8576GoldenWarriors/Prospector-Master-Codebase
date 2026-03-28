@@ -76,6 +76,7 @@ public class Vision extends SubsystemBase {
     @Override
     public void periodic() {
 
+
         if(DriverStation.isDisabled()) {
             setLimelightImuMode(IMUMode.SeedInternalIMU);
         } else {
@@ -83,8 +84,9 @@ public class Vision extends SubsystemBase {
         }
 
         for (int i = 0; i < io.length; i++) {
+
             io[i].updateInputs(inputs[i]);
-            Logger.processInputs("Vision/Camera" + Integer.toString(i), inputs[i]);
+            Logger.processInputs("Vision/Camera" + Integer.toString(i) + " " + inputs[i].name, inputs[i]);
             if(DriverStation.isDisabled()){
                 LimelightHelpers.SetThrottle(inputs[i].name,200);
             }else{
@@ -130,7 +132,7 @@ public class Vision extends SubsystemBase {
                         || observation.pose().getX() > aprilTagLayout.getFieldLength()
                         || observation.pose().getY() < 0.0
                         || observation.pose().getY() > aprilTagLayout.getFieldWidth()
-                        || Drive.bumpDetector.isBumping()
+                        || (Drive.bumpDetector.isBumping() && observation.tagCount() < 2)
                         || driveSpeedsSupplier.get().omegaRadiansPerSecond>4*Math.PI;
 
                 // Add pose to log
@@ -147,16 +149,28 @@ public class Vision extends SubsystemBase {
                 }
 
                 // Calculate standard deviations
-                double stdDevFactor = observation.averageTagDistance() / observation.tagCount();//2.21m for last test
-                double linearStdDev = linearStdDevBaseline * stdDevFactor;
-                double angularStdDev = angularStdDevBaseline * stdDevFactor;
+
+                double stdDevFactor = Math.pow(observation.averageTagDistance(), 0.5) / (4 * observation.tagCount());//2.21m for last test
+                Logger.recordOutput("Odometry/stdDevFactor " + inputs[cameraIndex].name, stdDevFactor);
+
+                double linearStdDev = addStddevs(linearStdDevBaseline, stdDevFactor); //Math.pow(linearStdDevBaseline, 2) + Math.pow(stdDevFactor, 2);
+                Logger.recordOutput("Odometry/linearStdDev " + inputs[cameraIndex].name, linearStdDev);
+
+                double angularStdDev = addStddevs(angularStdDevBaseline, stdDevFactor); //angularStdDevBaseline * stdDevFactor;
                 if (observation.type() == PoseObservationType.MEGATAG_2) {
-                    linearStdDev *= linearStdDevMegatag2Factor;
-                    angularStdDev *= angularStdDevMegatag2Factor;
+                    linearStdDev = addStddevs(linearStdDev, linearStdDevMegatag2Factor);
+                    Logger.recordOutput("Odometry/linearStdDev " + inputs[cameraIndex].name, linearStdDev);
+                    // *=linearStdDevMegatag2Factor;
+                    angularStdDev = addStddevs(angularStdDev, angularStdDevMegatag2Factor); // *=angularStdDevMegatag2Factor;
+                    // if(Drive.bumpDetector.isBumping()) {
+                    //     linearStdDev += Drive.bumpDetector.getBumpSTDDevs().getFirst();
+                    // }
                 }
                 if (cameraIndex < cameraStdDevFactors.length) {
-                    linearStdDev *= cameraStdDevFactors[cameraIndex];
-                    angularStdDev *= cameraStdDevFactors[cameraIndex];
+                    linearStdDev = addStddevs(linearStdDev, cameraStdDevFactors[cameraIndex]);
+                    Logger.recordOutput("Odometry/linearStdDev " + inputs[cameraIndex].name, linearStdDev);
+                    //*= cameraStdDevFactors[cameraIndex];
+                    angularStdDev = addStddevs(angularStdDev, cameraStdDevFactors[cameraIndex]); // *= cameraStdDevFactors[cameraIndex];
                 }
                 Logger.recordOutput("Odometry/Vision/xDeviation", linearStdDev);
                 Logger.recordOutput("Odometry/Vision/yDeviation", linearStdDev);
@@ -215,6 +229,10 @@ public class Vision extends SubsystemBase {
         for(VisionIO ios : io) {
             ios.setRobotOrientation(angle);
         }
+    }
+
+    public static double addStddevs(double a, double b) {
+        return Math.sqrt(Math.pow(a, 2) + Math.pow(b, 2));
     }
 
 
