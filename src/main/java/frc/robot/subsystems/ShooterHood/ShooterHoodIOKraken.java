@@ -1,7 +1,7 @@
 package frc.robot.subsystems.ShooterHood;
 
 import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.Rotation;
 
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
@@ -43,7 +43,7 @@ public class ShooterHoodIOKraken implements ShooterHoodIO {
         inputs.supplyCurrent = hoodMotor.getSupplyCurrent().getValue();
         inputs.speed = hoodMotor.getVelocity().getValue();
         inputs.isMotorConnected = hoodMotor.isConnected();
-        inputs.encoderValue_Radians = Rotations.of(hoodEncoder.get());
+        inputs.encoderValue_Radians = Rotation.of(hoodEncoder.get());
         inputs.isEncoderConnected = hoodEncoder.isConnected();
     }
 

@@ -443,6 +443,9 @@ public class DriveCommands {
 
 //     }
 
+    public static boolean angleAligned(){
+        return angleController.atGoal();
+    }
     public static PathPlannerPath driveOverBump(Supplier<Pose2d> currentPose) {
     Pose2d robotPose = currentPose.get();
     Translation2d botTranslation = robotPose.getTranslation();

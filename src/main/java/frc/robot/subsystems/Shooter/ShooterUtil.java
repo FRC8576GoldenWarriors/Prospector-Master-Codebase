@@ -22,8 +22,10 @@ public class ShooterUtil {
     InterpolatingTreeMap<Double, Double> angleMap = new InterpolatingTreeMap<>(InverseInterpolator.forDouble(), Interpolator.forDouble());
     List<Double> distanceList = new ArrayList<>();
 
-    private double speedFudge = 0;//8.5;//2.5;
-    private double angleFudge = 0;//0.06;
+    @AutoLogOutput
+    private double speedFudge = -6.5;//0;//8.5;//2.5;
+    @AutoLogOutput
+    private double angleFudge = 0.01;//0;//0.06;
     InterpolatingDoubleTreeMap tofMap = new InterpolatingDoubleTreeMap();
 
     public ShooterUtil(){

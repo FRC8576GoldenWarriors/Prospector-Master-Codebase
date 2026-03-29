@@ -513,6 +513,11 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
         return new DeferredCommand(() ->AutoBuilder.pathfindToPose(wantedPose, new PathConstraints(2.5, 3, 2, 3)),Set.of(this));
     }
 
+    public Command driveToPose(Pose2d wantedPose, PathConstraints constraints){
+        Pathfinding.setStartPosition(getPose().getTranslation());
+        return new DeferredCommand(() ->AutoBuilder.pathfindToPose(wantedPose, constraints),Set.of(this));
+    }
+
 
     /** Resets the current odometry pose. */
     public void resetOdometry(Pose2d pose) {
