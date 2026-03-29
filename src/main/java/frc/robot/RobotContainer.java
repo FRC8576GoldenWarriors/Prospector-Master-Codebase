@@ -45,6 +45,7 @@ import frc.robot.subsystems.transport.Transport;
 import frc.robot.subsystems.transport.TransportIOKraken;
 import frc.robot.subsystems.vision.*;
 import frc.robot.subsystems.vision.VisionIO.IMUMode;
+import frc.robot.util.FieldUtil;
 
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
@@ -68,6 +69,7 @@ public class RobotContainer {
     public static Transport transport;
     public static Macros macros;
      public static ShooterUtil shooterUtil = new ShooterUtil();
+     public static FieldUtil fieldUtil;
 
     //public static Macros macros;
 
@@ -111,6 +113,7 @@ public class RobotContainer {
                 transport = new Transport(new TransportIOKraken());
                 macros = new Macros(shooter, shooterHood, transport, intake);
                 autos = new Autos(drive,macros,DriverStation.getAlliance().orElse(Alliance.Blue)==Alliance.Red);
+                fieldUtil = new FieldUtil(drive::getPose);
                 //intake = new Intake(new IntakeKrakenIO());
                 break;
             case SIM:
@@ -138,6 +141,7 @@ public class RobotContainer {
                         camera1Name, robotToCamera1.minus(Pose3d.kZero), driveSimulation::getSimulatedDriveTrainPose));
                 //shooter = null;
                 autos = new Autos(drive,macros,DriverStation.getAlliance().orElse(Alliance.Blue)==Alliance.Red);
+                fieldUtil = new FieldUtil(drive::getPose);
                 break;
             default:
                 // Replayed robot, disable IO implementations
@@ -152,6 +156,7 @@ public class RobotContainer {
                  vision = new Vision(drive, drive::getChassisSpeeds, new VisionIO() {}, new VisionIO() {});
                 autos = null;
                shooter = null;
+               fieldUtil = null;
                 break;
         }
 
