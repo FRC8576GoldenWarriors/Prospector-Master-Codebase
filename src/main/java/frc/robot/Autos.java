@@ -53,15 +53,40 @@ public class Autos {
         autoChooser.addOption("Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
         autoChooser.addOption("Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
         autoChooser.addOption("Left Depot Auton", leftAuton());
-        autoChooser.addOption("Right Leave Shoot", rightLeave());
+        // TODO: Test the path with autobuilder
+        autoChooser.addOption("Right Leave Shoot", autoRightLeave());
         autoChooser.addOption("Middle Leave Shoot", testAutonThingy());
         autoChooser.addOption("Left Steal", leftSteal());
         SmartDashboard.putData("Auto Chooser",autoChooser.getSendableChooser());
     }
 
     public Command rightLeave(){
-        return runPath("OverBump", flipped,AutonConstants.startingRightPose).alongWith(macros.setWantedState(RobotStates.IntakeOn)).andThen(runPath("FRIntakeBalls", flipped,new PathConstraints(4.0, 5.2, 3*Math.PI, 4*Math.PI))).andThen(runPath("BackToBump", flipped,new PathConstraints(4.0, 5.2, 3*Math.PI, 4*Math.PI))).andThen(runPath("BackOverBump", flipped).alongWith(macros.setWantedState(RobotStates.IntakeOff))).andThen(DriveCommands.joystickDriveTagCentric(drive,()->0,()->0,()->drive.getPose()).until(()->DriveCommands.angleController.atGoal())).andThen(macros.setWantedState(RobotStates.RunContinous));//andThen(runPath("IntakeBalls", flipped,new PathConstraints(4.0, 5.2, 3*Math.PI, 4*Math.PI))).//.raceWith(new WaitCommand(8)).andThen(runPath("OverBump", flipped));//.andThen(runPath("OverBump", flipped));//runPath("RightLeave", flipped,AutonConstants.startingRightPose).andThen(DriveCommands.joystickDriveTagCentric(drive,()->0,()->0,()->drive.getPose()).until(()->DriveCommands.angleController.atGoal())).andThen(macros.setWantedState(RobotStates.AutonShoot));//runPath("OverBump",false,AutonConstants.startingRightPose).alongWith(macros.setWantedState(RobotStates.IntakeOn));//.andThen(runPath("IntakeBalls",false)).andThen(runPath("BackToBump",false)).andThen(runPath("BackOverBump",false)).andThen(DriveCommands.joystickDriveTagCentric(drive,()->0,()->0,()->drive.getPose()).until(()->DriveCommands.angleController.atGoal()).andThen(macros.setWantedState(RobotStates.AutonShoot)));
+        return runPath("OverBump", flipped,AutonConstants.startingRightPose)
+        .alongWith(macros.setWantedState(RobotStates.IntakeOn))
+        .andThen(runPath("FRIntakeBalls", flipped,new PathConstraints(4.0, 5.2, 3*Math.PI, 4*Math.PI)))
+        .andThen(runPath("BackToBump", flipped,new PathConstraints(4.0, 5.2, 3*Math.PI, 4*Math.PI)))
+        .andThen(runPath("BackOverBump", flipped).alongWith(macros.setWantedState(RobotStates.IntakeOff)))
+        .andThen(DriveCommands.joystickDriveTagCentric(drive,()->0,()->0,()->drive.getPose()).until(()->DriveCommands.angleController.atGoal()))
+        .andThen(macros.setWantedState(RobotStates.RunContinous));//andThen(runPath("IntakeBalls", flipped,new PathConstraints(4.0, 5.2, 3*Math.PI, 4*Math.PI))).//.raceWith(new WaitCommand(8)).andThen(runPath("OverBump", flipped));//.andThen(runPath("OverBump", flipped));//runPath("RightLeave", flipped,AutonConstants.startingRightPose).andThen(DriveCommands.joystickDriveTagCentric(drive,()->0,()->0,()->drive.getPose()).until(()->DriveCommands.angleController.atGoal())).andThen(macros.setWantedState(RobotStates.AutonShoot));//runPath("OverBump",false,AutonConstants.startingRightPose).alongWith(macros.setWantedState(RobotStates.IntakeOn));//.andThen(runPath("IntakeBalls",false)).andThen(runPath("BackToBump",false)).andThen(runPath("BackOverBump",false)).andThen(DriveCommands.joystickDriveTagCentric(drive,()->0,()->0,()->drive.getPose()).until(()->DriveCommands.angleController.atGoal()).andThen(macros.setWantedState(RobotStates.AutonShoot)));
     }
+
+    public Command autoRightLeave() {
+        try {
+            return
+                getAutoBuilderPathPlannerCommand("OverBump", flipped, false, null)
+            .alongWith(macros.setWantedState(RobotStates.IntakeOn))
+            .andThen(getAutoBuilderPathPlannerCommand("FRIntakeBalls", flipped, false, null))
+            .andThen(getAutoBuilderPathPlannerCommand("BackToBump", flipped, false, new PathConstraints(4.0, 5.2, 3*Math.PI, 4*Math.PI)))
+            .andThen(getAutoBuilderPathPlannerCommand("BackOverBump", flipped, false, null)
+            .alongWith(macros.setWantedState(RobotStates.IntakeOff)))
+            .andThen(DriveCommands.joystickDriveTagCentric(drive,()->0,()->0,()->drive.getPose())
+            .until(()->DriveCommands.angleController.atGoal()))
+            .andThen(macros.setWantedState(RobotStates.RunContinous));
+        } catch (Exception exception) {
+            return Commands.none();
+        }//andThen(runPath("IntakeBalls", flipped,new PathConstraints(4.0, 5.2, 3*Math.PI, 4*Math.PI))).//.raceWith(new WaitCommand(8)).andThen(runPath("OverBump", flipped));//.andThen(runPath("OverBump", flipped));//runPath("RightLeave", flipped,AutonConstants.startingRightPose).andThen(DriveCommands.joystickDriveTagCentric(drive,()->0,()->0,()->drive.getPose()).until(()->DriveCommands.angleController.atGoal())).andThen(macros.setWantedState(RobotStates.AutonShoot));//runPath("OverBump",false,AutonConstants.startingRightPose).alongWith(macros.setWantedState(RobotStates.IntakeOn));//.andThen(runPath("IntakeBalls",false)).andThen(runPath("BackToBump",false)).andThen(runPath("BackOverBump",false)).andThen(DriveCommands.joystickDriveTagCentric(drive,()->0,()->0,()->drive.getPose()).until(()->DriveCommands.angleController.atGoal()).andThen(macros.setWantedState(RobotStates.AutonShoot)));
+    }
+
     public Command leftAuton(){
         return runPath("LeftLeave", flipped,AutonConstants.startingLeftPose).andThen(DriveCommands.joystickDriveTagCentric(drive,()->0,()->0,()->drive.getPose())).until(()->DriveCommands.angleAligned()).andThen(macros.setWantedState(RobotStates.AutonShoot).withDeadline(new WaitCommand(6))).andThen(runPath("LeftToDepot", flipped).alongWith(macros.setWantedState(RobotStates.IntakeOn))).andThen(runPath("LeftOutOfDepot", flipped)).andThen(DriveCommands.joystickDriveTagCentric(drive,()->0,()->0,()->drive.getPose()).until(()->DriveCommands.angleAligned())).andThen(macros.setWantedState(RobotStates.AutonShoot));//runPath("LeftToDepot", flipped,AutonConstants.startingLeftPose).alongWith(macros.setWantedState(RobotStates.IntakeOn)).andThen(runPath("OutFromDepot", flipped)).andThen(DriveCommands.joystickDriveTagCentric(drive,()->0,()->0,()->drive.getPose()).until(()->DriveCommands.angleController.atGoal())).andThen(macros.setWantedState(RobotStates.Shoot));//runPath("OverBump",true,AutonConstants.startingRightPose).alongWith(macros.setWantedState(RobotStates.IntakeOn)).andThen(runPath("IntakeBalls",true)).andThen(runPath("BackToBump",true)).andThen(runPath("BackOverBump",true)).andThen(DriveCommands.joystickDriveTagCentric(drive,()->0,()->0,()->drive.getPose()).until(()->DriveCommands.angleController.atGoal()).andThen(macros.setWantedState(RobotStates.AutonShoot)));
     }
@@ -79,6 +104,26 @@ public class Autos {
         // return new SequentialCommandGroup(
         //    new InstantCommand(()->drive.resetOdometry(new Pose2d(path.getStartingHolonomicPose().get().getTranslation(),path.getStartingHolonomicPose().get().getRotation()))),
         //   drive.driveToPose(new Pose2d(path.getAllPathPoints().get(path.getAllPathPoints().size()-1).position,(path.getAllPathPoints().get(path.getAllPathPoints().size()-1).rotationTarget.rotation().plus(Rotation2d.k180deg)))),//AutoBuilder.followPath(path));
+    }
+
+    public Command getAutoBuilderPathPlannerCommand(String name, boolean flipped, boolean mirror, PathConstraints constraints) throws Exception {
+        return AutoBuilder.followPath(this.getAutoBuilderPathPlannerPath(name, flipped, mirror, constraints));
+    }
+
+    public PathPlannerPath getAutoBuilderPathPlannerPath(String pathName, boolean flipped, boolean mirror, PathConstraints constraints) throws Exception {
+        PathPlannerPath path = PathPlannerPath.fromPathFile(pathName);
+        if(flipped) {
+            path = path.flipPath();
+        }
+
+        if(mirror) {
+            path = path.mirrorPath();
+        }
+
+        if(constraints != null)
+            return new PathPlannerPath(path.getWaypoints(), constraints, path.getIdealStartingState(), path.getGoalEndState());
+        else
+            return path;
     }
 
     public PathPlannerPath flipPathWithoutHeading(PathPlannerPath originalPath){
