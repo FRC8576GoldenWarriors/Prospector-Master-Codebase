@@ -49,6 +49,9 @@ public class ShooterUtil {
         speedMap.put(2.0, 26.73);
         speedMap.put(4.408, 40.12);
 
+        //Sat tuning
+        speedMap.put(5.155,41.12);
+
         // speedMap.put(1.76, 31.12);
         // speedMap.put(2.25, 34.5);
         // //Iffy points
@@ -84,6 +87,9 @@ public class ShooterUtil {
         //Spity 2 pretuning
         angleMap.put(2.0, 0.065);
         angleMap.put(4.408, 0.147);
+
+        //Sat tuning
+        angleMap.put(5.155, 0.267);
 
 
         // angleMap.put(1.76,0.0113);

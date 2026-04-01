@@ -2,7 +2,6 @@ package frc.robot.subsystems.LEDs;
 
 import static edu.wpi.first.units.Units.*;
 
-import java.util.regex.Pattern;
 
 import org.littletonrobotics.junction.AutoLogOutput;
 
@@ -87,7 +86,7 @@ public class LEDs extends SubsystemBase {
     LEDPattern pattern = redGreenSwap(color);
     // SmartDashboard.putString(getName(), "blink");
     // Logger.recordOutput(getName(), "blink");
-    
+
     setPattern(pattern.blink(Seconds.of(speed)));
   }
 

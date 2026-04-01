@@ -15,6 +15,7 @@ import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.RobotContainer;
 
 public class Transport extends SubsystemBase {
 
@@ -58,7 +59,12 @@ public class Transport extends SubsystemBase {
         break;
 
       case TransportIn:
-        io.setTransportSpeed(RotationsPerSecond.of(TransportConstants.velocityTarget));;
+        double hubDistance = RobotContainer.drive.getDistanceFromHub();
+        //if(hubDistance > 4.5) {
+          //io.setTransportSpeed(RotationsPerSecond.of(TransportConstants.velocityTargetDistance));
+        //} else {
+          io.setTransportSpeed(RotationsPerSecond.of(TransportConstants.velocityTarget));
+        //}
         break;
 
       case TransportOut:
