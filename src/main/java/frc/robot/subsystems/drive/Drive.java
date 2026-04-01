@@ -157,7 +157,8 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
                 this::runVelocity,//this::runAutonVelocity,
                 new PPHolonomicDriveController(new PIDConstants(7.5, 0.0, 0.0), new PIDConstants(5.0, 0.0, 0.0)),
                 this.pathConfig,
-                () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
+                // ! Untested don't let pathplanner handle flip logic
+                () -> false,
                 this);
         Pathfinding.setPathfinder(new LocalADStarAK());
         PathPlannerLogging.setLogActivePathCallback((activePath) -> {
@@ -318,30 +319,6 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
         // Log optimized setpoints (runSetpoint mutates each state)
         Logger.recordOutput("SwerveStates/SetpointsOptimized", setpointStates);
     }
-
-        public void runAutonVelocity(ChassisSpeeds speeds) {
-        // Calculate module setpoints
-        if(DriverStation.getAlliance().orElse(Alliance.Blue)==Alliance.Red){
-            speeds = new ChassisSpeeds(-speeds.vxMetersPerSecond,-speeds.vyMetersPerSecond,speeds.omegaRadiansPerSecond);
-        }
-        Logger.recordOutput("SwerveStates/Chassis Speeds", speeds);
-        speeds = ChassisSpeeds.discretize(speeds, 0.02);
-        SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(speeds);
-        SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, maxSpeedMetersPerSec);
-
-        // Log unoptimized setpoints
-        Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
-        Logger.recordOutput("SwerveChassisSpeeds/Setpoints", speeds);
-
-        // Send setpoints to modules
-        for (int i = 0; i < 4; i++) {
-            modules[i].runSetpoint(setpointStates[i]);
-        }
-
-        // Log optimized setpoints (runSetpoint mutates each state)
-        Logger.recordOutput("SwerveStates/SetpointsOptimized", setpointStates);
-    }
-
 
     public void runAdvancedVelocity(ChassisSpeeds speeds) {
         runAdvancedVelocity(speeds, new Translation2d());
@@ -511,6 +488,11 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
     public Command driveToPose(Pose2d wantedPose){
         Pathfinding.setStartPosition(getPose().getTranslation());
         return new DeferredCommand(() ->AutoBuilder.pathfindToPose(wantedPose, new PathConstraints(2.5, 3, 2, 3)),Set.of(this));
+    }
+
+    public Command driveToPose(Pose2d wantedPose, PathConstraints constraints){
+        Pathfinding.setStartPosition(getPose().getTranslation());
+        return new DeferredCommand(() ->AutoBuilder.pathfindToPose(wantedPose, constraints),Set.of(this));
     }
 
 

@@ -16,6 +16,7 @@ package frc.robot;
 import static edu.wpi.first.units.Units.*;
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -110,7 +111,7 @@ public class RobotContainer {
                 shooterHood = new ShooterHood(new ShooterHoodIOKraken());
                 transport = new Transport(new TransportIOKraken());
                 macros = new Macros(shooter, shooterHood, transport, intake);
-                autos = new Autos(drive,macros,DriverStation.getAlliance().orElse(Alliance.Blue)==Alliance.Red);
+                autos = new Autos(drive,macros, DriverStation.getAlliance().orElse(Alliance.Blue)==Alliance.Red);
                 //intake = new Intake(new IntakeKrakenIO());
                 break;
             case SIM:

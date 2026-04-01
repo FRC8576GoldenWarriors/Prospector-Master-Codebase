@@ -22,6 +22,7 @@ public class TransportConstants {
     public static final double kV = 0.16;
 
     public static final double velocityTarget =70;//60;//50//25;//40;
+    public static final double velocityTargetDistance = 65;
     public static final double velocityTargetSlower = 25;
 
 
