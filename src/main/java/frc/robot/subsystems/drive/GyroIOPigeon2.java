@@ -45,17 +45,17 @@ public class GyroIOPigeon2 implements GyroIO {
     private final StatusSignal<LinearAcceleration> accelerationY = pigeon.getAccelerationY();
     private final StatusSignal<LinearAcceleration> accelerationZ = pigeon.getAccelerationZ();
     //private final Stack<Rotation2d> gyroStack = new Stack<Rotation2d>();
+
     public GyroIOPigeon2() {
-        pigeon.getConfigurator().apply(new Pigeon2Configuration());
+        Pigeon2Configuration config = new Pigeon2Configuration();
+        config.GyroTrim.withGyroScalarZ(DriveConstants.gyroTrimDegreesPerRotation);
+        pigeon.getConfigurator().apply(config);
         pigeon.getConfigurator().setYaw(0.0);
         yaw.setUpdateFrequency(odometryFrequency);
         yawVelocity.setUpdateFrequency(50.0);
         pigeon.optimizeBusUtilization();
         yawTimestampQueue = SparkOdometryThread.getInstance().makeTimestampQueue();
         yawPositionQueue = SparkOdometryThread.getInstance().registerSignal(yaw::getValueAsDouble);
-        Pigeon2Configuration config = new Pigeon2Configuration();
-        config.GyroTrim.GyroScalarZ = DriveConstants.gyroTrimDegreesPerRotation;
-        pigeon.getConfigurator().apply(config);
     }
 
     public void resetHeading(double headingDegrees) {

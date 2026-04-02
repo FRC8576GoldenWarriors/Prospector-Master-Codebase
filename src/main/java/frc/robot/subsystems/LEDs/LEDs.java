@@ -2,11 +2,13 @@ package frc.robot.subsystems.LEDs;
 
 import static edu.wpi.first.units.Units.*;
 
+
 import org.littletonrobotics.junction.AutoLogOutput;
 
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.LEDPattern;
+import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 
@@ -27,6 +29,7 @@ public class LEDs extends SubsystemBase {
     ClimbEnd,
     Disabled,
     Enabled,
+    Idle,
   }
 
   @AutoLogOutput (key = "LEDs/Wanted State")
@@ -75,21 +78,29 @@ public class LEDs extends SubsystemBase {
     this.state = state;
   }
 
-  public void blink(LEDPattern pattern, double speed) {
+  public static LEDPattern redGreenSwap(Color color) {
+    return LEDPattern.solid((new Color(color.green,color.red,color.blue)));
+  }
+
+  public void blink(Color color, double speed) {
+    LEDPattern pattern = redGreenSwap(color);
     // SmartDashboard.putString(getName(), "blink");
     // Logger.recordOutput(getName(), "blink");
+
     setPattern(pattern.blink(Seconds.of(speed)));
   }
 
-  public void strobe(LEDPattern pattern, double speed) {
+  public void strobe(Color color, double speed) {
+    LEDPattern pattern = redGreenSwap(color);
     // SmartDashboard.putString(getName(), "breathe");
     // Logger.recordOutput(getName(), "breathe");
     setPattern(pattern.breathe(Second.of(speed)).scrollAtRelativeSpeed(Percent.per(Second).of(25)));
   }
 
-  public void solid(LEDPattern pattern) {
+  public void solid(Color color) {
     // SmartDashboard.putString(getName(), "Solid");
     // Logger.recordOutput(getName(), "Solid");
+    LEDPattern pattern = redGreenSwap(color);
     setPattern(pattern);
   }
 
@@ -99,7 +110,8 @@ public class LEDs extends SubsystemBase {
 
       switch (state) {
         case Disabled:
-          strobe(LEDConstants.PatternConfig.RebStrobing, LEDConstants.PatternConfig.RebStrobingSpeed);
+          //strobe(LEDConstants.PatternConfig.RebStrobing, LEDConstants.PatternConfig.RebStrobingSpeed);
+          solid(LEDConstants.PatternConfig.RebStrobing);
           break;
         case OutOfRange:
           blink(LEDConstants.PatternConfig.WhiteBlink, LEDConstants.PatternConfig.WhiteBlinkSpeed);
@@ -115,6 +127,9 @@ public class LEDs extends SubsystemBase {
           break;
         case ClimbEnd:
           solid(LEDConstants.PatternConfig.BlueBlink);
+          break;
+        case Idle:
+          solid(LEDConstants.PatternConfig.YellowSolid);
           break;
         default:
           solid(LEDConstants.PatternConfig.YellowSolid);

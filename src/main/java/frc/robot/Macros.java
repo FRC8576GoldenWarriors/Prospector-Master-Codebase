@@ -208,7 +208,7 @@ public class Macros extends SubsystemBase {
       m_Intake.setWantedPosition(IntakeStates.IntakeDown);
     }
 
-    m_ShooterHood.setWantedState(ShooterHoodStates.Passing);
+    m_ShooterHood.setWantedState(ShooterHoodStates.Shoot);
   }
 
   }else{
