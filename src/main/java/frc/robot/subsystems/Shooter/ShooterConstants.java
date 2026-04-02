@@ -34,4 +34,6 @@ public class ShooterConstants {
     public static final double RADIUS_OF_HUB_METERS = Units.inchesToMeters(41.73);
     public static final double netHeight = Units.inchesToMeters(72) - SHOOTER_HEIGHT_METERS;
 
+    public static final double shooterRPSFudge = -6.5;
+    public static final double angleFudge = 0.01;
 }

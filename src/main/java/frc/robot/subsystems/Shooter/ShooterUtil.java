@@ -46,9 +46,10 @@ public class ShooterUtil {
         speedMap.put(2.66, 35.84);
 
         //Spity 2 pretuning
-        speedMap.put(2.0, 26.73);
-        speedMap.put(4.408, 40.12);
+        speedMap.put(2.0, 26.73+6.5);
+        speedMap.put(4.408, 40.12+6.5);
 
+        speedMap.put(5.155,40.12+6.5);
         // speedMap.put(1.76, 31.12);
         // speedMap.put(2.25, 34.5);
         // //Iffy points
@@ -82,8 +83,10 @@ public class ShooterUtil {
         angleMap.put(2.66, 0.10018);
 
         //Spity 2 pretuning
-        angleMap.put(2.0, 0.065);
-        angleMap.put(4.408, 0.147);
+        angleMap.put(2.0, 0.065+0.01);
+        angleMap.put(4.408, 0.147+0.01);
+
+        angleMap.put(5.155, 0.267+0.01);
 
 
         // angleMap.put(1.76,0.0113);
@@ -148,10 +151,10 @@ public class ShooterUtil {
     }
 
     public void resetSpeedFudge(){
-        speedFudge = 0;
+        speedFudge = ShooterConstants.shooterRPSFudge;
     }
     public void resetAngleFudge(){
-        angleFudge = 0;
+        angleFudge = ShooterConstants.angleFudge;
     }
     @AutoLogOutput (key = "ShooterUtil/Calculated RPS")
     public AngularVelocity getRPS(double limelightDistanceMeters){
