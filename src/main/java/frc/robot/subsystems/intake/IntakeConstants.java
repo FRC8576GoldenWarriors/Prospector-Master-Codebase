@@ -18,7 +18,7 @@ public class IntakeConstants {
     }
 
     public class Software{
-        public static double leftZero = -0.46;//-0.77+0.01-0.533+0.01-.518;//-0.29;//0.158-0.7;
+        public static double leftZero = -0.4585;//-0.46;//-0.77+0.01-0.533+0.01-.518;//-0.29;//0.158-0.7;
         public static double rightZero =0.22;//0.2;// 0.168;
         public static boolean leftInverted = true;
         public static boolean rightInverted = false;

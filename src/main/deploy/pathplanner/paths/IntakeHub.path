@@ -1,0 +1,54 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 6.794992867332382,
+        "y": 2.3881888888888874
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 6.688398576512456,
+        "y": 2.630925266903914
+      },
+      "isLocked": false,
+      "linkedName": "OverBump1"
+    },
+    {
+      "anchor": {
+        "x": 6.083366619115549,
+        "y": 3.912082738944366
+      },
+      "prevControl": {
+        "x": 6.083366619115549,
+        "y": 3.6389916589739895
+      },
+      "nextControl": null,
+      "isLocked": true,
+      "linkedName": "IntakeHubEnd"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 99.46232220802561
+  },
+  "reversed": false,
+  "folder": null,
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 45.0
+  },
+  "useDefaultConstraints": true
+}

@@ -2,7 +2,6 @@ package frc.robot.subsystems.LEDs;
 
 //import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
-import edu.wpi.first.wpilibj.LEDPattern;
 import edu.wpi.first.wpilibj.util.Color;
 
 public class LEDConstants {

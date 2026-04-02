@@ -261,18 +261,20 @@ public class DriveCommands {
             Drive drive, DoubleSupplier xSupplier, DoubleSupplier ySupplier, Supplier<Pose2d> drivePose) {
 
         // Create PID controller
-        angleController.setTolerance(Units.degreesToRadians(5));
+        angleController.setTolerance(Units.degreesToRadians(15));
         angleController.enableContinuousInput(-Math.PI, Math.PI);
 
 
         Logger.recordOutput("In Red Zone", drivePose.get().getX()  > (0));
         Logger.recordOutput("GetX", drivePose.get());
-        Logger.recordOutput("Drive/Tag centric aligned", angleController.atGoal());
+
         Logger.recordOutput("Drive/Alignment Goal", angleController.getGoal().position);
 
         // Construct command
         return Commands.run(
                         () -> {
+                                Logger.recordOutput("Drive/Alignment Goal", angleController.getGoal().position);
+                                Logger.recordOutput("Drive/Tag centric aligned", angleAligned());
                                 if((drivePose.get().getX()  > (VisionConstants.aprilTagLayout.getFieldLength()-4.61)&&DriverStation.getAlliance().orElse(Alliance.Blue)==Alliance.Red) ||(drivePose.get().getX() < 4.61&&DriverStation.getAlliance().orElse(Alliance.Blue)==Alliance.Blue)){
                                 Translation2d botTranslation = drivePose.get().getTranslation();
 
@@ -444,7 +446,7 @@ public class DriveCommands {
 //     }
 
     public static boolean angleAligned(){
-        return angleController.atGoal();
+        return MathUtil.isNear(angleController.getGoal().position, RobotContainer.drive.getPose().getRotation().getRadians(), Units.degreesToRadians(6));//angleController.atGoal();
     }
     public static PathPlannerPath driveOverBump(Supplier<Pose2d> currentPose) {
     Pose2d robotPose = currentPose.get();
