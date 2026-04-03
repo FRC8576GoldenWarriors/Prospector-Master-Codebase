@@ -634,6 +634,7 @@ public class DriveCommands {
                                             + " meters, "
                                             + formatter.format(Units.metersToInches(wheelRadius))
                                             + " inches");
+                                    Logger.recordOutput("Drive/Wheel Radius", wheelRadius);
                                 })));
     }
 

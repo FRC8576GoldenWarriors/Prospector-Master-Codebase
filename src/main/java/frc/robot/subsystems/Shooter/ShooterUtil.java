@@ -89,6 +89,7 @@ public class ShooterUtil {
         angleMap.put(5.155, 0.267+0.01);
 
 
+
         // angleMap.put(1.76,0.0113);
         // angleMap.put(2.25, 0.07);
         // //Iffy points
@@ -172,6 +173,13 @@ public class ShooterUtil {
                 .min((d1, d2) -> Double.compare(Math.abs(d1 - distance), Math.abs(d2 - distance)))
                 .orElse(0.0);
         return nearest;
+    }
+
+    public void addRPSPoint(double distance, double RPSSpeed, double fudgeFactor){
+        speedMap.put(distance, RPSSpeed-fudgeFactor);
+    }
+    public void addAnglePoint(double distance, double angle, double fudgeFactor){
+        angleMap.put(distance, angle-fudgeFactor);
     }
 
     // public Pair<AngularVelocity, Double> getSOTFCalc(double limelightDistanceX, double limelightDistanceY,double chassisVelX, double chassisVelY){

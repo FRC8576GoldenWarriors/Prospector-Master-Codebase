@@ -36,4 +36,7 @@ public class ShooterConstants {
 
     public static final double shooterRPSFudge = -6.5;
     public static final double angleFudge = 0.01;
+
+    public static final double shooterRPSPrespityFudge = -6.5;
+    public static final double anglePrespityFudge = 0.01;
 }
