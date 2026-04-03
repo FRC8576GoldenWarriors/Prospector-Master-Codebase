@@ -1,7 +1,8 @@
 package frc.robot.subsystems.ShooterHood;
 
 import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.Rotation;
+import static edu.wpi.first.units.Units.Rotations;
+
 
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
@@ -19,7 +20,6 @@ public class ShooterHoodIOKraken implements ShooterHoodIO {
 
     public ShooterHoodIOKraken() {
         hoodMotor = new TalonFX(ShooterHoodConstants.shooterHoodMotorID);
-
         hoodEncoder = new DutyCycleEncoder(ShooterHoodConstants.shooterHoodEncoderDIO, 1.0, ShooterHoodConstants.expectedZero);
 
         hoodConfig = new TalonFXConfiguration().withMotorOutput(
@@ -43,7 +43,8 @@ public class ShooterHoodIOKraken implements ShooterHoodIO {
         inputs.supplyCurrent = hoodMotor.getSupplyCurrent().getValue();
         inputs.speed = hoodMotor.getVelocity().getValue();
         inputs.isMotorConnected = hoodMotor.isConnected();
-        inputs.encoderValue_Radians = Rotation.of(hoodEncoder.get());
+        //inputs.encoderValue_Radians = hoodMotor.getPosition().getValue();
+        inputs.encoderValue_Radians = Rotations.of(hoodEncoder.get());
         inputs.isEncoderConnected = hoodEncoder.isConnected();
     }
 
