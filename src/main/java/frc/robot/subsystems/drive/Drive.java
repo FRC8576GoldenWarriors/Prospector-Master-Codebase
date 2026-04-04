@@ -50,6 +50,8 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -87,6 +89,8 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
     public static RobotConfig pathConfig;
     private CANrange range;
     private CANrange range2;
+
+    private Field2d field;
 
     private final double[] skidAmountX = new double[4];
     private final double[] skidAmountY = new double[4];
@@ -179,6 +183,9 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
         previousSetpoint = new SwerveSetpoint(getChassisSpeeds(), getModuleStates(), DriveFeedforwards.zeros(4));
         gyroStack = new Stack<>();
         gyroStack.push((gyroInputs.yawPosition));
+        field = new Field2d();
+        SmartDashboard.putData("Field",field);
+        //Logger.recordOutput("Field/Field", field);
     }
 
     @Override
@@ -291,6 +298,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
 
         // Update gyro alert
         gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.currentMode != Mode.SIM);
+        field.setRobotPose(getPose());
         Logger.recordOutput("Drive/CanRange", getDetected());
     }
 

@@ -22,9 +22,14 @@ import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+
+import static edu.wpi.first.units.Units.Meters;
+
 import java.util.NavigableMap;
 import java.util.Optional;
 import java.util.TreeMap;
+
+import org.littletonrobotics.junction.Logger;
 
 /**
  * This class wraps {@link SwerveDriveOdometry Swerve Drive Odometry} to fuse latency-compensated vision measurements
@@ -332,6 +337,9 @@ public class EnhancedSwervePoseEstimator {
         // Step 9: Update latest pose estimate. Since we cleared all updates after this vision update,
         // it's guaranteed to be the latest vision update.
         m_poseEstimate = visionUpdate.compensate(m_odometry.getPoseMeters());
+        //visionUpdate.odometryPose.relativeTo()
+        double difference = Math.hypot(visionUpdate.odometryPose.minus(visionUpdate.visionPose).getMeasureX().in(Meters),visionUpdate.odometryPose.minus(visionUpdate.visionPose).getMeasureY().in(Meters));
+        Logger.recordOutput("Odometry/Drive Vision Difference", difference);
     }
 
     /**

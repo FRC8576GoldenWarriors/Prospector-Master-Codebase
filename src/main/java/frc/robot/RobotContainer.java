@@ -49,6 +49,7 @@ import frc.robot.subsystems.vision.VisionIO.IMUMode;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeCoralOnFly;
+//import org.jcp.xml.dsig.internal.MacOutputStream;
 import org.littletonrobotics.junction.Logger;
 
 
@@ -173,7 +174,9 @@ public class RobotContainer {
         drive.setDefaultCommand(DriveCommands.joystickAdvancedDrive(
                drive, () -> -driveController.getLeftY(), () -> -driveController.getLeftX(), () -> -driveController.getRightX()));
 
-        driveController.leftTrigger().whileTrue(DriveCommands.joystickDriveTagCentric(drive, () -> -driveController.getLeftY(), () -> -driveController.getLeftX(), () -> drive.getPose()));
+        //driveController.leftTrigger().whileTrue(DriveCommands.joystickDriveTagCentric(drive, () -> -driveController.getLeftY(), () -> -driveController.getLeftX(), () -> drive.getPose()));
+        driveController.leftTrigger().onTrue(DriveCommands.joystickDriveTagCentric(drive,()->0,()->0,()->drive.getPose())
+             .until(()->DriveCommands.angleAligned()));
         driveController.rightTrigger().onTrue(macros.setWantedState(RobotStates.Shoot));
         driveController.rightBumper().onTrue(macros.setWantedState(RobotStates.IntakeOn));
         driveController.leftBumper().onTrue(macros.setWantedState(RobotStates.IntakeOff));
@@ -197,6 +200,7 @@ public class RobotContainer {
         opController.povLeft().onTrue(macros.setWantedState(RobotStates.IntakeOut));
         opController.leftBumper().onTrue(new InstantCommand(()->shooterUtil.resetAngleFudge()));
         opController.rightBumper().onTrue(new InstantCommand(()->shooterUtil.resetSpeedFudge()));
+        opController.start().onTrue(macros.setWantedState(RobotStates.Rest));
         // Lock to 0° when A button is held
         // controller
         //         .a()

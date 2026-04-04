@@ -34,10 +34,13 @@ import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.DriveConstants;
 import frc.robot.subsystems.vision.VisionConstants;
 
+import static edu.wpi.first.units.Units.Radians;
+
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
@@ -271,7 +274,7 @@ public class DriveCommands {
         Logger.recordOutput("Drive/Alignment Goal", angleController.getGoal().position);
 
         // Construct command
-        return Commands.run(
+        Command alignCommand =  Commands.run(
                         () -> {
                                 Logger.recordOutput("Drive/Alignment Goal", angleController.getGoal().position);
                                 Logger.recordOutput("Drive/Tag centric aligned", angleAligned());
@@ -296,6 +299,8 @@ public class DriveCommands {
                                 double angle = Math.atan(relY/relX);
                                 if(DriverStation.getAlliance().get().equals(Alliance.Red))
                                         angle += Math.PI;
+                                angleController.setGoal(angle);
+                                Logger.recordOutput("Drive/Expected Align Angle", Radians.of(angle));
 
 
                             // Get linear velocity
@@ -353,8 +358,10 @@ public class DriveCommands {
 
                                 }
                         },
-                        drive).beforeStarting(() -> angleController.reset(drive.getRotation().getRadians()));// Reset PID controller when command starts
-
+                        drive).beforeStarting(() -> angleController.reset(drive.getRotation().getRadians()));
+                        // Reset PID controller when command starts
+                        alignCommand.addRequirements(Set.of(drive));
+                        return alignCommand;
 
     }
 
@@ -446,7 +453,7 @@ public class DriveCommands {
 //     }
 
     public static boolean angleAligned(){
-        return MathUtil.isNear(angleController.getGoal().position, RobotContainer.drive.getPose().getRotation().getRadians(), Units.degreesToRadians(6));//angleController.atGoal();
+        return MathUtil.isNear(angleController.getGoal().position, RobotContainer.drive.getPose().getRotation().getRadians(), Units.degreesToRadians(3));//6));//angleController.atGoal();
     }
     public static PathPlannerPath driveOverBump(Supplier<Pose2d> currentPose) {
     Pose2d robotPose = currentPose.get();

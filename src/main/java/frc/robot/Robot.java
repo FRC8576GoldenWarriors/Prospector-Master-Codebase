@@ -13,13 +13,14 @@
 
 package frc.robot;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.util.LockableLoggedNetworkBoolean;
+
+import static edu.wpi.first.units.Units.Seconds;
 
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeCoralOnFly;
@@ -34,6 +35,7 @@ import org.littletonrobotics.urcl.URCL;
 
 import frc.robot.Macros.RobotStates;
 import frc.robot.util.AlertLogger;
+import frc.robot.util.HubTracker;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to each mode, as
@@ -43,9 +45,12 @@ import frc.robot.util.AlertLogger;
 public class Robot extends LoggedRobot {
     private Command autonomousCommand;
     private RobotContainer robotContainer;
+    // private double[] matchTimes = {20, 10, 25, 25, 25, 25, 30};
+    // private int currentShift = 0;
+    // private Timer matchTimer = new Timer();
     LockableLoggedNetworkBoolean wonAuton = new LockableLoggedNetworkBoolean("Won Autonomous Mode",false);
     boolean wonAutonBool = wonAuton.getAsBoolean();
-    boolean hubActive = false;
+    //boolean hubActive = false;
     public Robot() {
         // Record metadata
         Logger.recordMetadata("ProjectName", BuildConstants.MAVEN_NAME);
@@ -95,6 +100,8 @@ public class Robot extends LoggedRobot {
 
         // Instantiate our RobotContainer. This will perform all our button bindings,
         // and put our autonomous chooser on the dashboard.
+        //matchTimer.reset();
+        //Logger.recordOutput("Shift Timings", matchTimes[currentShift]);
         robotContainer = new RobotContainer();
 
     }
@@ -116,25 +123,27 @@ public class Robot extends LoggedRobot {
         Threads.setCurrentThreadPriority(false, 10);
         wonAutonBool = wonAuton.getAsBoolean();
         //SmartDashboard.putBoolean("Won Auton", wonAutonBool);
-        if(DriverStation.isEnabled()){
-            if(DriverStation.isAutonomous()){
-                hubActive = true;
-            }else{
-            if(MathUtil.isNear(120, DriverStation.getMatchTime(), 1)){
-                wonAuton.lockBoolean();
-            }
-            if(wonAutonBool){
-                hubActive = (DriverStation.getMatchTime()>130)||(DriverStation.getMatchTime()>80&&DriverStation.getMatchTime()<105)||(DriverStation.getMatchTime()<55&&DriverStation.getMatchTime()>30)||(DriverStation.getMatchTime()<30);
-            }else{
-                hubActive = (DriverStation.getMatchTime()>130)||(DriverStation.getMatchTime()>105&&DriverStation.getMatchTime()<130)||(DriverStation.getMatchTime()<80&&DriverStation.getMatchTime()>55)||(DriverStation.getMatchTime()<30);
-            }
-        }
-        }else{
-            hubActive = false;
-        }
-        SmartDashboard.putBoolean("Is Hub Active", hubActive);
+        // if(DriverStation.isEnabled()){
+        //     if(DriverStation.isAutonomous()){
+        //         hubActive = true;
+        //     }else{
+        //     if(MathUtil.isNear(120, DriverStation.getMatchTime(), 1)){
+        //         wonAuton.lockBoolean();
+        //     }
+        //     if(wonAutonBool){
+        //         hubActive = (DriverStation.getMatchTime()>130)||(DriverStation.getMatchTime()>80&&DriverStation.getMatchTime()<105)||(DriverStation.getMatchTime()<55&&DriverStation.getMatchTime()>30)||(DriverStation.getMatchTime()<30);
+        //     }else{
+        //         hubActive = (DriverStation.getMatchTime()>130)||(DriverStation.getMatchTime()>105&&DriverStation.getMatchTime()<130)||(DriverStation.getMatchTime()<80&&DriverStation.getMatchTime()>55)||(DriverStation.getMatchTime()<30);
+        //     }
+        // }
+        // }else{
+        //     hubActive = false;
+        // }
+        SmartDashboard.putBoolean("Is Hub Active", HubTracker.isActive());
         AlertLogger.periodic();
         //SmartDashboard.putRaw("Field",new Field2d().getObject("Rebuilt"));
+        Logger.recordOutput("Shift Timings", HubTracker.timeRemainingInCurrentShift().orElse(Seconds.of(-1)));
+
     }
 
     /** This function is called once when the robot is disabled. */
@@ -158,17 +167,25 @@ public class Robot extends LoggedRobot {
     @Override
     public void autonomousInit() {
         autonomousCommand = robotContainer.getAutonomousCommand();
-
+        //matchTimer.restart();
         // schedule the autonomous command (example)
         if (autonomousCommand != null) {
             autonomousCommand.schedule();
         }
+
     }
 
     /** This function is called periodically during autonomous. */
     @Override
-    public void autonomousPeriodic() {}
+    public void autonomousPeriodic() {
 
+    }
+
+    @Override
+    public void autonomousExit() {
+        //matchTimer.stop();
+        RobotContainer.macros.setWantedState(RobotStates.Idle);
+    }
     /** This function is called once when teleop is enabled. */
     @Override
     public void teleopInit() {
@@ -180,6 +197,7 @@ public class Robot extends LoggedRobot {
             autonomousCommand.cancel();
         }
         RobotContainer.macros.setWantedState(RobotStates.Idle);
+        //matchTimer.restart();
     }
 
     /** This function is called periodically during operator control. */

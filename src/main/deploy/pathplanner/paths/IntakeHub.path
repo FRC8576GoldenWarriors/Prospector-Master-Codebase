@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 6.445649072753208,
-        "y": 2.388
+        "x": 6.15043890865955,
+        "y": 2.5233333333333325
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.2852588151479925,
-        "y": 2.7598466982997247
+        "x": 5.990048651054334,
+        "y": 2.8951800316330574
       },
       "isLocked": false,
       "linkedName": "OverBump1"
@@ -48,7 +48,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 45.0
+    "rotation": 45.90905290773171
   },
   "useDefaultConstraints": true
 }
