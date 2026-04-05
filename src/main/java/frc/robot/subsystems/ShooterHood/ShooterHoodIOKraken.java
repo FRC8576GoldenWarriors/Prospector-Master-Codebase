@@ -34,6 +34,8 @@ public class ShooterHoodIOKraken implements ShooterHoodIO {
         hoodMotor.getConfigurator().apply(hoodConfig);
 
         hoodEncoder.setInverted(ShooterHoodConstants.encoderInverted);
+          hoodMotor.getStatorCurrent().setUpdateFrequency(50);
+            hoodMotor.getVelocity().setUpdateFrequency(50);
     }
 
     @Override

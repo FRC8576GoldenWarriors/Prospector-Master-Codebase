@@ -20,6 +20,8 @@ public interface ShooterIO {
     public AngularVelocity rightMotorSpeed = RotationsPerSecond.of(0.0);
     public double rightEncoderPosition = 0;
     public boolean rightMotorConnected = false;
+
+    
   }
 
   public default void updateInputs(ShooterIOInputs inputs) {}
