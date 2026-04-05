@@ -174,13 +174,15 @@ public class RobotContainer {
         drive.setDefaultCommand(DriveCommands.joystickAdvancedDrive(
                drive, () -> -driveController.getLeftY(), () -> -driveController.getLeftX(), () -> -driveController.getRightX()));
 
-        //driveController.leftTrigger().whileTrue(DriveCommands.joystickDriveTagCentric(drive, () -> -driveController.getLeftY(), () -> -driveController.getLeftX(), () -> drive.getPose()));
-        driveController.leftTrigger().onTrue(DriveCommands.joystickDriveTagCentric(drive,()->0,()->0,()->drive.getPose())
-             .until(()->DriveCommands.angleAligned()));
+        driveController.leftTrigger().whileTrue(DriveCommands.joystickDriveTagCentric(drive, () -> -driveController.getLeftY(), () -> -driveController.getLeftX(), () -> drive.getPose()));
+        // driveController.leftTrigger().onTrue(DriveCommands.joystickDriveTagCentric(drive,()->0,()->0,()->drive.getPose())
+        //      .until(()->DriveCommands.angleAligned()));
         driveController.rightTrigger().onTrue(macros.setWantedState(RobotStates.Shoot));
         driveController.rightBumper().onTrue(macros.setWantedState(RobotStates.IntakeOn));
         driveController.leftBumper().onTrue(macros.setWantedState(RobotStates.IntakeOff));
-        driveController.x().whileTrue(DriveCommands.joystickDriveAt45(drive, () -> -driveController.getLeftY(), () -> -driveController.getLeftX(), () -> drive.getPose()));
+        driveController.x().whileTrue(DriveCommands.joystickDriveAt45(drive, () -> -driveController.getLeftY(), () -> -driveController.getLeftX()));
+
+
         driveController.b().onTrue(macros.setWantedState(RobotStates.Rest));
         driveController.povRight().onTrue(macros.setWantedState(RobotStates.IntakeOut));
         //driveController.povLeft().onTrue(new DriveX(drive, 1).withTimeout(Seconds.of(3)));

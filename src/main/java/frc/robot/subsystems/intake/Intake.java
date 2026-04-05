@@ -175,6 +175,9 @@ public class Intake extends SubsystemBase {
       leftEncoderAlert.set(!inputs.leftEncoderConnected);
       rightEncoderAlert.set(!inputs.rightEncoderConnected);
       Logger.recordOutput("Intake/Wanted State", wantedState);
+      Logger.recordOutput("Intake/PID", PIDVoltage);
+      Logger.recordOutput("Intake/FF", FFVoltage);
+      Logger.recordOutput("Intake/Input Voltage", inputVoltage);
 }
 
 public void setWantedPosition(IntakeStates wantedState) {
