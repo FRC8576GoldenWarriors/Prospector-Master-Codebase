@@ -33,7 +33,7 @@ import frc.robot.Macros.RobotStates;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.LEDs.LEDs;
 import frc.robot.subsystems.Shooter.Shooter;
-import frc.robot.subsystems.Shooter.ShooterIOReal;
+import frc.robot.subsystems.Shooter.ShooterIOKraken;
 import frc.robot.subsystems.Shooter.ShooterUtil;
 import frc.robot.subsystems.ShooterHood.ShooterHood;
 import frc.robot.subsystems.ShooterHood.ShooterHoodIOKraken;
@@ -109,7 +109,7 @@ public class RobotContainer {
                 new VisionIOLimelight(VisionConstants.camera3Name, drive::getRotation, drive::getYawVelocity));
                 //shooter = new Shooter(0);
                 intake = new Intake(new IntakeKrakenIO());
-                shooter = new Shooter(new ShooterIOReal());
+                shooter = new Shooter(new ShooterIOKraken());
                 shooterHood = new ShooterHood(new ShooterHoodIOKraken());
                 transport = new Transport(new TransportIOKraken());
                 macros = new Macros(shooter, shooterHood, transport, intake);

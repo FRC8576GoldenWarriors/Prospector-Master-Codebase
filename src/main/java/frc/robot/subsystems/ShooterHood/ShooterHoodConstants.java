@@ -1,8 +1,12 @@
 package frc.robot.subsystems.ShooterHood;
 
+import static edu.wpi.first.units.Units.Hertz;
+
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import edu.wpi.first.units.measure.Frequency;
 
 public class ShooterHoodConstants {
+    public static final Frequency updateFrequency = Hertz.of(50);
     public static final int shooterHoodMotorID = 40;
     public static final int shooterHoodEncoderDIO = 3;
     public static double expectedZero = +0.92+0.06-0.03+0.65-0.01-0.03-0.005;//0.97+0.98+0.08-0.06-0.04+0.66+0.44-0.902;

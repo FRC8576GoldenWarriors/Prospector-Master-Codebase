@@ -1,5 +1,6 @@
 package frc.robot.subsystems.Shooter;
 
+import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -14,10 +15,9 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 import static edu.wpi.first.units.Units.*;
 
-import java.util.List;
 
 
-public class ShooterIOReal implements ShooterIO {
+public class ShooterIOKraken implements ShooterIO {
   private final TalonFX leftMotor;
   private final TalonFX rightMotor;
 
@@ -29,7 +29,20 @@ public class ShooterIOReal implements ShooterIO {
 
   private SysIdRoutine sysId;
 
-  public ShooterIOReal() {
+  private final StatusSignal<Voltage> leftMotorVoltageSignal;
+  private final StatusSignal<Current> leftMotorStatorCurrentSignal;
+  private final StatusSignal<Current> leftMotorSupplyCurrentSignal;
+  private final StatusSignal<AngularVelocity> leftMotorVelocitySignal;
+  private final StatusSignal<Angle> leftEncoderPositionSignal;
+
+  private final StatusSignal<Voltage> rightMotorVoltageSignal;
+  private final StatusSignal<Current> rightMotorStatorCurrentSignal;
+  private final StatusSignal<Current> rightMotorSupplyCurrentSignal;
+  private final StatusSignal<AngularVelocity> rightMotorVelocitySignal;
+  private final StatusSignal<Angle> rightEncoderPositionSignal;
+
+
+  public ShooterIOKraken() {
     leftMotor = new TalonFX(ShooterConstants.LEFT_SHOOTER_ID);
     rightMotor = new TalonFX(ShooterConstants.RIGHT_SHOOTER_ID);
 
@@ -49,7 +62,34 @@ public class ShooterIOReal implements ShooterIO {
     // config.Slot0.kD = ShooterConstants.kD;
     // config.Slot0.kV = ShooterConstants.kVLeft;
     // config.Slot0.kA = ShooterConstants.kALeft;
+    leftMotorVoltageSignal = leftMotor.getMotorVoltage();
+    leftMotorStatorCurrentSignal = leftMotor.getStatorCurrent();
+    leftMotorSupplyCurrentSignal = leftMotor.getSupplyCurrent();
+    leftMotorVelocitySignal = leftMotor.getVelocity();
+    leftEncoderPositionSignal = leftMotor.getPosition();
 
+    rightMotorVoltageSignal = rightMotor.getMotorVoltage();
+    rightMotorStatorCurrentSignal = rightMotor.getStatorCurrent();
+    rightMotorSupplyCurrentSignal = rightMotor.getSupplyCurrent();
+    rightMotorVelocitySignal = rightMotor.getVelocity();
+    rightEncoderPositionSignal = rightMotor.getPosition();
+
+    leftMotor.optimizeBusUtilization(Hertz.of(0));
+    rightMotor.optimizeBusUtilization(Hertz.of(0));
+
+    BaseStatusSignal.setUpdateFrequencyForAll(
+      ShooterConstants.updateFrequency,
+      leftMotorVoltageSignal,
+      leftMotorStatorCurrentSignal,
+      leftMotorSupplyCurrentSignal,
+      leftMotorVelocitySignal,
+      leftEncoderPositionSignal,
+
+      rightMotorVoltageSignal,
+      rightMotorStatorCurrentSignal,
+      rightMotorSupplyCurrentSignal,
+      rightMotorVelocitySignal,
+      rightEncoderPositionSignal);
 
 
     //config.Slot0.kV = ShooterConstants.kVRight;
@@ -66,27 +106,32 @@ public class ShooterIOReal implements ShooterIO {
 
   @Override
   public void updateInputs(ShooterIOInputs inputs) {
-    StatusSignal<AngularVelocity> leftStatus = leftMotor.getVelocity();
-    StatusSignal<AngularVelocity> rightStatus = rightMotor.getVelocity();
+    BaseStatusSignal.refreshAll(
+      leftMotorVoltageSignal,
+      leftMotorStatorCurrentSignal,
+      leftMotorSupplyCurrentSignal,
+      leftMotorVelocitySignal,
+      leftEncoderPositionSignal,
 
-    StatusSignal<Current> leftMotorStatorCurrent = leftMotor.getStatorCurrent();
+      rightMotorVoltageSignal,
+      rightMotorStatorCurrentSignal,
+      rightMotorSupplyCurrentSignal,
+      rightMotorVelocitySignal,
+      rightEncoderPositionSignal);
 
-    StatusSignal<Current> leftMotorSupplyCurrent = leftMotor.getSupplyCurrent();
-
-    StatusSignal.refreshAll(List.of(leftMotorStatorCurrent,leftMotorSupplyCurrent,leftStatus,rightStatus));
-    inputs.leftMotorVoltage = leftMotor.getMotorVoltage().getValue();
-    inputs.leftMotorStatorCurrent = leftMotorStatorCurrent.getValue();//leftMotor.getStatorCurrent().getValue();
-    inputs.leftMotorSupplyCurrent = leftMotorSupplyCurrent.getValue();//leftMotor.getSupplyCurrent().getValue();
-    inputs.leftMotorSpeed = leftStatus.getValue();
+    inputs.leftMotorVoltage = leftMotorVoltageSignal.getValue();
+    inputs.leftMotorStatorCurrent = leftMotorStatorCurrentSignal.getValue();//leftMotor.getStatorCurrent().getValue();
+    inputs.leftMotorSupplyCurrent = leftMotorSupplyCurrentSignal.getValue();//leftMotor.getSupplyCurrent().getValue();
+    inputs.leftMotorSpeed = leftMotorVelocitySignal.getValue();
     inputs.leftMotorConnected = leftMotor.isConnected();
-    inputs.leftEncoderPosition = leftMotor.getPosition().getValue().in(Rotations);
+    inputs.leftEncoderPosition = leftEncoderPositionSignal.getValue().in(Rotations);
 
-    inputs.rightMotorVoltage = rightMotor.getMotorVoltage().getValue();
-    inputs.rightMotorStatorCurrent = rightMotor.getStatorCurrent().getValue();
-    inputs.rightMotorSupplyCurrent = rightMotor.getSupplyCurrent().getValue();
-    inputs.rightMotorSpeed = rightStatus.getValue();
+    inputs.rightMotorVoltage = rightMotorVoltageSignal.getValue();
+    inputs.rightMotorStatorCurrent = rightMotorStatorCurrentSignal.getValue();
+    inputs.rightMotorSupplyCurrent = rightMotorSupplyCurrentSignal.getValue();
+    inputs.rightMotorSpeed = rightMotorVelocitySignal.getValue();
     inputs.rightMotorConnected = rightMotor.isConnected();
-    inputs.rightEncoderPosition = rightMotor.getPosition().getValue().in(Rotations);
+    inputs.rightEncoderPosition = rightEncoderPositionSignal.getValue().in(Rotations);
   }
 
   @Override

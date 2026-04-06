@@ -33,7 +33,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.DriveConstants;
-import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.util.FieldUtil;
 
 import static edu.wpi.first.units.Units.Radians;

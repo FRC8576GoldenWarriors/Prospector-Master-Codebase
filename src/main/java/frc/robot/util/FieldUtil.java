@@ -3,7 +3,6 @@ package frc.robot.util;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 
-import java.lang.reflect.Field;
 import java.util.function.Supplier;
 
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -42,5 +41,5 @@ public class FieldUtil{
         Alliance currentAlliance = DriverStation.getAlliance().orElse(Alliance.Blue);
         return (position==fieldPosition.BlueZone&&currentAlliance==Alliance.Blue)||(position==fieldPosition.RedZone&&currentAlliance==Alliance.Red);
     }
-    
+
 }
