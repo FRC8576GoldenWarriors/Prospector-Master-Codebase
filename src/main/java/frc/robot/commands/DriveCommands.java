@@ -419,26 +419,18 @@ public class DriveCommands {
 
     }
 
-    public static Command DriveX(Drive drive, Supplier<ChassisSpeeds> chassisSpeeds) {
+    public static Command driveX(Drive drive, Supplier<ChassisSpeeds> chassisSpeeds) {
         return Commands.run(
                 () -> {
                         drive.runVelocity(chassisSpeeds.get());
-                }, drive).beforeStarting(() -> {
-                        angleController.reset(drive.getRotation().getRadians(),
-                        drive.getChassisSpeeds().omegaRadiansPerSecond);
-                        translationController.reset();
-                });
+                }, drive);
     }
 
-    public static Command DriveX(Drive drive, Supplier<ChassisSpeeds> chassisSpeeds, Time timeout) {
+    public static Command driveX(Drive drive, Supplier<ChassisSpeeds> chassisSpeeds, Time timeout) {
         return Commands.run(
                 () -> {
                         drive.runVelocity(chassisSpeeds.get());
-                }, drive).beforeStarting(() -> {
-                        angleController.reset(drive.getRotation().getRadians(),
-                        drive.getChassisSpeeds().omegaRadiansPerSecond);
-                        translationController.reset();
-                })
+                }, drive)
                 .withTimeout(timeout);
     }
 

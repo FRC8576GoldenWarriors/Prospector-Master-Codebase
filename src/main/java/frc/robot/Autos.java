@@ -1,6 +1,8 @@
 package frc.robot;
 
 
+import static edu.wpi.first.units.Units.Seconds;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,6 +19,7 @@ import com.pathplanner.lib.util.FlippingUtil;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
@@ -29,7 +32,6 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Macros.RobotStates;
 import frc.robot.commands.DriveCommands;
-import frc.robot.commands.DriveX;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.drive.Drive;
 
@@ -112,7 +114,7 @@ public class Autos {
             .andThen(DriveCommands.joystickDriveTagCentric(drive,()->0,()->0,()->drive.getPose())
              .until(()->DriveCommands.angleAligned()))
              .andThen(macros.setWantedState(RobotStates.RunContinous).alongWith(new WaitCommand(6))
-             .alongWith(new DriveX(drive,0)))
+             .alongWith(DriveCommands.driveX(drive, () -> new ChassisSpeeds())))
             //.andThen(getAutoBuilderPathPlannerCommand("OverBump", flipped, false, null))
              .andThen(macros.setWantedState(RobotStates.Rest).alongWith(new WaitCommand(1)))
              .andThen(getAutoBuilderPathPlannerCommand("LeftToDepot", flipped, false, null)
@@ -160,7 +162,7 @@ public class Autos {
             .andThen(DriveCommands.joystickDriveTagCentric(drive,()->0,()->0,()->drive.getPose())
              .until(()->DriveCommands.angleAligned()))
              .andThen(macros.setWantedState(RobotStates.RunContinous).alongWith(new WaitCommand(6))
-             .alongWith(new DriveX(drive,0).withTimeout(6)))
+             .alongWith(DriveCommands.driveX(drive, () -> new ChassisSpeeds(), Seconds.of(6))))
             //.andThen(getAutoBuilderPathPlannerCommand("OverBump", flipped, false, null))
              .andThen(macros.setWantedState(RobotStates.Rest).alongWith(new WaitCommand(1)))
              .andThen(getAutoBuilderPathPlannerCommand("OverBump", flipped, true, null))
@@ -234,7 +236,7 @@ public class Autos {
             .andThen(DriveCommands.joystickDriveTagCentric(drive,()->0,()->0,()->drive.getPose())
              .until(()->DriveCommands.angleAligned()))
              .andThen(macros.setWantedState(RobotStates.RunContinous).alongWith(new WaitCommand(6))
-             .alongWith(new DriveX(drive,0).withTimeout(6)))
+             .alongWith(DriveCommands.driveX(drive, () -> new ChassisSpeeds(), Seconds.of(6))))
             //.andThen(getAutoBuilderPathPlannerCommand("OverBump", flipped, false, null))
              .andThen(macros.setWantedState(RobotStates.Rest).alongWith(new WaitCommand(1)))
              .andThen(macros.setWantedState(RobotStates.IntakeOn))
