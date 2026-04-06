@@ -24,6 +24,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
@@ -197,8 +198,8 @@ public class DriveCommands {
                 .beforeStarting(() -> angleController.reset(drive.getRotation().getRadians()));
     }
 
-        public static Command joystickDriveAt45(
-                Drive drive, DoubleSupplier xSupplier, DoubleSupplier ySupplier) {
+    public static Command joystickDriveAt45(
+           Drive drive, DoubleSupplier xSupplier, DoubleSupplier ySupplier) {
 
         // Create PID controller
         // ProfiledPIDController angleController = new ProfiledPIDController(
@@ -416,6 +417,29 @@ public class DriveCommands {
                         drive).beforeStarting(() -> {angleController.reset(drive.getRotation().getRadians());
                         translationController.reset();});
 
+    }
+
+    public static Command DriveX(Drive drive, Supplier<ChassisSpeeds> chassisSpeeds) {
+        return Commands.run(
+                () -> {
+                        drive.runVelocity(chassisSpeeds.get());
+                }, drive).beforeStarting(() -> {
+                        angleController.reset(drive.getRotation().getRadians(),
+                        drive.getChassisSpeeds().omegaRadiansPerSecond);
+                        translationController.reset();
+                });
+    }
+
+    public static Command DriveX(Drive drive, Supplier<ChassisSpeeds> chassisSpeeds, Time timeout) {
+        return Commands.run(
+                () -> {
+                        drive.runVelocity(chassisSpeeds.get());
+                }, drive).beforeStarting(() -> {
+                        angleController.reset(drive.getRotation().getRadians(),
+                        drive.getChassisSpeeds().omegaRadiansPerSecond);
+                        translationController.reset();
+                })
+                .withTimeout(timeout);
     }
 
 //     public static PathPlannerPath driveOverBump(Supplier<Pose2d> currentPose){
