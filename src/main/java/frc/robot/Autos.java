@@ -23,6 +23,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -98,6 +99,7 @@ public class Autos {
                 .andThen(macros.setWantedState(RobotStates.RunContinous)
                 .alongWith(new WaitCommand(6)));
         } catch (Exception exception) {
+            DriverStation.reportError(exception.getLocalizedMessage(), exception.getStackTrace());
             return Commands.none();
         }
      }
@@ -125,6 +127,7 @@ public class Autos {
              .andThen(macros.setWantedState(RobotStates.RunContinous).alongWith(new WaitCommand(6)));
 
         } catch (Exception exception) {
+            DriverStation.reportError(exception.getLocalizedMessage(), exception.getStackTrace());
             return Commands.none();
         }
     }
@@ -147,6 +150,7 @@ public class Autos {
              .alongWith(macros.setWantedState(RobotStates.IntakeOn)));
 
         } catch (Exception exception) {
+            DriverStation.reportError(exception.getLocalizedMessage(), exception.getStackTrace());
             return Commands.none();
         }
     }
@@ -170,6 +174,7 @@ public class Autos {
              .andThen(getAutoBuilderPathPlannerCommand("Intake2", flipped, true, null));
 
         } catch (Exception exception) {
+            DriverStation.reportError(exception.getLocalizedMessage(), exception.getStackTrace());
             return Commands.none();
         }
     }
@@ -207,6 +212,7 @@ public class Autos {
              .alongWith(macros.setWantedState(RobotStates.IntakeOn)));
              // .alongWith(macros.setWantedState(RobotStates.IntakeOn));
         } catch (Exception exception) {
+            DriverStation.reportError(exception.getLocalizedMessage(), exception.getStackTrace());
             return Commands.none();
         }//andThen(runPath("IntakeBalls", flipped,new PathConstraints(4.0, 5.2, 3*Math.PI, 4*Math.PI))).//.raceWith(new WaitCommand(8)).andThen(runPath("OverBump", flipped));//.andThen(runPath("OverBump", flipped));//runPath("RightLeave", flipped,AutonConstants.startingRightPose).andThen(DriveCommands.joystickDriveTagCentric(drive,()->0,()->0,()->drive.getPose()).until(()->DriveCommands.angleController.atGoal())).andThen(macros.setWantedState(RobotStates.AutonShoot));//runPath("OverBump",false,AutonConstants.startingRightPose).alongWith(macros.setWantedState(RobotStates.IntakeOn));//.andThen(runPath("IntakeBalls",false)).andThen(runPath("BackToBump",false)).andThen(runPath("BackOverBump",false)).andThen(DriveCommands.joystickDriveTagCentric(drive,()->0,()->0,()->drive.getPose()).until(()->DriveCommands.angleController.atGoal()).andThen(macros.setWantedState(RobotStates.AutonShoot)));
     }
@@ -244,6 +250,7 @@ public class Autos {
              .andThen(getAutoBuilderPathPlannerCommand("Intake2", flipped, false, new PathConstraints(2, 3.5, 3*Math.PI, 4*Math.PI)));
              // .alongWith(macros.setWantedState(RobotStates.IntakeOn));
         } catch (Exception exception) {
+            DriverStation.reportError(exception.getLocalizedMessage(), exception.getStackTrace());
             return Commands.none();
         }//andThen(runPath("IntakeBalls", flipped,new PathConstraints(4.0, 5.2, 3*Math.PI, 4*Math.PI))).//.raceWith(new WaitCommand(8)).andThen(runPath("OverBump", flipped));//.andThen(runPath("OverBump", flipped));//runPath("RightLeave", flipped,AutonConstants.startingRightPose).andThen(DriveCommands.joystickDriveTagCentric(drive,()->0,()->0,()->drive.getPose()).until(()->DriveCommands.angleController.atGoal())).andThen(macros.setWantedState(RobotStates.AutonShoot));//runPath("OverBump",false,AutonConstants.startingRightPose).alongWith(macros.setWantedState(RobotStates.IntakeOn));//.andThen(runPath("IntakeBalls",false)).andThen(runPath("BackToBump",false)).andThen(runPath("BackOverBump",false)).andThen(DriveCommands.joystickDriveTagCentric(drive,()->0,()->0,()->drive.getPose()).until(()->DriveCommands.angleController.atGoal()).andThen(macros.setWantedState(RobotStates.AutonShoot)));
     }
