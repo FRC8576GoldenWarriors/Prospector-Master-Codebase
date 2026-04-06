@@ -6,6 +6,7 @@ import static edu.wpi.first.units.Units.*;
 import edu.wpi.first.math.util.Units;
 
 public class ShooterConstants {
+    public static final Frequency updateFrequency = Hertz.of(50);
     // Motor IDs (Subset 30-40)
     public static final int LEFT_SHOOTER_ID = 31;
     public static final int RIGHT_SHOOTER_ID = 32;

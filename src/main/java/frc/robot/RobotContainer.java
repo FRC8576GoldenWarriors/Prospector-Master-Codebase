@@ -35,6 +35,7 @@ import frc.robot.subsystems.LEDs.LEDs;
 import frc.robot.subsystems.Shooter.Shooter;
 import frc.robot.subsystems.Shooter.ShooterIO;
 import frc.robot.subsystems.Shooter.ShooterIOReal;
+import frc.robot.subsystems.Shooter.ShooterIOKraken;
 import frc.robot.subsystems.Shooter.ShooterUtil;
 import frc.robot.subsystems.ShooterHood.ShooterHood;
 import frc.robot.subsystems.ShooterHood.ShooterHoodIO;
@@ -49,6 +50,7 @@ import frc.robot.subsystems.transport.TransportIO;
 import frc.robot.subsystems.transport.TransportIOKraken;
 import frc.robot.subsystems.vision.*;
 import frc.robot.subsystems.vision.VisionIO.IMUMode;
+import frc.robot.util.FieldUtil;
 
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
@@ -72,7 +74,8 @@ public class RobotContainer {
     public static ShooterHood shooterHood;
     public static Transport transport;
     public static Macros macros;
-     public static ShooterUtil shooterUtil = new ShooterUtil();
+    public static ShooterUtil shooterUtil = new ShooterUtil();
+    public static FieldUtil fieldUtil;
 
     //public static Macros macros;
 
@@ -111,11 +114,12 @@ public class RobotContainer {
                 new VisionIOLimelight(VisionConstants.camera3Name, drive::getRotation, drive::getYawVelocity));
                 //shooter = new Shooter(0);
                 intake = new Intake(new IntakeKrakenIO());
-                shooter = new Shooter(new ShooterIOReal());
+                shooter = new Shooter(new ShooterIOKraken());
                 shooterHood = new ShooterHood(new ShooterHoodIOKraken());
                 transport = new Transport(new TransportIOKraken());
                 macros = new Macros(shooter, shooterHood, transport, intake);
                 autos = new Autos(drive,macros,DriverStation.getAlliance().orElse(Alliance.Blue)==Alliance.Red);
+                fieldUtil = new FieldUtil(drive::getPose);
                 //intake = new Intake(new IntakeKrakenIO());
                 break;
             case SIM:
@@ -143,6 +147,7 @@ public class RobotContainer {
                         camera1Name, robotToCamera1.minus(Pose3d.kZero), driveSimulation::getSimulatedDriveTrainPose));
                 //shooter = null;
                 autos = new Autos(drive,macros,DriverStation.getAlliance().orElse(Alliance.Blue)==Alliance.Red);
+                fieldUtil = new FieldUtil(drive::getPose);
                 break;
             default:
                 // Replayed robot, disable IO implementations

@@ -49,7 +49,6 @@ public class VisionIOLimelight implements VisionIO {
 
     private final DoubleArraySubscriber megatag1Subscriber;
     private final DoubleArraySubscriber megatag2Subscriber;
-    private final DoubleArraySubscriber standardDeviationSubscriber;
 
     private final DoubleArraySubscriber tagCornersSubscriber;
     private final DoubleArrayPublisher cropPublisher;
@@ -86,7 +85,6 @@ public class VisionIOLimelight implements VisionIO {
         tySubscriber = table.getDoubleTopic("ty").subscribe(0.0);
         megatag1Subscriber = table.getDoubleArrayTopic("botpose_wpiblue").subscribe(new double[] {});
         megatag2Subscriber = table.getDoubleArrayTopic("botpose_orb_wpiblue").subscribe(new double[] {});
-        standardDeviationSubscriber = table.getDoubleArrayTopic("stddevs").subscribe(new double[] {});
         tagCornersSubscriber = table.getDoubleArrayTopic("tcornxy").subscribe(new double[] {});
         rewindEnablePublisher = table.getDoubleTopic("rewind_enable_set").publish();
         captureRewindSubscriber = table.getDoubleArrayTopic("capture_rewind").subscribe(new double[] {});
@@ -130,13 +128,13 @@ public class VisionIOLimelight implements VisionIO {
         // Read new pose observations from NetworkTables
         Set<Integer> tagIds = new HashSet<>();
         List<PoseObservation> poseObservations = new LinkedList<>();
-        TimestampedDoubleArray[] standardDeviations = standardDeviationSubscriber.readQueue();
+        //TimestampedDoubleArray[] standardDeviations = standardDeviationSubscriber.readQueue();
         for (var rawSample : megatag1Subscriber.readQueue()) {
             if (rawSample.value.length == 0) continue;
             for (int i = 11; i < rawSample.value.length; i += 7) {
                 tagIds.add((int) rawSample.value[i]);
             }
-            double[] stdArray = findTimestampedValue(standardDeviations, rawSample.timestamp);
+            //double[] stdArray = findTimestampedValue(standardDeviations, rawSample.timestamp);
             poseObservations.add(new PoseObservation(
                     // Timestamp, based on server timestamp of publish and latency
                     rawSample.timestamp * 1.0e-6 - rawSample.value[6] * 1.0e-3,
@@ -164,7 +162,7 @@ public class VisionIOLimelight implements VisionIO {
             for (int i = 11; i < rawSample.value.length; i += 7) {
                 tagIds.add((int) rawSample.value[i]);
             }
-            double[] stdArray = findTimestampedValue(standardDeviations, rawSample.timestamp);
+            //double[] stdArray = findTimestampedValue(standardDeviations, rawSample.timestamp);
             poseObservations.add(new PoseObservation(
                     // Timestamp, based on server timestamp of publish and latency
                     rawSample.timestamp * 1.0e-6 - rawSample.value[6] * 1.0e-3,

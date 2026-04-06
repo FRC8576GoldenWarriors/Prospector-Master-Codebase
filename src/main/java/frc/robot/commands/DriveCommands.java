@@ -24,6 +24,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
@@ -32,7 +33,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.DriveConstants;
-import frc.robot.subsystems.vision.VisionConstants;
+import frc.robot.util.FieldUtil;
 
 import static edu.wpi.first.units.Units.Radians;
 
@@ -197,8 +198,8 @@ public class DriveCommands {
                 .beforeStarting(() -> angleController.reset(drive.getRotation().getRadians()));
     }
 
-        public static Command joystickDriveAt45(
-                Drive drive, DoubleSupplier xSupplier, DoubleSupplier ySupplier) {
+    public static Command joystickDriveAt45(
+           Drive drive, DoubleSupplier xSupplier, DoubleSupplier ySupplier) {
 
         // Create PID controller
         // ProfiledPIDController angleController = new ProfiledPIDController(
@@ -272,7 +273,7 @@ public class DriveCommands {
                         () -> {
                                 Logger.recordOutput("Drive/Alignment Goal", angleController.getGoal().position);
                                 Logger.recordOutput("Drive/Tag centric aligned", angleAligned());
-                                if((drivePose.get().getX()  > (VisionConstants.aprilTagLayout.getFieldLength()-4.61)&&DriverStation.getAlliance().orElse(Alliance.Blue)==Alliance.Red) ||(drivePose.get().getX() < 4.61&&DriverStation.getAlliance().orElse(Alliance.Blue)==Alliance.Blue)){
+                                if(FieldUtil.isOnAllianceSide()){
                                 Translation2d botTranslation = drivePose.get().getTranslation();
 
                                 List<Translation2d> hubs = List.of(
@@ -363,7 +364,7 @@ public class DriveCommands {
         translationController.setTolerance(TRANSLATION_TOLERANCE_METERS);
         return Commands.run(
                         () -> {
-                                if((drivePose.get().getX()  > (VisionConstants.aprilTagLayout.getFieldLength()-4.61)&&DriverStation.getAlliance().orElse(Alliance.Blue)==Alliance.Red) ||(drivePose.get().getX() < 4.61&&DriverStation.getAlliance().orElse(Alliance.Blue)==Alliance.Blue)){
+                                if(FieldUtil.isOnAllianceSide()){
                                 Translation2d botTranslation = drivePose.get().getTranslation();
 
                                 List<Translation2d> hubs = List.of(
@@ -416,6 +417,21 @@ public class DriveCommands {
                         drive).beforeStarting(() -> {angleController.reset(drive.getRotation().getRadians());
                         translationController.reset();});
 
+    }
+
+    public static Command driveX(Drive drive, Supplier<ChassisSpeeds> chassisSpeeds) {
+        return Commands.run(
+                () -> {
+                        drive.runVelocity(chassisSpeeds.get());
+                }, drive);
+    }
+
+    public static Command driveX(Drive drive, Supplier<ChassisSpeeds> chassisSpeeds, Time timeout) {
+        return Commands.run(
+                () -> {
+                        drive.runVelocity(chassisSpeeds.get());
+                }, drive)
+                .withTimeout(timeout);
     }
 
 //     public static PathPlannerPath driveOverBump(Supplier<Pose2d> currentPose){

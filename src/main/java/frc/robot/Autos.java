@@ -1,6 +1,8 @@
 package frc.robot;
 
 
+import static edu.wpi.first.units.Units.Seconds;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,9 +19,11 @@ import com.pathplanner.lib.util.FlippingUtil;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -29,7 +33,6 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Macros.RobotStates;
 import frc.robot.commands.DriveCommands;
-import frc.robot.commands.DriveX;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.drive.Drive;
 
@@ -61,6 +64,7 @@ public class Autos {
         autoChooser.addOption("Left Depot Auton", autoLeftDepot());
         autoChooser.addOption("Left Steal Long", autoLeftStealLong());
         autoChooser.addOption("Right Steal Long", autoRightStealLong());
+        autoChooser.addOption("Right Double Dip", rightDoubleSteal());
         SmartDashboard.putData("Auto Chooser",autoChooser.getSendableChooser());
     }
 
@@ -75,6 +79,31 @@ public class Autos {
         //.andThen();//andThen(runPath("IntakeBalls", flipped,new PathConstraints(4.0, 5.2, 3*Math.PI, 4*Math.PI))).//.raceWith(new WaitCommand(8)).andThen(runPath("OverBump", flipped));//.andThen(runPath("OverBump", flipped));//runPath("RightLeave", flipped,AutonConstants.startingRightPose).andThen(DriveCommands.joystickDriveTagCentric(drive,()->0,()->0,()->drive.getPose()).until(()->DriveCommands.angleController.atGoal())).andThen(macros.setWantedState(RobotStates.AutonShoot));//runPath("OverBump",false,AutonConstants.startingRightPose).alongWith(macros.setWantedState(RobotStates.IntakeOn));//.andThen(runPath("IntakeBalls",false)).andThen(runPath("BackToBump",false)).andThen(runPath("BackOverBump",false)).andThen(DriveCommands.joystickDriveTagCentric(drive,()->0,()->0,()->drive.getPose()).until(()->DriveCommands.angleController.atGoal()).andThen(macros.setWantedState(RobotStates.AutonShoot)));
     }
 
+    public Command rightDoubleSteal(){
+        try {
+        return getAutoBuilderPathPlannerCommand("OverBump", flipped, false, null)
+                .alongWith(macros.setWantedState(RobotStates.IntakeOn))
+                .andThen(getAutoBuilderPathPlannerCommand("IntakeBalls", flipped, false, null))
+                .andThen(getAutoBuilderPathPlannerCommand("BackToBump", flipped, false, null))
+                .andThen(getAutoBuilderPathPlannerCommand("BackOverBump", flipped, false, null))
+                .andThen(DriveCommands.joystickDriveTagCentric(drive,()->0,()->0,()->drive.getPose())
+                .until(()->DriveCommands.angleController.atGoal()))
+                .andThen(macros.setWantedState(RobotStates.RunContinous)
+                .alongWith(new WaitCommand(6)))
+                .andThen(getAutoBuilderPathPlannerCommand("OverBump", flipped, false, null)
+                .alongWith(macros.setWantedState(RobotStates.IntakeOn)))
+                .andThen(getAutoBuilderPathPlannerCommand("IntakeHub", flipped, false, null))
+                .andThen(getAutoBuilderPathPlannerCommand("HubOverBump", flipped, false, null))
+                .andThen(DriveCommands.joystickDriveTagCentric(drive,()->0,()->0,()->drive.getPose())
+                .until(()->DriveCommands.angleController.atGoal()))
+                .andThen(macros.setWantedState(RobotStates.RunContinous)
+                .alongWith(new WaitCommand(6)));
+        } catch (Exception exception) {
+            DriverStation.reportError(exception.getLocalizedMessage(), exception.getStackTrace());
+            return Commands.none();
+        }
+     }
+
     public Command autoLeftDepot(){
         try {
             return
@@ -87,7 +116,7 @@ public class Autos {
             .andThen(DriveCommands.joystickDriveTagCentric(drive,()->0,()->0,()->drive.getPose())
              .until(()->DriveCommands.angleAligned()))
              .andThen(macros.setWantedState(RobotStates.RunContinous).alongWith(new WaitCommand(6))
-             .alongWith(new DriveX(drive,0)))
+             .alongWith(DriveCommands.driveX(drive, () -> new ChassisSpeeds())))
             //.andThen(getAutoBuilderPathPlannerCommand("OverBump", flipped, false, null))
              .andThen(macros.setWantedState(RobotStates.Rest).alongWith(new WaitCommand(1)))
              .andThen(getAutoBuilderPathPlannerCommand("LeftToDepot", flipped, false, null)
@@ -98,6 +127,7 @@ public class Autos {
              .andThen(macros.setWantedState(RobotStates.RunContinous).alongWith(new WaitCommand(6)));
 
         } catch (Exception exception) {
+            DriverStation.reportError(exception.getLocalizedMessage(), exception.getStackTrace());
             return Commands.none();
         }
     }
@@ -120,6 +150,7 @@ public class Autos {
              .alongWith(macros.setWantedState(RobotStates.IntakeOn)));
 
         } catch (Exception exception) {
+            DriverStation.reportError(exception.getLocalizedMessage(), exception.getStackTrace());
             return Commands.none();
         }
     }
@@ -135,7 +166,7 @@ public class Autos {
             .andThen(DriveCommands.joystickDriveTagCentric(drive,()->0,()->0,()->drive.getPose())
              .until(()->DriveCommands.angleAligned()))
              .andThen(macros.setWantedState(RobotStates.RunContinous).alongWith(new WaitCommand(6))
-             .alongWith(new DriveX(drive,0).withTimeout(6)))
+             .alongWith(DriveCommands.driveX(drive, () -> new ChassisSpeeds(), Seconds.of(6))))
             //.andThen(getAutoBuilderPathPlannerCommand("OverBump", flipped, false, null))
              .andThen(macros.setWantedState(RobotStates.Rest).alongWith(new WaitCommand(1)))
              .andThen(getAutoBuilderPathPlannerCommand("OverBump", flipped, true, null))
@@ -143,6 +174,7 @@ public class Autos {
              .andThen(getAutoBuilderPathPlannerCommand("Intake2", flipped, true, null));
 
         } catch (Exception exception) {
+            DriverStation.reportError(exception.getLocalizedMessage(), exception.getStackTrace());
             return Commands.none();
         }
     }
@@ -180,6 +212,7 @@ public class Autos {
              .alongWith(macros.setWantedState(RobotStates.IntakeOn)));
              // .alongWith(macros.setWantedState(RobotStates.IntakeOn));
         } catch (Exception exception) {
+            DriverStation.reportError(exception.getLocalizedMessage(), exception.getStackTrace());
             return Commands.none();
         }//andThen(runPath("IntakeBalls", flipped,new PathConstraints(4.0, 5.2, 3*Math.PI, 4*Math.PI))).//.raceWith(new WaitCommand(8)).andThen(runPath("OverBump", flipped));//.andThen(runPath("OverBump", flipped));//runPath("RightLeave", flipped,AutonConstants.startingRightPose).andThen(DriveCommands.joystickDriveTagCentric(drive,()->0,()->0,()->drive.getPose()).until(()->DriveCommands.angleController.atGoal())).andThen(macros.setWantedState(RobotStates.AutonShoot));//runPath("OverBump",false,AutonConstants.startingRightPose).alongWith(macros.setWantedState(RobotStates.IntakeOn));//.andThen(runPath("IntakeBalls",false)).andThen(runPath("BackToBump",false)).andThen(runPath("BackOverBump",false)).andThen(DriveCommands.joystickDriveTagCentric(drive,()->0,()->0,()->drive.getPose()).until(()->DriveCommands.angleController.atGoal()).andThen(macros.setWantedState(RobotStates.AutonShoot)));
     }
@@ -209,7 +242,7 @@ public class Autos {
             .andThen(DriveCommands.joystickDriveTagCentric(drive,()->0,()->0,()->drive.getPose())
              .until(()->DriveCommands.angleAligned()))
              .andThen(macros.setWantedState(RobotStates.RunContinous).alongWith(new WaitCommand(6))
-             .alongWith(new DriveX(drive,0).withTimeout(6)))
+             .alongWith(DriveCommands.driveX(drive, () -> new ChassisSpeeds(), Seconds.of(6))))
             //.andThen(getAutoBuilderPathPlannerCommand("OverBump", flipped, false, null))
              .andThen(macros.setWantedState(RobotStates.Rest).alongWith(new WaitCommand(1)))
              .andThen(macros.setWantedState(RobotStates.IntakeOn))
@@ -217,6 +250,7 @@ public class Autos {
              .andThen(getAutoBuilderPathPlannerCommand("Intake2", flipped, false, new PathConstraints(2, 3.5, 3*Math.PI, 4*Math.PI)));
              // .alongWith(macros.setWantedState(RobotStates.IntakeOn));
         } catch (Exception exception) {
+            DriverStation.reportError(exception.getLocalizedMessage(), exception.getStackTrace());
             return Commands.none();
         }//andThen(runPath("IntakeBalls", flipped,new PathConstraints(4.0, 5.2, 3*Math.PI, 4*Math.PI))).//.raceWith(new WaitCommand(8)).andThen(runPath("OverBump", flipped));//.andThen(runPath("OverBump", flipped));//runPath("RightLeave", flipped,AutonConstants.startingRightPose).andThen(DriveCommands.joystickDriveTagCentric(drive,()->0,()->0,()->drive.getPose()).until(()->DriveCommands.angleController.atGoal())).andThen(macros.setWantedState(RobotStates.AutonShoot));//runPath("OverBump",false,AutonConstants.startingRightPose).alongWith(macros.setWantedState(RobotStates.IntakeOn));//.andThen(runPath("IntakeBalls",false)).andThen(runPath("BackToBump",false)).andThen(runPath("BackOverBump",false)).andThen(DriveCommands.joystickDriveTagCentric(drive,()->0,()->0,()->drive.getPose()).until(()->DriveCommands.angleController.atGoal()).andThen(macros.setWantedState(RobotStates.AutonShoot)));
     }

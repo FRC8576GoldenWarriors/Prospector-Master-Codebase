@@ -26,6 +26,7 @@ public interface ModuleIO {
         public double driveCurrentAmps = 0.0;
 
         public boolean turnConnected = false;
+        public boolean canCoderConnected = false;
         public Rotation2d turnPosition = new Rotation2d();
         public double turnPositionRads = 0.0;
         public double turnVelocityRadPerSec = 0.0;

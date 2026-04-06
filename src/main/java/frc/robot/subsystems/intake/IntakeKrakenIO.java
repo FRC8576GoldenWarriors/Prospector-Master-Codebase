@@ -1,14 +1,21 @@
 package frc.robot.subsystems.intake;
 
 import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.Hertz;
+import static edu.wpi.first.units.Units.Rotations;
 
-
+import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 
 public class IntakeKrakenIO implements IntakeIO{
@@ -20,6 +27,18 @@ public class IntakeKrakenIO implements IntakeIO{
     TalonFXConfiguration leadConfig;
     TalonFXConfiguration pivotConfig;
     TalonFXConfiguration rollerConfig;
+
+    private final StatusSignal<Voltage> pivotMotorVoltageSignal;
+    private final StatusSignal<Current> pivotMotorStatorCurrentSignal;
+    private final StatusSignal<Current> pivotMotorSupplyCurrentSignal;
+    private final StatusSignal<AngularVelocity> pivotMotorAngularVelocitySignal;
+    private final StatusSignal<Angle> pivotMotorAngleSignal;
+
+    private final StatusSignal<Voltage> rollerMotorVoltageSignal;
+    private final StatusSignal<Current> rollerMotorStatorCurrentSignal;
+    private final StatusSignal<Current> rollerMotorSupplyCurrentSignal;
+    private final StatusSignal<AngularVelocity> rollerMotorAngularVelocitySignal;
+    private final StatusSignal<Angle> rollerMotorAngleSignal;
 
 
     public IntakeKrakenIO(){
@@ -57,6 +76,35 @@ public class IntakeKrakenIO implements IntakeIO{
             .withSupplyCurrentLimitEnable(true)
             .withStatorCurrentLimitEnable(false));
 
+        pivotMotorVoltageSignal = pivotMotor.getMotorVoltage();
+        pivotMotorStatorCurrentSignal = pivotMotor.getStatorCurrent();
+        pivotMotorSupplyCurrentSignal = pivotMotor.getSupplyCurrent();
+        pivotMotorAngularVelocitySignal = pivotMotor.getVelocity();
+        pivotMotorAngleSignal = pivotMotor.getPosition();
+
+        rollerMotorVoltageSignal = rollerMotor.getMotorVoltage();
+        rollerMotorStatorCurrentSignal = rollerMotor.getStatorCurrent();
+        rollerMotorSupplyCurrentSignal = rollerMotor.getSupplyCurrent();
+        rollerMotorAngularVelocitySignal = rollerMotor.getVelocity();
+        rollerMotorAngleSignal = rollerMotor.getPosition();
+
+        pivotMotor.optimizeBusUtilization(Hertz.of(0));
+        rollerMotor.optimizeBusUtilization(Hertz.of(0));
+
+        BaseStatusSignal.setUpdateFrequencyForAll(
+        IntakeConstants.Software.updateFrequency,
+         pivotMotorVoltageSignal,
+         pivotMotorStatorCurrentSignal,
+         pivotMotorSupplyCurrentSignal,
+         pivotMotorAngularVelocitySignal,
+         pivotMotorAngleSignal,
+         rollerMotorVoltageSignal,
+         rollerMotorStatorCurrentSignal,
+         rollerMotorSupplyCurrentSignal,
+         rollerMotorAngularVelocitySignal,
+         rollerMotorAngleSignal);
+
+
 
         pivotMotor.getConfigurator().apply(pivotConfig);
         rollerMotor.getConfigurator().apply(rollerConfig);
@@ -65,22 +113,36 @@ public class IntakeKrakenIO implements IntakeIO{
 
     @Override
     public void updateInputs(IntakeIOInputs inputs) {
-     inputs.pivotVoltage = pivotMotor.getMotorVoltage().getValue();
-     inputs.pivotCurrent = pivotMotor.getStatorCurrent().getValue();
-     inputs.pivotRPS = pivotMotor.getVelocity().getValue();
-     //inputs.pivotMotorTemperature = pivotMotor.getDeviceTemp().getValue();
+     BaseStatusSignal.refreshAll(
+         pivotMotorVoltageSignal,
+         pivotMotorStatorCurrentSignal,
+         pivotMotorSupplyCurrentSignal,
+         pivotMotorAngularVelocitySignal,
+         pivotMotorAngleSignal,
+         rollerMotorVoltageSignal,
+         rollerMotorStatorCurrentSignal,
+         rollerMotorSupplyCurrentSignal,
+         rollerMotorAngularVelocitySignal,
+         rollerMotorAngleSignal
+     );
+
      inputs.pivotConnected = pivotMotor.isConnected();
-     inputs.rollerVoltage = rollerMotor.getMotorVoltage().getValue();
-     inputs.rollerCurrent = rollerMotor.getStatorCurrent().getValue();
-     inputs.rollerRPS = rollerMotor.getVelocity().getValue();
-     //inputs.rollerMotorTemperature = rollerMotor.getDeviceTemp().getValue();
+     inputs.pivotVoltage = pivotMotorVoltageSignal.getValue();
+     inputs.pivotCurrent = pivotMotorStatorCurrentSignal.getValue();
+     inputs.pivotSupplyCurrent = pivotMotorSupplyCurrentSignal.getValue();
+     inputs.pivotRPS = pivotMotorAngularVelocitySignal.getValue();
+
      inputs.rollerConnected = rollerMotor.isConnected();
+     inputs.rollerVoltage = rollerMotorVoltageSignal.getValue();
+     inputs.rollerCurrent = rollerMotorStatorCurrentSignal.getValue();
+     inputs.rollerSupplyCurrent = rollerMotorSupplyCurrentSignal.getValue();
+     inputs.rollerRPS = rollerMotorAngularVelocitySignal.getValue();
+
      inputs.leftEncoderConnected = leftEncoder.isConnected();
+     inputs.leftEncoderRotations = Rotations.of(leftEncoder.get());
+
      inputs.rightEncoderConnected = rightEncoder.isConnected();
-     inputs.leftEncoderRotations = leftEncoder.get();
-     inputs.rightEncoderRotations = rightEncoder.get();
-     inputs.pivotSupplyCurrent = pivotMotor.getSupplyCurrent().getValue();
-     inputs.rollerSupplyCurrent = rollerMotor.getSupplyCurrent().getValue();
+     inputs.rightEncoderRotations = Rotations.of(rightEncoder.get());
     }
 
     @Override

@@ -30,6 +30,7 @@ public class Module {
 
     private final Alert driveDisconnectedAlert;
     private final Alert turnDisconnectedAlert;
+    private final Alert canCoderDisconnectedAlert;
     private SwerveModulePosition[] odometryPositions = new SwerveModulePosition[] {};
 
     public Module(ModuleIO io, int index) {
@@ -39,6 +40,8 @@ public class Module {
                 new Alert("Disconnected drive motor on module " + Integer.toString(index) + ".", AlertType.kError);
         turnDisconnectedAlert =
                 new Alert("Disconnected turn motor on module " + Integer.toString(index) + ".", AlertType.kError);
+        canCoderDisconnectedAlert =
+                new Alert("Disconnected CAN coder on module " + Integer.toString(index) + ".", AlertType.kError);
     }
 
     public void periodic() {
@@ -58,6 +61,7 @@ public class Module {
         // Update alerts
         driveDisconnectedAlert.set(!inputs.driveConnected);
         turnDisconnectedAlert.set(!inputs.turnConnected);
+        canCoderDisconnectedAlert.set(!inputs.canCoderConnected);
     }
 
     /** Runs the module with the specified setpoint state. Mutates the state to optimize it. */

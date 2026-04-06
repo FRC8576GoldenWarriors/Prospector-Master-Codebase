@@ -31,8 +31,8 @@ public class LEDConstants {
 
 
     // red strobing - disabled
-    public static final Color RebStrobing = ((Color.kRed));
-    public static final double RebStrobingSpeed = 2.0;
+    public static final Color RedStrobing = ((Color.kRed));
+    public static final double RedStrobingSpeed = 2.0;
     //ENABLED
     public static final Color YellowSolid = ((new Color(255,150,11)));
 

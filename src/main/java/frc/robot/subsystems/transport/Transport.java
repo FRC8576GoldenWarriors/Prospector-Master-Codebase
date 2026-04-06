@@ -11,8 +11,6 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
-import edu.wpi.first.math.filter.Debouncer.DebounceType;
-import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -78,7 +76,11 @@ public class Transport extends SubsystemBase {
 
   @AutoLogOutput (key = "Transport/No Fuel Detected")
   public boolean noFuelDetected() {
-    Debouncer wait = new Debouncer(1,DebounceType.kFalling);
-    return (!inputs.leftFuelDetected && !inputs.rightFuelDetected);
+    return !hasFuel();
+  }
+
+  @AutoLogOutput (key = "Transport/Has Fuel")
+  public boolean hasFuel() {
+    return inputs.leftFuelDetected || inputs.rightFuelDetected;
   }
 }

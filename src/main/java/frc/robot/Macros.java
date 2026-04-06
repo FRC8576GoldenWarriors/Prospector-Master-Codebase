@@ -4,11 +4,11 @@
 
 package frc.robot;
 
+
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -21,7 +21,7 @@ import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.Intake.IntakeStates;
 import frc.robot.subsystems.transport.Transport;
 import frc.robot.subsystems.transport.Transport.TransportStates;
-import frc.robot.subsystems.vision.VisionConstants;
+import frc.robot.util.FieldUtil;
 
 
 @SuppressWarnings("unused")
@@ -146,7 +146,7 @@ public class Macros extends SubsystemBase {
   }
   public void shoot(){
     if(RobotContainer.driveController.rightTrigger().getAsBoolean()){
-      if((RobotContainer.drive.getPose().getX()  > (VisionConstants.aprilTagLayout.getFieldLength()-4.61)&&DriverStation.getAlliance().orElse(Alliance.Blue)==Alliance.Red) ||(RobotContainer.drive.getPose().getX() < 4.61&&DriverStation.getAlliance().orElse(Alliance.Blue)==Alliance.Blue)){
+      if(FieldUtil.isOnAllianceSide()){
         if(m_ShooterHood.atSetpoint()){
       m_shooter.setWantedState(ShooterStates.SHOOT);
     }
