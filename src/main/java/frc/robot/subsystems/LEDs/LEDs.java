@@ -111,7 +111,7 @@ public class LEDs extends SubsystemBase {
       switch (state) {
         case Disabled:
           //strobe(LEDConstants.PatternConfig.RebStrobing, LEDConstants.PatternConfig.RebStrobingSpeed);
-          solid(LEDConstants.PatternConfig.RebStrobing);
+          solid(LEDConstants.PatternConfig.RedStrobing);
           break;
         case OutOfRange:
           blink(LEDConstants.PatternConfig.WhiteBlink, LEDConstants.PatternConfig.WhiteBlinkSpeed);
