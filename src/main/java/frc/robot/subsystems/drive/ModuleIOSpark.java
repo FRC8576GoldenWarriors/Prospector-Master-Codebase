@@ -227,6 +227,7 @@ public ModuleIOSpark(int module) {
                 (values) -> inputs.turnAppliedVolts = values[0] * values[1]);
         ifOk(turnSpark, turnSpark::getOutputCurrent, (value) -> inputs.turnCurrentAmps = value);
         inputs.turnConnected = turnConnectedDebounce.calculate(!sparkStickyFault);
+        inputs.canCoderConnected = absoluteTurnEncoder.isConnected();
 
         // Update odometry inputs
         inputs.odometryTimestamps =
