@@ -87,8 +87,8 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
     private final Alert gyroDisconnectedAlert =
             new Alert("Disconnected gyro, using kinematics as fallback.", AlertType.kError);
     public static RobotConfig pathConfig;
-    private CANrange range;
-    private CANrange range2;
+    // private CANrange range;
+    // private CANrange range2;
 
     private Field2d field;
 
@@ -176,8 +176,8 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
                 new SysIdRoutine.Config(
                         null, null, null, (state) -> Logger.recordOutput("Drive/SysIdState", state.toString())),
                 new SysIdRoutine.Mechanism((voltage) -> runCharacterization(voltage.in(Volts)), null, this));
-                range = new CANrange(1);
-                range2 = new CANrange(2);
+                // range = new CANrange(1);
+                // range2 = new CANrange(2);
 
         setpointGenerator = new SwerveSetpointGenerator(this.pathConfig, Units.rotationsPerMinuteToRadiansPerSecond(maxSpeedRPM));
         previousSetpoint = new SwerveSetpoint(getChassisSpeeds(), getModuleStates(), DriveFeedforwards.zeros(4));

@@ -33,15 +33,19 @@ import frc.robot.Macros.RobotStates;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.LEDs.LEDs;
 import frc.robot.subsystems.Shooter.Shooter;
+import frc.robot.subsystems.Shooter.ShooterIO;
 import frc.robot.subsystems.Shooter.ShooterIOReal;
 import frc.robot.subsystems.Shooter.ShooterUtil;
 import frc.robot.subsystems.ShooterHood.ShooterHood;
+import frc.robot.subsystems.ShooterHood.ShooterHoodIO;
 import frc.robot.subsystems.ShooterHood.ShooterHoodIOKraken;
 //import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.intake.IntakeIO;
 import frc.robot.subsystems.intake.IntakeKrakenIO;
 import frc.robot.subsystems.transport.Transport;
+import frc.robot.subsystems.transport.TransportIO;
 import frc.robot.subsystems.transport.TransportIOKraken;
 import frc.robot.subsystems.vision.*;
 import frc.robot.subsystems.vision.VisionIO.IMUMode;
@@ -151,8 +155,12 @@ public class RobotContainer {
                         new ModuleIO() {},
                         (pose) -> {});
                  vision = new Vision(drive, drive::getChassisSpeeds, new VisionIO() {}, new VisionIO() {});
-                autos = null;
-               shooter = null;
+                 intake = new Intake(new IntakeIO(){});
+                shooter = new Shooter(new ShooterIO(){});
+                shooterHood = new ShooterHood(new ShooterHoodIO(){});
+                transport = new Transport(new TransportIO(){});
+                macros = new Macros(shooter, shooterHood, transport, intake);
+                autos = new Autos(drive,macros,DriverStation.getAlliance().orElse(Alliance.Blue)==Alliance.Red);
                 break;
         }
 
