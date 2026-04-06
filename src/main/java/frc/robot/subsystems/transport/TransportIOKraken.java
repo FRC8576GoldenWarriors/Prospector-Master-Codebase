@@ -2,6 +2,7 @@ package frc.robot.subsystems.transport;
 
 
 import static edu.wpi.first.units.Units.Hertz;
+import static edu.wpi.first.units.Units.Seconds;
 
 import org.littletonrobotics.junction.AutoLogOutput;
 
@@ -14,6 +15,8 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 
+import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
@@ -22,8 +25,12 @@ import edu.wpi.first.wpilibj.DigitalInput;
 public class TransportIOKraken implements TransportIO {
     private final TalonFX transportMotor;
     private final TalonFXConfiguration transportMotorConfiguration;
+
     private final DigitalInput leftTransportPhotoElectric;
     private final DigitalInput rightTransportPhotoElectric;
+
+    private final Debouncer leftTransportPhotoElectricDebouncer;
+    private final Debouncer rightTransportPhotoElectricDebouncer;
 
     private final StatusSignal<Current> statorCurrentStatusSignal;
     private final StatusSignal<Current> supplyCurrentStatusSignal;
@@ -44,6 +51,9 @@ public class TransportIOKraken implements TransportIO {
             .withSupplyCurrentLimit(TransportConstants.transportMotorCurrentLimit)
             .withSupplyCurrentLimitEnable(TransportConstants.enableTransportMotorCurrentLimit)
         );
+        leftTransportPhotoElectricDebouncer = new Debouncer(TransportConstants.debounceTime.in(Seconds), DebounceType.kFalling);
+        rightTransportPhotoElectricDebouncer = new Debouncer(TransportConstants.debounceTime.in(Seconds), DebounceType.kFalling);
+
 
 
         Slot0Configs slot0Configs = transportMotorConfiguration.Slot0;
@@ -85,8 +95,8 @@ public class TransportIOKraken implements TransportIO {
 
         inputs.transportMotorIsConnected = transportMotor.isConnected();
 
-        inputs.leftFuelDetected = !leftTransportPhotoElectric.get();
-        inputs.rightFuelDetected = !rightTransportPhotoElectric.get();
+        inputs.leftFuelDetected = leftTransportPhotoElectricDebouncer.calculate(!leftTransportPhotoElectric.get());
+        inputs.rightFuelDetected = rightTransportPhotoElectricDebouncer.calculate(!rightTransportPhotoElectric.get());
 
         inputs.transportMotorStatorCurrent = statorCurrentStatusSignal.getValue();
         inputs.transportMotorSupplyCurrent = supplyCurrentStatusSignal.getValue();

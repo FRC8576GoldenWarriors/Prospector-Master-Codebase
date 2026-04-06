@@ -3,6 +3,7 @@ package frc.robot.subsystems.transport;
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Hertz;
 import static edu.wpi.first.units.Units.RPM;
+import static edu.wpi.first.units.Units.Seconds;
 
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -10,10 +11,12 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Frequency;
+import edu.wpi.first.units.measure.Time;
 
 public class TransportConstants {
 
     public static final Frequency updateFrequency = Hertz.of(50);
+    public static final Time debounceTime = Seconds.of(0.2);
 
     public static final int transportMotorID = 20;
     public static final int leftTransportPhotoelectricID = 5;
