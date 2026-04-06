@@ -7,9 +7,13 @@ import org.littletonrobotics.junction.AutoLogOutput;
 
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.LEDPattern;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.RobotContainer;
+import frc.robot.commands.DriveCommands;
+import frc.robot.subsystems.intake.Intake.IntakeStates;
 
 
 
@@ -104,10 +108,25 @@ public class LEDs extends SubsystemBase {
     setPattern(pattern);
   }
 
+  public void updateInputs() {
+    if(DriverStation.isDisabled()) {
+      state = LEDStates.Disabled;
+    } else if (!DriveCommands.angleAligned() && RobotContainer.driveController.leftTrigger().getAsBoolean()) {
+      state = LEDStates.OutOfRange;
+    } else if (DriveCommands.angleAligned()) {
+      state = LEDStates.ReadyToShoot;
+    } else if (RobotContainer.intake.getState() == IntakeStates.Intake) {
+      state = LEDStates.GroundIntake;
+    } else if (DriverStation.isEnabled()) {
+      state = LEDStates.Idle;
+    } else {
+      state = LEDStates.Idle;
+    }
+  }
+
   @Override
   public void periodic() {
-
-
+      updateInputs();
       switch (state) {
         case Disabled:
           //strobe(LEDConstants.PatternConfig.RebStrobing, LEDConstants.PatternConfig.RebStrobingSpeed);
