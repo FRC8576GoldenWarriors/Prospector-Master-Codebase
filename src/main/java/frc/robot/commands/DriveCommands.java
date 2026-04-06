@@ -34,6 +34,7 @@ import frc.robot.RobotContainer;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.DriveConstants;
 import frc.robot.subsystems.vision.VisionConstants;
+import frc.robot.util.FieldUtil;
 
 import static edu.wpi.first.units.Units.Radians;
 
@@ -273,7 +274,7 @@ public class DriveCommands {
                         () -> {
                                 Logger.recordOutput("Drive/Alignment Goal", angleController.getGoal().position);
                                 Logger.recordOutput("Drive/Tag centric aligned", angleAligned());
-                                if((drivePose.get().getX()  > (VisionConstants.aprilTagLayout.getFieldLength()-4.61)&&DriverStation.getAlliance().orElse(Alliance.Blue)==Alliance.Red) ||(drivePose.get().getX() < 4.61&&DriverStation.getAlliance().orElse(Alliance.Blue)==Alliance.Blue)){
+                                if(FieldUtil.isOnAllianceSide()){
                                 Translation2d botTranslation = drivePose.get().getTranslation();
 
                                 List<Translation2d> hubs = List.of(
@@ -364,7 +365,7 @@ public class DriveCommands {
         translationController.setTolerance(TRANSLATION_TOLERANCE_METERS);
         return Commands.run(
                         () -> {
-                                if((drivePose.get().getX()  > (VisionConstants.aprilTagLayout.getFieldLength()-4.61)&&DriverStation.getAlliance().orElse(Alliance.Blue)==Alliance.Red) ||(drivePose.get().getX() < 4.61&&DriverStation.getAlliance().orElse(Alliance.Blue)==Alliance.Blue)){
+                                if(FieldUtil.isOnAllianceSide()){
                                 Translation2d botTranslation = drivePose.get().getTranslation();
 
                                 List<Translation2d> hubs = List.of(
