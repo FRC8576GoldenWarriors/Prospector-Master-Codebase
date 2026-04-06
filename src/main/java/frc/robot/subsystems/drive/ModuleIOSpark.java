@@ -13,9 +13,13 @@
 
 package frc.robot.subsystems.drive;
 
+import static edu.wpi.first.units.Units.Hertz;
+import static edu.wpi.first.units.Units.Radians;
 import static frc.robot.subsystems.drive.DriveConstants.*;
 import static frc.robot.util.SparkUtil.*;
 
+import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.ClosedLoopSlot;
@@ -36,7 +40,8 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.Angle;
+
 import java.util.Queue;
 import java.util.function.DoubleSupplier;
 
@@ -46,6 +51,7 @@ import java.util.function.DoubleSupplier;
  */
 public class ModuleIOSpark implements ModuleIO {
     private final Rotation2d zeroRotation;
+    private final StatusSignal<Angle> absoluteTurnEncoderAngleSignal;
 
     // Hardware objects
     private final SparkBase driveSpark;
@@ -106,6 +112,11 @@ public ModuleIOSpark(int module) {
                     default -> 0;
                 });
         boolean invertedDriveValue = false;
+        absoluteTurnEncoderAngleSignal = absoluteTurnEncoder.getAbsolutePosition();
+        absoluteTurnEncoder.optimizeBusUtilization(Hertz.of(0));
+        BaseStatusSignal.setUpdateFrequencyForAll(
+        updateFrequency,
+        absoluteTurnEncoderAngleSignal);
         switch(module){
                                 case 0:
                                 invertedDriveValue = false;
@@ -189,8 +200,7 @@ public ModuleIOSpark(int module) {
         tryUntilOk(
                 turnSpark,
                 5,
-                () -> turnEncoder.setPosition(Units.rotationsToRadians(
-                        absoluteTurnEncoder.getAbsolutePosition().getValueAsDouble())));
+                () -> turnEncoder.setPosition(absoluteTurnEncoderAngleSignal.getValue().in(Radians)));
         // Create odometry queues
         timestampQueue = SparkOdometryThread.getInstance().makeTimestampQueue();
         drivePositionQueue = SparkOdometryThread.getInstance().registerSignal(driveSpark, driveEncoder::getPosition);
@@ -199,6 +209,7 @@ public ModuleIOSpark(int module) {
 
     @Override
     public void updateInputs(ModuleIOInputs inputs) {
+        BaseStatusSignal.refreshAll(absoluteTurnEncoderAngleSignal);
         // Update drive inputs
         sparkStickyFault = false;
         ifOk(driveSpark, driveEncoder::getPosition, (value) -> inputs.drivePositionRad = value);

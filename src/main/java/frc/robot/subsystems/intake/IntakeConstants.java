@@ -1,8 +1,11 @@
 package frc.robot.subsystems.intake;
 
+import static edu.wpi.first.units.Units.Hertz;
+
 import com.ctre.phoenix6.signals.InvertedValue;
 
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import edu.wpi.first.units.measure.Frequency;
 
 public class IntakeConstants {
 
@@ -18,6 +21,7 @@ public class IntakeConstants {
     }
 
     public class Software{
+        public static final Frequency updateFrequency = Hertz.of(50);
         public static double leftZero = -0.44;//0;//-0.458;//-0.46;//-0.77+0.01-0.533+0.01-.518;//-0.29;//0.158-0.7;
         public static double rightZero =0.20+0.26;//0.2;// 0.168;
         public static boolean leftInverted = true;

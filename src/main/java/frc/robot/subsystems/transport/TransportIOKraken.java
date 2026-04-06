@@ -1,8 +1,12 @@
 package frc.robot.subsystems.transport;
 
 
+import static edu.wpi.first.units.Units.Hertz;
+import static edu.wpi.first.units.Units.Seconds;
+
 import org.littletonrobotics.junction.AutoLogOutput;
 
+import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
@@ -11,18 +15,28 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 
+import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.DigitalInput;
 
 public class TransportIOKraken implements TransportIO {
     private final TalonFX transportMotor;
     private final TalonFXConfiguration transportMotorConfiguration;
+
     private final DigitalInput leftTransportPhotoElectric;
     private final DigitalInput rightTransportPhotoElectric;
 
+    private final Debouncer leftTransportPhotoElectricDebouncer;
+    private final Debouncer rightTransportPhotoElectricDebouncer;
+
     private final StatusSignal<Current> statorCurrentStatusSignal;
     private final StatusSignal<Current> supplyCurrentStatusSignal;
+
+    private final StatusSignal<AngularVelocity> transportAngularVelocity;
+    private final StatusSignal<Voltage> transportMotorVoltage;
 
     private final VelocityVoltage velcoityRequest = new VelocityVoltage(0);
 
@@ -37,6 +51,10 @@ public class TransportIOKraken implements TransportIO {
             .withSupplyCurrentLimit(TransportConstants.transportMotorCurrentLimit)
             .withSupplyCurrentLimitEnable(TransportConstants.enableTransportMotorCurrentLimit)
         );
+        leftTransportPhotoElectricDebouncer = new Debouncer(TransportConstants.debounceTime.in(Seconds), DebounceType.kFalling);
+        rightTransportPhotoElectricDebouncer = new Debouncer(TransportConstants.debounceTime.in(Seconds), DebounceType.kFalling);
+
+
 
         Slot0Configs slot0Configs = transportMotorConfiguration.Slot0;
         slot0Configs.kV = TransportConstants.kV;
@@ -48,6 +66,19 @@ public class TransportIOKraken implements TransportIO {
         statorCurrentStatusSignal = transportMotor.getStatorCurrent();
         supplyCurrentStatusSignal = transportMotor.getSupplyCurrent();
 
+        transportAngularVelocity = transportMotor.getVelocity();
+        transportMotorVoltage = transportMotor.getMotorVoltage();
+
+        transportMotor.optimizeBusUtilization(Hertz.of(0));
+
+        BaseStatusSignal.setUpdateFrequencyForAll(
+            TransportConstants.updateFrequency,
+            statorCurrentStatusSignal,
+            supplyCurrentStatusSignal,
+            transportAngularVelocity,
+            transportMotorVoltage
+        );
+
         leftTransportPhotoElectric = new DigitalInput(TransportConstants.leftTransportPhotoelectricID);
         rightTransportPhotoElectric = new DigitalInput(TransportConstants.rightTransportPhotoelectricID);
 
@@ -56,17 +87,22 @@ public class TransportIOKraken implements TransportIO {
 
     @Override
     public void updateInputs(TransportIOInputs inputs) {
-        StatusSignal.refreshAll(statorCurrentStatusSignal, supplyCurrentStatusSignal);
+        StatusSignal.refreshAll(
+            statorCurrentStatusSignal,
+            supplyCurrentStatusSignal,
+            transportAngularVelocity,
+            transportMotorVoltage);
+
         inputs.transportMotorIsConnected = transportMotor.isConnected();
 
-        inputs.leftFuelDetected = !leftTransportPhotoElectric.get();
-        inputs.rightFuelDetected = !rightTransportPhotoElectric.get();
+        inputs.leftFuelDetected = leftTransportPhotoElectricDebouncer.calculate(!leftTransportPhotoElectric.get());
+        inputs.rightFuelDetected = rightTransportPhotoElectricDebouncer.calculate(!rightTransportPhotoElectric.get());
 
         inputs.transportMotorStatorCurrent = statorCurrentStatusSignal.getValue();
         inputs.transportMotorSupplyCurrent = supplyCurrentStatusSignal.getValue();
 
-        inputs.transportAngularVelocity = transportMotor.getVelocity().getValue();
-        inputs.transportMotorVoltage = transportMotor.getMotorVoltage().getValue();
+        inputs.transportAngularVelocity = transportAngularVelocity.getValue();
+        inputs.transportMotorVoltage = transportMotorVoltage.getValue();
 
 
     }
