@@ -18,6 +18,12 @@ public interface TransportIO {
         Current transportMotorStatorCurrent = Amps.of(0);
         Current transportMotorSupplyCurrent = Amps.of(0);
         AngularVelocity transportAngularVelocity = RotationsPerSecond.of(0.0);
+
+        Voltage transportMotorVoltageBack = Volts.of(0);
+        Current transportMotorStatorCurrentBack = Amps.of(0);
+        Current transportMotorSupplyCurrentBack = Amps.of(0);
+        AngularVelocity transportAngularVelocityBack = RotationsPerSecond.of(0.0);
+
         boolean transportMotorIsConnected = false;
         boolean leftFuelDetected = false;
         boolean rightFuelDetected = false;

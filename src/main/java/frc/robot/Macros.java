@@ -211,7 +211,11 @@ public class Macros extends SubsystemBase {
     m_ShooterHood.setWantedState(ShooterHoodStates.Shoot);
   }
 
-  }else{
+  }else if(RobotContainer.driveController.leftTrigger().getAsBoolean()){
+  m_shooter.setWantedState(ShooterStates.SHOOT);
+
+
+}else{
     wantedState = RobotStates.Idle;
   }
    // m_Intake.setWantedPosition(IntakeStates.Intake);
@@ -254,27 +258,27 @@ public class Macros extends SubsystemBase {
   }
 
   public void runContinous(){
-    if(m_ShooterHood.atSetpoint()){
-      m_shooter.setWantedState(ShooterStates.SHOOT);
-    }
-    if(m_shooter.isRevved()&&m_ShooterHood.atSetpoint()){
+    // if(m_ShooterHood.atSetpoint()){
+    //   m_shooter.setWantedState(ShooterStates.SHOOT);
+    // }
+    // if(m_shooter.isRevved()&&m_ShooterHood.atSetpoint()){
     //m_ShooterHood.setWantedState(ShooterHoodStates.Shoot);
     m_Transport.setWantedState(TransportStates.TransportIn);
-     }
-     //else{
-    //   m_Transport.setWantedState(TransportStates.Idle);
-    // }
-    if(m_Intake.getState()==IntakeStates.Idle){
-   m_Intake.setWantedPosition(IntakeStates.IntakeDown);
-   }
-    if(!(m_Intake.getState()==IntakeStates.Agitate)&&m_Intake.nearSetpoint()){
-      m_Intake.setWantedPosition(IntakeStates.Agitate);
-    }
-    else if(m_Intake.getState()==IntakeStates.Agitate&&m_Intake.nearSetpoint()){
-      m_Intake.setWantedPosition(IntakeStates.IntakeDown);
-    }
+  //    }
+  //    //else{
+  //   //   m_Transport.setWantedState(TransportStates.Idle);
+  //   // }
+  //   if(m_Intake.getState()==IntakeStates.Idle){
+  //  m_Intake.setWantedPosition(IntakeStates.IntakeDown);
+  //  }
+  //   if(!(m_Intake.getState()==IntakeStates.Agitate)&&m_Intake.nearSetpoint()){
+  //     m_Intake.setWantedPosition(IntakeStates.Agitate);
+  //   }
+  //   else if(m_Intake.getState()==IntakeStates.Agitate&&m_Intake.nearSetpoint()){
+  //     m_Intake.setWantedPosition(IntakeStates.IntakeDown);
+  //   }
 
-    m_ShooterHood.setWantedState(ShooterHoodStates.Shoot);
+  //   m_ShooterHood.setWantedState(ShooterHoodStates.Shoot);
   //  m_shooter.setWantedState(ShooterStates.Tuning);
     //m_ShooterHood.setWantedState(ShooterHoodStates.Test);
   //  if(m_Intake.getState()==IntakeStates.Idle){
