@@ -56,18 +56,18 @@ public class Transport extends SubsystemBase {
         break;
 
       case TransportIn:
-        io.setTransportSpeed(RotationsPerSecond.of(TransportConstants.velocityTarget));;
+        io.setTransportSpeed(RotationsPerSecond.of(TransportConstants.velocityTarget),RotationsPerSecond.of(TransportConstants.velocityTarget));
         break;
 
       case TransportOut:
-        io.setTransportSpeed(RotationsPerSecond.of(-TransportConstants.velocityTarget));;
+        io.setTransportSpeed(RotationsPerSecond.of(-TransportConstants.velocityTarget),RotationsPerSecond.of(-TransportConstants.velocityTarget));
         break;
 
       case Rest:
-        io.setTransportSpeed(RotationsPerSecond.of(TransportConstants.velocityTargetSlower));;
+        io.setTransportSpeed(RotationsPerSecond.of(TransportConstants.velocityTargetSlower),RotationsPerSecond.of(TransportConstants.velocityTargetSlower));
         break;
       default:
-        io.setTransportSpeed(RPM.of(0));
+        io.setTransportSpeed(RPM.of(0),RPM.of(0));
         currentState = TransportStates.Idle;
         break;
     }

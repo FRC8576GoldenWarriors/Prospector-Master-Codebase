@@ -56,8 +56,9 @@ public class IntakeKrakenIO implements IntakeIO{
             )
             .withCurrentLimits(
             new CurrentLimitsConfigs()
-            .withStatorCurrentLimit(Amps.of(40))
-            .withStatorCurrentLimitEnable(true)
+            .withSupplyCurrentLimit(Amps.of(60))
+            // .withStatorCurrentLimit(Amps.of(40))
+            // .withStatorCurrentLimitEnable(true)
             );
 
 
@@ -72,9 +73,9 @@ public class IntakeKrakenIO implements IntakeIO{
             );
         pivotConfig = pivotConfig.withCurrentLimits(
             new CurrentLimitsConfigs()
-            .withSupplyCurrentLimit(Amps.of(40))
-            .withSupplyCurrentLimitEnable(true)
-            .withStatorCurrentLimitEnable(false));
+            .withSupplyCurrentLimit(Amps.of(60))
+            .withSupplyCurrentLimitEnable(true));
+            //withStatorCurrentLimitEnable(false));
 
         pivotMotorVoltageSignal = pivotMotor.getMotorVoltage();
         pivotMotorStatorCurrentSignal = pivotMotor.getStatorCurrent();

@@ -126,11 +126,11 @@ public class Macros extends SubsystemBase {
     m_Intake.setWantedPosition(IntakeStates.Rest);
   }
   public void intakeOn(){
-    if(!m_Intake.nearSetpoint()){
-    m_Intake.setWantedPosition(IntakeStates.IntakeDown);
-    }else{
+    // if(!m_Intake.nearSetpoint()){
+    // m_Intake.setWantedPosition(IntakeStates.IntakeDown);
+    // }else{
       m_Intake.setWantedPosition(IntakeStates.Intake);
-    }
+    //}
   }
   public void transportOut(){
     // m_shooter.setWantedState(ShooterStates.IDLE);
@@ -157,15 +157,15 @@ public class Macros extends SubsystemBase {
      //else{
     //   m_Transport.setWantedState(TransportStates.Idle);
     // }
-    if(m_Intake.getState()==IntakeStates.Idle){
-   m_Intake.setWantedPosition(IntakeStates.IntakeDown);
-   }
-    if(!(m_Intake.getState()==IntakeStates.Agitate)&&m_Intake.nearSetpoint()){
-      m_Intake.setWantedPosition(IntakeStates.Agitate);
-    }
-    else if(m_Intake.getState()==IntakeStates.Agitate&&m_Intake.nearSetpoint()){
-      m_Intake.setWantedPosition(IntakeStates.IntakeDown);
-    }
+  //   if(m_Intake.getState()==IntakeStates.Idle){
+  //  m_Intake.setWantedPosition(IntakeStates.IntakeDown);
+  //  }
+  //   if(!(m_Intake.getState()==IntakeStates.Agitate)&&m_Intake.nearSetpoint()){
+  //     m_Intake.setWantedPosition(IntakeStates.Agitate);
+  //   }
+  //   else if(m_Intake.getState()==IntakeStates.Agitate&&m_Intake.nearSetpoint()){
+  //     m_Intake.setWantedPosition(IntakeStates.IntakeDown);
+  //   }
 
     m_ShooterHood.setWantedState(ShooterHoodStates.Shoot);
   //   if(m_ShooterHood.atSetpoint()){
@@ -211,8 +211,8 @@ public class Macros extends SubsystemBase {
     m_ShooterHood.setWantedState(ShooterHoodStates.Shoot);
   }
 
-  }else if(RobotContainer.driveController.leftTrigger().getAsBoolean()){
-  m_shooter.setWantedState(ShooterStates.SHOOT);
+  // }else if(RobotContainer.driveController.leftTrigger().getAsBoolean()){
+  // m_shooter.setWantedState(ShooterStates.SHOOT);
 
 
 }else{
@@ -258,13 +258,35 @@ public class Macros extends SubsystemBase {
   }
 
   public void runContinous(){
+    if(m_ShooterHood.atSetpoint()){
+      m_shooter.setWantedState(ShooterStates.SHOOT);
+    }
+    if(m_shooter.isRevved()&&m_ShooterHood.atSetpoint()){
+    //m_ShooterHood.setWantedState(ShooterHoodStates.Shoot);
+    m_Transport.setWantedState(TransportStates.TransportIn);
+     }
+     //else{
+    //   m_Transport.setWantedState(TransportStates.Idle);
+    // }
+    if(m_Intake.getState()==IntakeStates.Idle){
+   m_Intake.setWantedPosition(IntakeStates.IntakeDown);
+   }
+    if(!(m_Intake.getState()==IntakeStates.Agitate)&&m_Intake.nearSetpoint()){
+      m_Intake.setWantedPosition(IntakeStates.Agitate);
+    }
+    else if(m_Intake.getState()==IntakeStates.Agitate&&m_Intake.nearSetpoint()){
+      m_Intake.setWantedPosition(IntakeStates.IntakeDown);
+    }
+
+    m_ShooterHood.setWantedState(ShooterHoodStates.Shoot);
+    //m_Intake.setWantedPosition(IntakeStates.Rest);
     // if(m_ShooterHood.atSetpoint()){
     //   m_shooter.setWantedState(ShooterStates.SHOOT);
     // }
     // if(m_shooter.isRevved()&&m_ShooterHood.atSetpoint()){
-    //m_ShooterHood.setWantedState(ShooterHoodStates.Shoot);
-    m_Transport.setWantedState(TransportStates.TransportIn);
-  //    }
+    // //m_ShooterHood.setWantedState(ShooterHoodStates.Shoot);
+    // m_Transport.setWantedState(TransportStates.TransportIn);
+    //  }
   //    //else{
   //   //   m_Transport.setWantedState(TransportStates.Idle);
   //   // }
@@ -278,7 +300,7 @@ public class Macros extends SubsystemBase {
   //     m_Intake.setWantedPosition(IntakeStates.IntakeDown);
   //   }
 
-  //   m_ShooterHood.setWantedState(ShooterHoodStates.Shoot);
+   //m_ShooterHood.setWantedState(ShooterHoodStates.Shoot);
   //  m_shooter.setWantedState(ShooterStates.Tuning);
     //m_ShooterHood.setWantedState(ShooterHoodStates.Test);
   //  if(m_Intake.getState()==IntakeStates.Idle){
@@ -292,12 +314,12 @@ public class Macros extends SubsystemBase {
     //   m_Transport.setWantedState(TransportStates.Idle);
     // }
     //m_Transport.setWantedState(TransportStates.TransportIn);
-    // if(!(m_Intake.getState()==IntakeStates.Agitate)&&m_Intake.nearSetpoint()){
-    //   m_Intake.setWantedPosition(IntakeStates.Agitate);
-    // }
-    // else if(m_Intake.getState()==IntakeStates.Agitate&&m_Intake.nearSetpoint()){
-    //   m_Intake.setWantedPosition(IntakeStates.IntakeDown);
-    // }
+    if(!(m_Intake.getState()==IntakeStates.Agitate)&&m_Intake.nearSetpoint()){
+      m_Intake.setWantedPosition(IntakeStates.IntakeDown);
+    }
+    else if(m_Intake.getState()!=IntakeStates.Agitate&&m_Intake.nearSetpoint()){
+      m_Intake.setWantedPosition(IntakeStates.Agitate);
+    }
     //m_Transport.setWantedState(TransportStates.TransportIn);
   }
   public SequentialCommandGroup setWantedState(RobotStates wantedState){
@@ -305,8 +327,4 @@ public class Macros extends SubsystemBase {
         Commands.parallel(new InstantCommand(()->m_Intake.resetPID(), m_Intake)
         ), new InstantCommand(()->this.setWantedStatePrivate(wantedState), this));
     }
-
-
-
-
 }

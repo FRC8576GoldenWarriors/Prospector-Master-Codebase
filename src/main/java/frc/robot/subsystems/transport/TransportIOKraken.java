@@ -12,10 +12,8 @@ import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.MotorAlignmentValue;
 
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
@@ -35,24 +33,24 @@ public class TransportIOKraken implements TransportIO {
     private final Debouncer leftTransportPhotoElectricDebouncer;
     private final Debouncer rightTransportPhotoElectricDebouncer;
 
-    private final StatusSignal<Current> statorCurrentStatusSignal;
-    private final StatusSignal<Current> supplyCurrentStatusSignal;
-
-    private final StatusSignal<AngularVelocity> transportAngularVelocity;
-    private final StatusSignal<Voltage> transportMotorVoltage;
-
     private final StatusSignal<Current> statorCurrentStatusSignalBack;
     private final StatusSignal<Current> supplyCurrentStatusSignalBack;
 
     private final StatusSignal<AngularVelocity> transportAngularVelocityBack;
     private final StatusSignal<Voltage> transportMotorVoltageBack;
 
+    private final StatusSignal<Current> statorCurrentStatusSignal;
+    private final StatusSignal<Current> supplyCurrentStatusSignal;
+
+    private final StatusSignal<AngularVelocity> transportAngularVelocity;
+    private final StatusSignal<Voltage> transportMotorVoltage;
+
 
     private final VelocityVoltage velcoityRequest = new VelocityVoltage(0);
 
     public TransportIOKraken() {
-        transportMotor = new TalonFX(TransportConstants.transportMotorID);
-        transportMotorBack = new TalonFX(TransportConstants.transportMotorID2);
+        transportMotorBack = new TalonFX(TransportConstants.transportMotorID);
+        transportMotor = new TalonFX(TransportConstants.transportMotorID2);
         transportMotorConfiguration = new TalonFXConfiguration();
         transportMotorConfiguration.withMotorOutput(
             new MotorOutputConfigs().withNeutralMode(TransportConstants.transportMotorNeutralMode)
@@ -87,7 +85,7 @@ public class TransportIOKraken implements TransportIO {
         transportMotorVoltageBack = transportMotorBack.getMotorVoltage();
 
         transportMotor.optimizeBusUtilization(Hertz.of(0));
-
+        transportMotorBack.optimizeBusUtilization(Hertz.of(0));
         BaseStatusSignal.setUpdateFrequencyForAll(
             TransportConstants.updateFrequency,
             statorCurrentStatusSignal,
@@ -99,9 +97,11 @@ public class TransportIOKraken implements TransportIO {
         leftTransportPhotoElectric = new DigitalInput(TransportConstants.leftTransportPhotoelectricID);
         rightTransportPhotoElectric = new DigitalInput(TransportConstants.rightTransportPhotoelectricID);
 
-        transportMotor.getConfigurator().apply(transportMotorConfiguration);
         transportMotorBack.getConfigurator().apply(transportMotorConfiguration);
-        transportMotorBack.setControl(new Follower(TransportConstants.transportMotorID,MotorAlignmentValue.Aligned));
+        transportMotorConfiguration.MotorOutput.Inverted = TransportConstants.transportMotorBackInversion;
+        transportMotorConfiguration.Slot0.kV = TransportConstants.kV*1.5;
+        transportMotor.getConfigurator().apply(transportMotorConfiguration);
+        //transportMotorBack.setControl(new Follower(TransportConstants.transportMotorID,MotorAlignmentValue.Aligned));
     }
 
     @Override
@@ -136,8 +136,9 @@ public class TransportIOKraken implements TransportIO {
     }
 
     @Override
-    public void setTransportSpeed(AngularVelocity rpsVelocity) {
+    public void setTransportSpeed(AngularVelocity rpsVelocity,AngularVelocity backVelocity) {
         transportMotor.setControl(velcoityRequest.withVelocity(rpsVelocity));
+        transportMotorBack.setControl(velcoityRequest.withVelocity(backVelocity));
     }
 
 
@@ -145,6 +146,7 @@ public class TransportIOKraken implements TransportIO {
     @AutoLogOutput(key = "Transport/Voltage")
     public void setTransportVoltage(double volts) {
         transportMotor.setVoltage(volts);
+        transportMotorBack.setVoltage(volts);
     }
 
     @Override
