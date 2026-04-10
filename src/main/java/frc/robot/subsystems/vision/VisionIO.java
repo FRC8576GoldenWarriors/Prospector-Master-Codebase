@@ -13,8 +13,10 @@
 
 package frc.robot.subsystems.vision;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import frc.robot.subsystems.vision.LimelightHelpers.RawDetection;
 
 import org.littletonrobotics.junction.AutoLog;
 
@@ -27,6 +29,7 @@ public interface VisionIO {
         public int[] tagIds = new int[0];
         public String name = "";
         public double[] cropWindow = new double[0];
+        public Pose2d[] objectPoses = null;
     }
 
     /** Represents the angle to a simple target, not used for pose estimation. */
@@ -63,4 +66,6 @@ public interface VisionIO {
     default void setRobotOrientation(double angle) {}
 
     default void updateInputs(VisionIOInputs inputs) {}
+    default Pose2d getObjectPose2d(RawDetection data, Pose2d robotPose){return null;}
 }
+

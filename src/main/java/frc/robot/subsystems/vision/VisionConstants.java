@@ -36,7 +36,7 @@ public class VisionConstants {
     public static String camera1Name = "limelight-left";
     public static String camera2Name = "limelight-tower";
     public static String camera3Name = "limelight-right";
-
+    public static int wantedClassID = 0;
     // Robot to camera transforms
     // (Not used by Limelight, configure in web UI instead)
     public static Pose3d robotToCamera0 = PoseUtil.toLimelightPose(Inches.of(-0.208), Inches.of(-6.018), Inches.of(-30.998), Degrees.of(0), Degrees.of(15), Degrees.of(0));

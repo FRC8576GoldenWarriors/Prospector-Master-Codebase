@@ -13,9 +13,11 @@
 
 package frc.robot.subsystems.vision;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.DoubleArrayPublisher;
 import edu.wpi.first.networktables.DoubleArraySubscriber;
@@ -26,9 +28,12 @@ import edu.wpi.first.networktables.TimestampedDoubleArray;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
+import frc.robot.RobotContainer;
+import frc.robot.subsystems.vision.LimelightHelpers.RawDetection;
 
 import static edu.wpi.first.units.Units.DegreesPerSecond;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -220,6 +225,15 @@ public class VisionIOLimelight implements VisionIO {
         } else {
             setCrop(new double[] {-1, 1, -1, 1}); //reset crop
         }
+
+
+
+
+
+        inputs.objectPoses = this.convertRawDetectionsToPoses(LimelightHelpers.getRawDetections(name));
+
+
+
     }
 
     public static double[] findTimestampedValue(TimestampedDoubleArray[] arr, long timestamp) {
@@ -258,8 +272,60 @@ public class VisionIOLimelight implements VisionIO {
     public void flushLimelight() {
         NetworkTableInstance.getDefault().flush();
     }
+    private Pose2d[] convertRawDetectionsToPoses(RawDetection[] rawData){
+        List<Pose2d> objectPose2ds = new ArrayList<>();
+        for(int i = 0; i<rawData.length;i++){
+            if(this.getObjectPose2d(rawData[i],RobotContainer.drive.getPose()) != Pose2d.kZero){continue;}
+            objectPose2ds.add(this.getObjectPose2d(rawData[i],RobotContainer.drive.getPose()));
+        } 
+        return objectPose2ds.toArray(Pose2d[]::new);
+    }
 
+    //To-Do, find offsets when  cad
+    public Pose2d getObjectPose2d(RawDetection data, Pose2d robotPose){
+        if(data.classId != VisionConstants.wantedClassID){
+            return new Pose2d();
+        }
+        //degrees to the object in x and y directions
+        double tx = data.txnc;
+        double ty = data.tync;
 
+        //camera offset from the middle of the bot to correctly get the final object pose
+        double cameraOffsetX = 0;
+        double cameraOffsetY = 0;
+
+        //the angle of the ball to the camera in the y direction
+        double targetOffsetAngle_Vertical = ty;
+
+        // how many degrees back is your limelight rotated from perfectly vertical?
+        double limelightMountAngleDegrees = -25.0;
+
+        // distance from the center of the Limelight lens to the floor
+        double limelightLensHeightMeters = Units.inchesToMeters(24);
+
+        // distance from the target to the floor
+        double goalHeightMeters = Units.inchesToMeters(2.953);
+
+        double angleToGoalDegrees = limelightMountAngleDegrees + targetOffsetAngle_Vertical;
+        double angleToGoalRadians = angleToGoalDegrees * (3.14159 / 180.0);
+
+        //calculate distance
+        double distanceFromLimelightToGoalMeters = (goalHeightMeters - limelightLensHeightMeters) / Math.tan(angleToGoalRadians);
+
+        //create an relative object translation
+        Translation2d relativeObjectTranslation = new Translation2d(distanceFromLimelightToGoalMeters, tx);
+        //add the camera offsets to get the true relative translation relative to the current robot pose
+        Translation2d objectTranslation = new Translation2d(relativeObjectTranslation.getX()+cameraOffsetX,relativeObjectTranslation.getY()+cameraOffsetY);
+
+        //calculate absolute object pose using current robotPose
+        Pose2d objectPose = new Pose2d(objectTranslation,new Rotation2d());
+        objectPose  = objectPose.relativeTo(robotPose);
+
+        
+
+        return objectPose;
+
+    }
     /** Parses the 3D pose from a Limelight botpose array. */
     private static Pose3d parsePose(double[] rawLLArray) {
         return new Pose3d(

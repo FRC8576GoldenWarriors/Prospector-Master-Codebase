@@ -27,9 +27,13 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.RobotContainer;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.vision.LimelightHelpers.RawDetection;
 import frc.robot.subsystems.vision.VisionIO.IMUMode;
 import frc.robot.subsystems.vision.VisionIO.PoseObservationType;
+
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Supplier;
@@ -42,6 +46,7 @@ public class Vision extends SubsystemBase {
     private final VisionIOInputsAutoLogged[] inputs;
     private final Supplier<ChassisSpeeds> driveSpeedsSupplier;
     private final Alert[] disconnectedAlerts;
+    private final int driverCameraIndex = 0;
 
     public Vision(VisionConsumer consumer, Supplier<ChassisSpeeds> driveSpeedsSupplier, VisionIO... io) {
         this.consumer = consumer;
@@ -93,6 +98,8 @@ public class Vision extends SubsystemBase {
                 LimelightHelpers.SetThrottle(inputs[i].name, 0);
             }
         }
+
+        
 
         // Initialize logging values
         List<Pose3d> allTagPoses = new LinkedList<>();
@@ -215,6 +222,7 @@ public class Vision extends SubsystemBase {
 
     public void setLimelightImuMode(IMUMode imuMode) {
         for(VisionIO ios : io) {
+
             ios.setImuMode(imuMode);
         }
     }
@@ -234,7 +242,6 @@ public class Vision extends SubsystemBase {
     public static double addStddevs(double a, double b) {
         return Math.sqrt(Math.pow(a, 2) + Math.pow(b, 2));
     }
-
 
 
     @FunctionalInterface

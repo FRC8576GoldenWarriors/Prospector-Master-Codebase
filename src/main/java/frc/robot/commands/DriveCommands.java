@@ -33,6 +33,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.DriveConstants;
+import frc.robot.subsystems.vision.Vision;
 import frc.robot.util.FieldUtil;
 
 import static edu.wpi.first.units.Units.Radians;
@@ -173,6 +174,49 @@ public class DriveCommands {
                                     getLinearVelocityFromJoysticks(xSupplier.getAsDouble(), ySupplier.getAsDouble());
                                 double rotationAngle = (drive.getRotation().getRadians()>0)?rotationSupplier.get().getRadians():-rotationSupplier.get().getRadians();
 
+                            // Calculate angular speed
+                            double omega = angleController.calculate(
+                                    drive.getRotation().getRadians(),
+                                    rotationAngle);
+
+                            // Convert to field relative speeds & send command
+                            ChassisSpeeds speeds = new ChassisSpeeds(
+                                    linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
+                                    linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(), //* Math.abs(omega) * Math.abs(linearVelocity.getX()) * turnCorrection.get(),
+                                    omega);
+                            boolean isFlipped = DriverStation.getAlliance().isPresent()
+                                    && DriverStation.getAlliance().get() == Alliance.Red;
+                            speeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+                                    speeds,
+                                    isFlipped
+                                            ? drive.getRotation().plus(new Rotation2d(Math.PI))
+                                            : drive.getRotation());
+                            drive.runVelocity(speeds);
+                        },
+                        drive)
+
+                // Reset PID controller when command starts
+                .beforeStarting(() -> angleController.reset(drive.getRotation().getRadians()));
+    }
+
+
+       public static Command driveToFuel(
+            Drive drive, DoubleSupplier xSupplier, DoubleSupplier ySupplier, Supplier<Rotation2d> rotationSupplier) {
+
+        List<Pose2d> objectPoses = Vision.objectPoses;
+        // Create PID controller
+        // ProfiledPIDController angleController = new ProfiledPIDController(
+        //         ANGLE_KP, 0.0, ANGLE_KD, new TrapezoidProfile.Constraints(ANGLE_MAX_VELOCITY, ANGLE_MAX_ACCELERATION));
+        angleController.enableContinuousInput(-Math.PI, Math.PI);
+        // Construct command
+        return Commands.run(
+                        () -> {
+                            // Get linear velocity
+                            Translation2d linearVelocity =
+                                    getLinearVelocityFromJoysticks(xSupplier.getAsDouble(), ySupplier.getAsDouble());
+                               
+                           double rotationAngle = (drive.getRotation().getRadians()>0)?rotationSupplier.get().getRadians():-rotationSupplier.get().getRadians();
+                                
                             // Calculate angular speed
                             double omega = angleController.calculate(
                                     drive.getRotation().getRadians(),
