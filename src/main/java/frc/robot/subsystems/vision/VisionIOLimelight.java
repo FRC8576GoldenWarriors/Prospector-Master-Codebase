@@ -111,7 +111,9 @@ public class VisionIOLimelight implements VisionIO {
             entries[0] = counter + 1;
             entries[1] = Math.min(rewindCaptureDurationSeconds, 165);
             captureRewindPublisher.accept(entries);
+            rewindEnabled = false;
         }
+    }
 
         // Update connection status based on whether an update has been seen in the last 250ms
         inputs.connected = ((RobotController.getFPGATime() - latencySubscriber.getLastChange()) / 1000) < 250;
