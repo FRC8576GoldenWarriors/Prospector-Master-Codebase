@@ -27,6 +27,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 
+
 import static edu.wpi.first.units.Units.DegreesPerSecond;
 
 import java.util.Arrays;
@@ -111,6 +112,7 @@ public class VisionIOLimelight implements VisionIO {
             entries[0] = counter + 1;
             entries[1] = Math.min(rewindCaptureDurationSeconds, 165);
             captureRewindPublisher.accept(entries);
+            rewindEnabled = false;
         }
 
         // Update connection status based on whether an update has been seen in the last 250ms
