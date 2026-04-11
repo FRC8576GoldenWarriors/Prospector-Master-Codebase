@@ -24,6 +24,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
@@ -32,12 +33,13 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.DriveConstants;
-import frc.robot.subsystems.vision.VisionConstants;
+import frc.robot.util.FieldUtil;
 
 import static edu.wpi.first.units.Units.Radians;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -67,6 +69,7 @@ public class DriveCommands {
     private static final double FF_RAMP_RATE = 0.1; // Volts/Sec
     private static final double WHEEL_RADIUS_MAX_VELOCITY = 0.25; // Rad/Sec
     private static final double WHEEL_RADIUS_RAMP_RATE = 0.05; // Rad/Sec^2
+    private static final List<Integer> angles = List.of(45, 135, -45, -135);
 
     public static final ProfiledPIDController angleController = new ProfiledPIDController(
                 ANGLE_KP, 0.0, ANGLE_KD, new TrapezoidProfile.Constraints(ANGLE_MAX_VELOCITY, ANGLE_MAX_ACCELERATION));
@@ -195,8 +198,8 @@ public class DriveCommands {
                 .beforeStarting(() -> angleController.reset(drive.getRotation().getRadians()));
     }
 
-        public static Command joystickDriveAt45(
-                Drive drive, DoubleSupplier xSupplier, DoubleSupplier ySupplier, Supplier<Pose2d> drivePose) {
+    public static Command joystickDriveAt45(
+           Drive drive, DoubleSupplier xSupplier, DoubleSupplier ySupplier) {
 
         // Create PID controller
         // ProfiledPIDController angleController = new ProfiledPIDController(
@@ -207,24 +210,16 @@ public class DriveCommands {
 
         return Commands.sequence(
                 Commands.runOnce(() -> {
-                Translation2d botTranslation = drivePose.get().getTranslation();
+                // Snap to the nearest 45-degree angle using gyro heading
+                double currentAngle = drive.getRotation().getDegrees();
+                double snappedAngle = angles.stream().min(Comparator.comparingDouble(n -> Math.abs(n - currentAngle)))
+                .orElse(45);
 
-                List<Translation2d> hubs = List.of(
-                        new Translation2d(Units.inchesToMeters(181.56), Units.inchesToMeters(158.32)),
-                        new Translation2d(Units.inchesToMeters(468.56), Units.inchesToMeters(158.32))
-                );
-                Translation2d closestHub = botTranslation.nearest(hubs);
-
-                double relX = botTranslation.getX() - closestHub.getX();
-                double relY = botTranslation.getY() - closestHub.getY();
-
-                double angleToBot = Math.atan2(relY, -relX);
-                double snappedAngle = Math.floor(angleToBot / (Math.PI / 2.0)) * (Math.PI / 2.0) + (Math.PI / 4.0);
-
-                lockedRotation[0] = new Rotation2d(snappedAngle);
+                lockedRotation[0] =  Rotation2d.fromDegrees(snappedAngle);
 
                 // Reset PID controller when command starts
                 angleController.reset(drive.getRotation().getRadians());
+                angleController.setGoal(Units.degreesToRadians(snappedAngle));
                 }),
                 // Construct command
                 Commands.run(
@@ -278,7 +273,7 @@ public class DriveCommands {
                         () -> {
                                 Logger.recordOutput("Drive/Alignment Goal", angleController.getGoal().position);
                                 Logger.recordOutput("Drive/Tag centric aligned", angleAligned());
-                                if((drivePose.get().getX()  > (VisionConstants.aprilTagLayout.getFieldLength()-4.61)&&DriverStation.getAlliance().orElse(Alliance.Blue)==Alliance.Red) ||(drivePose.get().getX() < 4.61&&DriverStation.getAlliance().orElse(Alliance.Blue)==Alliance.Blue)){
+                                if(FieldUtil.isOnAllianceSide()){
                                 Translation2d botTranslation = drivePose.get().getTranslation();
 
                                 List<Translation2d> hubs = List.of(
@@ -369,7 +364,7 @@ public class DriveCommands {
         translationController.setTolerance(TRANSLATION_TOLERANCE_METERS);
         return Commands.run(
                         () -> {
-                                if((drivePose.get().getX()  > (VisionConstants.aprilTagLayout.getFieldLength()-4.61)&&DriverStation.getAlliance().orElse(Alliance.Blue)==Alliance.Red) ||(drivePose.get().getX() < 4.61&&DriverStation.getAlliance().orElse(Alliance.Blue)==Alliance.Blue)){
+                                if(FieldUtil.isOnAllianceSide()){
                                 Translation2d botTranslation = drivePose.get().getTranslation();
 
                                 List<Translation2d> hubs = List.of(
@@ -422,6 +417,21 @@ public class DriveCommands {
                         drive).beforeStarting(() -> {angleController.reset(drive.getRotation().getRadians());
                         translationController.reset();});
 
+    }
+
+    public static Command driveX(Drive drive, Supplier<ChassisSpeeds> chassisSpeeds) {
+        return Commands.run(
+                () -> {
+                        drive.runVelocity(chassisSpeeds.get());
+                }, drive);
+    }
+
+    public static Command driveX(Drive drive, Supplier<ChassisSpeeds> chassisSpeeds, Time timeout) {
+        return Commands.run(
+                () -> {
+                        drive.runVelocity(chassisSpeeds.get());
+                }, drive)
+                .withTimeout(timeout);
     }
 
 //     public static PathPlannerPath driveOverBump(Supplier<Pose2d> currentPose){
