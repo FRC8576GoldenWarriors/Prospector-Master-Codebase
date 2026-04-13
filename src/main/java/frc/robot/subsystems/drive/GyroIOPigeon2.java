@@ -20,8 +20,10 @@ import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static frc.robot.subsystems.drive.DriveConstants.*;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
+import com.ctre.phoenix6.hardware.DeviceIdentifier;
 import com.ctre.phoenix6.hardware.Pigeon2;
 
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -78,7 +80,7 @@ public class GyroIOPigeon2 implements GyroIO {
             accelerationX,
             accelerationY,
             accelerationZ);
-
+            StatusSignal<Double> random = new StatusSignal<Double>(new DeviceIdentifier(0,"SimGyro",CANBus.roboRIO()), 1, "Random", null, Double.class, (doub)->{return Double.valueOf(doub);});
         yawTimestampQueue = SparkOdometryThread.getInstance().makeTimestampQueue();
         yawPositionQueue = SparkOdometryThread.getInstance().registerSignal(yaw::getValueAsDouble);
     }

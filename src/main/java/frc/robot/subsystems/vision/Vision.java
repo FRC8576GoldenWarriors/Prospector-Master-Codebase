@@ -89,6 +89,7 @@ public class Vision extends SubsystemBase {
             Logger.processInputs("Vision/Camera" + Integer.toString(i) + " " + inputs[i].name, inputs[i]);
             if(DriverStation.isDisabled()){
                 LimelightHelpers.SetThrottle(inputs[i].name,200);
+                //io[i].startRewind();
             }else{
                 LimelightHelpers.SetThrottle(inputs[i].name, 0);
             }
@@ -225,9 +226,24 @@ public class Vision extends SubsystemBase {
         }
     }
 
-    public void setRobotOrientations(double angle) {
+    public void setRobotOrientations(double angle, boolean flush) {
         for(VisionIO ios : io) {
             ios.setRobotOrientation(angle);
+            if(flush) {
+                ios.flushLimelight();
+            }
+        }
+    }
+
+    public void enableRewind(boolean on) {
+        for(VisionIO ios : io) {
+            ios.setRewindEnabled(on);
+        }
+    }
+
+    public void triggerRewindCapture() {
+        for(VisionIO ios : io) {
+            ios.triggerRewindCapture();
         }
     }
 

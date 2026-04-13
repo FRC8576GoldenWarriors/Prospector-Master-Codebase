@@ -23,6 +23,7 @@ public interface ShooterHoodIO {
         public boolean isMotorConnected = false;
         public Angle encoderValue_Radians = Rotations.of(0);
         public boolean isEncoderConnected = false;
+        public Angle motor_encoder_value = Rotations.of(0);
     }
 
     default void setVoltage(double voltage) {}
