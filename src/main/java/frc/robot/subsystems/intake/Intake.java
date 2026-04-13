@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems.intake;
 
+import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Rotations;
 
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -189,7 +190,7 @@ public void resetPID() {
 }
 @AutoLogOutput (key = "Intake/Near Setpoint")
 public boolean nearSetpoint(){
-  return MathUtil.isNear(PID.getGoal().position, inputs.leftEncoderRotations.in(Rotations), 0.12);//||debounce.calculate(inputs.pivotSupplyCurrent.in(Amps)>=9);
+  return MathUtil.isNear(PID.getGoal().position, inputs.leftEncoderRotations.in(Rotations), 0.01)||debounce.calculate(inputs.pivotSupplyCurrent.in(Amps)>=9);
 }
 public boolean nearSetpointAgitate(){
   return MathUtil.isNear(PID.getGoal().position, inputs.leftEncoderRotations.in(Rotations), 0.1);//||(inputs.pivotSupplyCurrent.in(Amps)>10);

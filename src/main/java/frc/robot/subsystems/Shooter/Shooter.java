@@ -26,6 +26,7 @@ public class Shooter extends SubsystemBase {
   private SysIdRoutine sysId;
   private Alert leftMotorAlert = new Alert("The Left Motor is disconnected", AlertType.kError);
   private Alert rightMotorAlert = new Alert("The Right Motor is disconnected", AlertType.kError);
+  private Alert addedMotorAlert = new Alert("The Added Motor is disconnected", AlertType.kError);
   private Debouncer isRevvedDebouncer = new Debouncer(0.12, DebounceType.kRising);
 
   private LoggedNetworkNumber kPNumber = new LoggedNetworkNumber("Tuning/Shooter kP",ShooterConstants.kP);
@@ -106,7 +107,7 @@ public class Shooter extends SubsystemBase {
           setShooter(wantedRPS);
           break;
         case Tuning:
-          wantedRPS = RotationsPerSecond.of(25);//50);
+          wantedRPS = RotationsPerSecond.of(35);//50);
           setShooter(wantedRPS);
 
         case VOLTAGE_CONTROL_POSITIVE:
@@ -130,6 +131,7 @@ public class Shooter extends SubsystemBase {
 
     leftMotorAlert.set(!inputs.leftMotorConnected);
     rightMotorAlert.set(!inputs.rightMotorConnected);
+    addedMotorAlert.set(!inputs.addedMotorConnected);
   }
 
   public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {

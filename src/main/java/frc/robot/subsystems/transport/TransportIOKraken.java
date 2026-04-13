@@ -91,12 +91,17 @@ public class TransportIOKraken implements TransportIO {
             statorCurrentStatusSignal,
             supplyCurrentStatusSignal,
             transportAngularVelocity,
-            transportMotorVoltage
+            transportMotorVoltage,
+            statorCurrentStatusSignalBack,
+            supplyCurrentStatusSignalBack,
+            transportAngularVelocityBack,
+            transportMotorVoltageBack
         );
 
         leftTransportPhotoElectric = new DigitalInput(TransportConstants.leftTransportPhotoelectricID);
         rightTransportPhotoElectric = new DigitalInput(TransportConstants.rightTransportPhotoelectricID);
-
+        // transportMotorConfiguration.Slot0.kP = 2*TransportConstants.kP;
+        // transportMotorConfiguration.Slot0.kV = 2*TransportConstants.kV;
         transportMotorBack.getConfigurator().apply(transportMotorConfiguration);
         transportMotorConfiguration.MotorOutput.Inverted = TransportConstants.transportMotorBackInversion;
         transportMotorConfiguration.Slot0.kV = TransportConstants.kV*1.5;

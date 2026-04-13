@@ -20,6 +20,7 @@ import static edu.wpi.first.units.Units.*;
 public class ShooterIOKraken implements ShooterIO {
   private final TalonFX leftMotor;
   private final TalonFX rightMotor;
+  private final TalonFX addedMotor;
 
   private TalonFXConfiguration config;
   private TalonFXConfiguration leftConfig;
@@ -42,10 +43,16 @@ public class ShooterIOKraken implements ShooterIO {
   private final StatusSignal<Angle> rightEncoderPositionSignal;
 
 
+  private final StatusSignal<Voltage> addedMotorVoltageSignal;
+  private final StatusSignal<Current> addedMotorStatorCurrentSignal;
+  private final StatusSignal<Current> addedMotorSupplyCurrentSignal;
+  private final StatusSignal<AngularVelocity> addedMotorVelocitySignal;
+  private final StatusSignal<Angle> addedEncoderPositionSignal;
+
   public ShooterIOKraken() {
     leftMotor = new TalonFX(ShooterConstants.LEFT_SHOOTER_ID);
     rightMotor = new TalonFX(ShooterConstants.RIGHT_SHOOTER_ID);
-
+    addedMotor = new TalonFX(ShooterConstants.ADDED_SHOOTER_ID);
     config = new TalonFXConfiguration();
     config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
     // Current Limits & Brake Mode
@@ -74,9 +81,15 @@ public class ShooterIOKraken implements ShooterIO {
     rightMotorVelocitySignal = rightMotor.getVelocity();
     rightEncoderPositionSignal = rightMotor.getPosition();
 
+    addedMotorVoltageSignal = addedMotor.getMotorVoltage();
+    addedMotorStatorCurrentSignal = addedMotor.getStatorCurrent();
+    addedMotorSupplyCurrentSignal = addedMotor.getSupplyCurrent();
+    addedMotorVelocitySignal = addedMotor.getVelocity();
+    addedEncoderPositionSignal = addedMotor.getPosition();
+
     leftMotor.optimizeBusUtilization(Hertz.of(0));
     rightMotor.optimizeBusUtilization(Hertz.of(0));
-
+    addedMotor.optimizeBusUtilization(Hertz.of(0));
     BaseStatusSignal.setUpdateFrequencyForAll(
       ShooterConstants.updateFrequency,
       leftMotorVoltageSignal,
@@ -89,7 +102,13 @@ public class ShooterIOKraken implements ShooterIO {
       rightMotorStatorCurrentSignal,
       rightMotorSupplyCurrentSignal,
       rightMotorVelocitySignal,
-      rightEncoderPositionSignal);
+      rightEncoderPositionSignal,
+
+      addedMotorVoltageSignal,
+      addedMotorStatorCurrentSignal,
+      addedMotorSupplyCurrentSignal,
+      addedMotorVelocitySignal,
+      addedEncoderPositionSignal);
 
 
     //config.Slot0.kV = ShooterConstants.kVRight;
@@ -99,6 +118,7 @@ public class ShooterIOKraken implements ShooterIO {
     // config.Slot0.kA = ShooterConstants.kARight;
     config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
     rightMotor.getConfigurator().apply(config);
+    addedMotor.getConfigurator().apply(config);
     //rightMotor.setControl(new Follower(leftMotor.getDeviceID(), MotorAlignmentValue.Aligned));
     //leftConfig = config.clone().withMotorOutput(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Brake));
 
@@ -117,7 +137,13 @@ public class ShooterIOKraken implements ShooterIO {
       rightMotorStatorCurrentSignal,
       rightMotorSupplyCurrentSignal,
       rightMotorVelocitySignal,
-      rightEncoderPositionSignal);
+      rightEncoderPositionSignal,
+
+      addedMotorVoltageSignal,
+      addedMotorStatorCurrentSignal,
+      addedMotorSupplyCurrentSignal,
+      addedMotorVelocitySignal,
+      addedEncoderPositionSignal);
 
     inputs.leftMotorVoltage = leftMotorVoltageSignal.getValue();
     inputs.leftMotorStatorCurrent = leftMotorStatorCurrentSignal.getValue();//leftMotor.getStatorCurrent().getValue();
@@ -132,6 +158,13 @@ public class ShooterIOKraken implements ShooterIO {
     inputs.rightMotorSpeed = rightMotorVelocitySignal.getValue();
     inputs.rightMotorConnected = rightMotor.isConnected();
     inputs.rightEncoderPosition = rightEncoderPositionSignal.getValue().in(Rotations);
+
+    inputs.addedMotorVoltage = addedMotorVoltageSignal.getValue();
+    inputs.addedMotorStatorCurrent = addedMotorStatorCurrentSignal.getValue();
+    inputs.addedMotorSupplyCurrent = addedMotorSupplyCurrentSignal.getValue();
+    inputs.addedMotorSpeed = addedMotorVelocitySignal.getValue();
+    inputs.addedMotorConnected = addedMotor.isConnected();
+    inputs.addedEncoderPosition = addedEncoderPositionSignal.getValue().in(Rotations);
   }
 
   @Override
@@ -145,14 +178,17 @@ public class ShooterIOKraken implements ShooterIO {
   public void setShooterVoltage(Voltage leftVolts, Voltage rightVolts) {
     leftMotor.setControl(voltageRequest.withOutput(leftVolts));
     rightMotor.setControl(voltageRequest.withOutput(rightVolts));
+    addedMotor.setControl(voltageRequest.withOutput(rightVolts));
   }
 
   @Override
   public void stop() {
      leftMotor.setControl(voltageRequest.withOutput(0));
     rightMotor.setControl(voltageRequest.withOutput(0));
+    addedMotor.setControl(voltageRequest.withOutput(0));
     leftMotor.stopMotor();
     rightMotor.stopMotor();
+    addedMotor.stopMotor();
   }
 
   @Override
@@ -169,5 +205,6 @@ public class ShooterIOKraken implements ShooterIO {
     // speedRequest.IgnoreSoftwareLimits = true;
     leftMotor.set(speed);//setControl(speedRequest);
     rightMotor.set(speed);//setControl(speedRequest);
+    addedMotor.set(speed);
   }
 }

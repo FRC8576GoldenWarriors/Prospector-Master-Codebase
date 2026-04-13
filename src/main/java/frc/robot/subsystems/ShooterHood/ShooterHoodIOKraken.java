@@ -42,7 +42,6 @@ public class ShooterHoodIOKraken implements ShooterHoodIO {
             .withStatorCurrentLimit(Amps.of(40))
             .withStatorCurrentLimitEnable(true)
             );
-
         shooterHoodVoltageSignal = hoodMotor.getMotorVoltage();
         shooterHoodStatorCurrentSignal = hoodMotor.getStatorCurrent();
         shooterHoodSupplyCurrentSignal = hoodMotor.getSupplyCurrent();
@@ -63,6 +62,7 @@ public class ShooterHoodIOKraken implements ShooterHoodIO {
         hoodMotor.getConfigurator().apply(hoodConfig);
 
         hoodEncoder.setInverted(ShooterHoodConstants.encoderInverted);
+        hoodMotor.setPosition(hoodEncoder.get());
     }
 
     @Override
@@ -82,6 +82,7 @@ public class ShooterHoodIOKraken implements ShooterHoodIO {
         //inputs.encoderValue_Radians = hoodMotor.getPosition().getValue();
         inputs.encoderValue_Radians = Rotations.of(hoodEncoder.get());
         inputs.isEncoderConnected = hoodEncoder.isConnected();
+        inputs.motor_encoder_value = hoodMotor.getPosition().getValue().div(60).times(18);
     }
 
     @Override

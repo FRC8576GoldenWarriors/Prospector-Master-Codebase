@@ -13,6 +13,8 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -35,6 +37,7 @@ import org.littletonrobotics.urcl.URCL;
 
 
 import frc.robot.Macros.RobotStates;
+import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.util.AlertLogger;
 import frc.robot.util.HubTracker;
 
@@ -146,6 +149,14 @@ public class Robot extends LoggedRobot {
         AlertLogger.periodic();
         //SmartDashboard.putRaw("Field",new Field2d().getObject("Rebuilt"));
         Logger.recordOutput("Shift Timings", HubTracker.timeRemainingInCurrentShift().orElse(Seconds.of(-1)));
+        Pose2d robotPose = RobotContainer.drive.getPose();
+        if(robotPose != null) {
+            Pose3d robotPose3d = new Pose3d(robotPose);
+            Logger.recordOutput("Front Limelight Pose in Robot Space", VisionConstants.robotToCamera0.relativeTo(robotPose3d));
+            Logger.recordOutput("Left Limelight Pose in Robot Space", VisionConstants.robotToCamera1.relativeTo(robotPose3d));
+            Logger.recordOutput("Back Limelight Pose in Robot Space", VisionConstants.robotToCamera2.relativeTo(robotPose3d));
+            Logger.recordOutput("Right Limelight Pose in Robot Space", VisionConstants.robotToCamera3.relativeTo(robotPose3d));
+        }
 
     }
 
@@ -169,6 +180,7 @@ public class Robot extends LoggedRobot {
     @SuppressWarnings("removal")
     @Override
     public void autonomousInit() {
+        RobotContainer.vision.enableRewind(true);
         autonomousCommand = robotContainer.getAutonomousCommand();
         //matchTimer.restart();
         // schedule the autonomous command (example)
@@ -196,6 +208,7 @@ public class Robot extends LoggedRobot {
         // teleop starts running. If you want the autonomous to
         // continue until interrupted by another command, remove
         // this line or comment it out.
+        RobotContainer.vision.enableRewind(true);
         if (autonomousCommand != null) {
             autonomousCommand.cancel();
         }
@@ -206,6 +219,11 @@ public class Robot extends LoggedRobot {
     /** This function is called periodically during operator control. */
     @Override
     public void teleopPeriodic() {}
+
+    @Override
+    public void teleopExit() {
+        RobotContainer.vision.triggerRewindCapture();
+    }
 
     /** This function is called once when test mode is enabled. */
     @Override

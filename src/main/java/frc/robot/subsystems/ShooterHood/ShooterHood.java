@@ -69,7 +69,7 @@ public class ShooterHood extends SubsystemBase {
 
   @Override
   public void periodic() {
-    currentAnglePosition = inputs.encoderValue_Radians.in(Rotations);
+    currentAnglePosition = inputs.motor_encoder_value.in(Rotations);
     io.updateInputs(inputs);
 
     kP = kPNumber.get();
