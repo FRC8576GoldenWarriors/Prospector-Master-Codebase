@@ -24,9 +24,7 @@ import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.TimestampedDoubleArray;
 import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
-
 
 import static edu.wpi.first.units.Units.DegreesPerSecond;
 
@@ -36,6 +34,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
+
 
 /** IO implementation for real Limelight hardware. */
 public class VisionIOLimelight implements VisionIO {
@@ -54,15 +53,8 @@ public class VisionIOLimelight implements VisionIO {
     private final DoubleArraySubscriber tagCornersSubscriber;
     private final DoubleArrayPublisher cropPublisher;
 
-    private final DoublePublisher rewindEnablePublisher;
-
-    private final DoubleArraySubscriber captureRewindSubscriber;
-    private final DoubleArrayPublisher captureRewindPublisher;
 
     private final DoublePublisher imuModePublisher;
-
-    private boolean rewindEnabled = false;
-    private boolean isRewinding = false;
 
     private double rewindCaptureDurationSeconds = 165.0;
 
@@ -87,9 +79,6 @@ public class VisionIOLimelight implements VisionIO {
         megatag1Subscriber = table.getDoubleArrayTopic("botpose_wpiblue").subscribe(new double[] {});
         megatag2Subscriber = table.getDoubleArrayTopic("botpose_orb_wpiblue").subscribe(new double[] {});
         tagCornersSubscriber = table.getDoubleArrayTopic("tcornxy").subscribe(new double[] {});
-        rewindEnablePublisher = table.getDoubleTopic("rewind_enable_set").publish();
-        captureRewindSubscriber = table.getDoubleArrayTopic("capture_rewind").subscribe(new double[] {});
-        captureRewindPublisher = table.getDoubleArrayTopic("capture_rewind").publish();
         imuModePublisher = table.getDoubleTopic("imumode_set").publish();
         //LimelightHelpers.SetIMUAssistAlpha(name, 0.1);
         this.name = name;
@@ -97,23 +86,6 @@ public class VisionIOLimelight implements VisionIO {
 
     @Override
     public void updateInputs(VisionIOInputs inputs) {
-        if(!rewindEnabled && DriverStation.isFMSAttached() && DriverStation.isAutonomous()) {
-            rewindEnablePublisher.accept(1.0);
-            rewindEnabled = true;
-        } else {
-            rewindEnablePublisher.accept(0.0);
-        }
-
-        if(rewindEnabled && !isRewinding && DriverStation.isFMSAttached() && DriverStation.isDisabled()) {
-            isRewinding = true;
-            double[] currentArray = captureRewindSubscriber.get();
-            double counter = (currentArray.length > 0) ? currentArray[0] : 0;
-            double[] entries = new double[2];
-            entries[0] = counter + 1;
-            entries[1] = Math.min(rewindCaptureDurationSeconds, 165);
-            captureRewindPublisher.accept(entries);
-            rewindEnabled = false;
-        }
 
         // Update connection status based on whether an update has been seen in the last 250ms
         inputs.connected = ((RobotController.getFPGATime() - latencySubscriber.getLastChange()) / 1000) < 250;
@@ -224,6 +196,15 @@ public class VisionIOLimelight implements VisionIO {
         }
     }
 
+    @Override
+    public void setRewindEnabled(boolean on) {
+        LimelightHelpers.setRewindEnabled(name, on);
+    }
+
+    public void triggerRewindCapture() {
+        LimelightHelpers.triggerRewindCapture(name, rewindCaptureDurationSeconds);
+    }
+
     public static double[] findTimestampedValue(TimestampedDoubleArray[] arr, long timestamp) {
         double[] values = new double[12];
         for(var unit : arr) {
@@ -245,7 +226,7 @@ public class VisionIOLimelight implements VisionIO {
            case UseInternalWithExternal -> imuModeValue = 4;
            default -> imuModeValue = 1;
         }
-        imuModeValue = 0; //default to external
+        //imuModeValue = 0; //default to external
         imuModePublisher.accept(imuModeValue);
     }
 

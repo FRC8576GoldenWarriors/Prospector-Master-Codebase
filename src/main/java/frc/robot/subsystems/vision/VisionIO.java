@@ -63,4 +63,8 @@ public interface VisionIO {
     default void setRobotOrientation(double angle) {}
 
     default void updateInputs(VisionIOInputs inputs) {}
+
+    default void setRewindEnabled(boolean on) {}
+
+    default void triggerRewindCapture() {}
 }

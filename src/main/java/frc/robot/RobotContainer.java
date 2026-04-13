@@ -62,7 +62,7 @@ import org.littletonrobotics.junction.Logger;
 public class RobotContainer {
     // Subsystems
     public static Drive drive;
-    private final Vision vision;
+    public static Vision vision;
     private final GyroIO gyro;
     public static Intake intake;
     public static Shooter shooter;
@@ -257,8 +257,7 @@ public class RobotContainer {
                         new Pose2d(drive.getPose().getTranslation(), new Rotation2d())); // zero gyro
         driveController.start().onTrue(Commands.runOnce(resetGyro, drive).ignoringDisable(true).alongWith(new InstantCommand(() -> {
                 vision.setLimelightImuMode(IMUMode.SeedInternalIMU);
-                vision.setRobotOrientations((DriverStation.getAlliance().orElse(Alliance.Blue)==Alliance.Blue)?drive.getPose().getRotation().getDegrees():drive.getPose().getRotation().getDegrees()+180);
-                vision.flushLimelights();
+                vision.setRobotOrientations((DriverStation.getAlliance().orElse(Alliance.Blue)==Alliance.Blue)?drive.getPose().getRotation().getDegrees():drive.getPose().getRotation().getDegrees()+180, true);
         })));
 
         // Example Coral Placement Code
@@ -286,11 +285,14 @@ public class RobotContainer {
                             Degrees.of(-60)))));
         }
         resetHeadingTrigger.onTrue(new InstantCommand(() -> {
-            Pose2d currentPose = drive.getPose();
+            //Pose2d currentPose = drive.getPose();
             Pose2d resetPose = new Pose2d(
                     new Translation2d(Inches.of(651.22).in(Meters), Inches.of(317.69).in(Meters)),//new Translation2d(currentPose.getX(), currentPose.getY()),
                     (DriverStation.getAlliance().get() == Alliance.Red) ? Rotation2d.k180deg : Rotation2d.kZero);
             drive.resetGyro(resetPose);
+            vision.setRobotOrientations(resetPose.getRotation().getDegrees(), false);
+            vision.setLimelightImuMode(IMUMode.SeedInternalIMU);
+            vision.setRobotOrientations(resetPose.getRotation().getDegrees(), true);
         }));
         // controller.povUp().onTrue(new InstantCommand(() -> {
         //     Pose2d resetPose = new Pose2d(

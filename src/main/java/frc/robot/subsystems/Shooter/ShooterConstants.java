@@ -10,6 +10,7 @@ public class ShooterConstants {
     // Motor IDs (Subset 30-40)
     public static final int LEFT_SHOOTER_ID = 31;
     public static final int RIGHT_SHOOTER_ID = 32;
+    public static final int ADDED_SHOOTER_ID = 33;
 
     // Current Limits
     public static final Current SUPPLY_CURRENT_LIMIT = Amps.of(60);
@@ -22,7 +23,7 @@ public class ShooterConstants {
     public static final double kVLeft = 0.125175*1.142;//0.12;//0.12;
     public static final double kALeft = 0.20611;
     public static final double kS = 0;//0.15;//0.24;
-    public static final double kV = 0.14;//0.1375;//0.1275;//0.130018;//0.12*1.5;
+    public static final double kV = 0.14;//0.07;//0.14;//0.1375;//0.1275;//0.130018;//0.12*1.5;
     public static final double kARight = 0.17284;
     public static final double kPLeft = 0;//3;//0.17284;//3;
     // Manual Testing Constants
