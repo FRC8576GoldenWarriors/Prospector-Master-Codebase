@@ -1,4 +1,4 @@
-package frc.robot.util.poseEstimation;
+package frc.robot.util.poseEstimation.bumpDetection;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Seconds;
