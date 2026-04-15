@@ -114,7 +114,7 @@ public class Intake extends SubsystemBase {
           PIDVoltage  = PID.calculate(currentPosition, IntakeConstants.Software.intakeDown);
           FFVoltage = FF.calculate(IntakeConstants.Software.intakeDown, 0.5);
           inputVoltage = PIDVoltage + FFVoltage;
-          wantedSpeed = 0;
+          wantedSpeed = IntakeConstants.Software.rollerSpeed;
 
           io.setPivotVoltage(inputVoltage);
           io.setRollerSpeed(wantedSpeed);
@@ -123,7 +123,7 @@ public class Intake extends SubsystemBase {
           PIDVoltage  = PID.calculate(currentPosition, IntakeConstants.Software.agitatePosition);
           FFVoltage = FF.calculate(IntakeConstants.Software.agitatePosition, 0.5);
           inputVoltage = PIDVoltage + FFVoltage;
-          wantedSpeed = 0;
+          wantedSpeed = IntakeConstants.Software.rollerSpeed;
 
           io.setPivotVoltage(inputVoltage);
           io.setRollerSpeed(wantedSpeed);

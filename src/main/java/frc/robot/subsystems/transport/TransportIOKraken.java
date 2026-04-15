@@ -104,7 +104,7 @@ public class TransportIOKraken implements TransportIO {
         // transportMotorConfiguration.Slot0.kV = 2*TransportConstants.kV;
         transportMotorBack.getConfigurator().apply(transportMotorConfiguration);
         transportMotorConfiguration.MotorOutput.Inverted = TransportConstants.transportMotorBackInversion;
-        transportMotorConfiguration.Slot0.kV = TransportConstants.kV*1.5;
+        transportMotorConfiguration.Slot0.kV = TransportConstants.kV*2.5;//*1.5;
         transportMotor.getConfigurator().apply(transportMotorConfiguration);
         //transportMotorBack.setControl(new Follower(TransportConstants.transportMotorID,MotorAlignmentValue.Aligned));
     }

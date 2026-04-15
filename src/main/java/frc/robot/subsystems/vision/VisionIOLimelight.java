@@ -25,7 +25,9 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.TimestampedDoubleArray;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.RobotController;
+import frc.robot.subsystems.vision.LimelightHelpers.IMUData;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
 
 import java.util.Arrays;
@@ -80,6 +82,7 @@ public class VisionIOLimelight implements VisionIO {
         megatag2Subscriber = table.getDoubleArrayTopic("botpose_orb_wpiblue").subscribe(new double[] {});
         tagCornersSubscriber = table.getDoubleArrayTopic("tcornxy").subscribe(new double[] {});
         imuModePublisher = table.getDoubleTopic("imumode_set").publish();
+        LimelightHelpers.SetIMUAssistAlpha(name, 0.01);
         //LimelightHelpers.SetIMUAssistAlpha(name, 0.1);
         this.name = name;
     }
@@ -97,6 +100,9 @@ public class VisionIOLimelight implements VisionIO {
         // Update orientation for MegaTag 2
         orientationPublisher.accept(new double[] {rotationSupplier.get().getDegrees(), rotationVelocitySupplier.get().in(DegreesPerSecond), 0.0, 0.0, 0.0, 0.0});
         NetworkTableInstance.getDefault().flush(); // Increases network traffic but recommended by Limelight
+
+        IMUData imuData = LimelightHelpers.getIMUData(name);
+        inputs.limelightRotation = new Rotation2d(Degrees.of(imuData.robotYaw));
 
 
         // Read new pose observations from NetworkTables

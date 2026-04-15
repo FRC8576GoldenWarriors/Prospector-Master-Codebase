@@ -44,7 +44,8 @@ public class Macros extends SubsystemBase {
     TransportOut,
     TransportIn,
     AutonShoot,
-    IntakeOut
+    IntakeOut,
+    Test
     //Testing
   }
 
@@ -94,6 +95,9 @@ public class Macros extends SubsystemBase {
           break;
         case IntakeOut:
           intakeOut();
+          break;
+        case Test:
+          testing();
           break;
         default:
             break;
@@ -221,6 +225,10 @@ public class Macros extends SubsystemBase {
    // m_Intake.setWantedPosition(IntakeStates.Intake);
   }
 
+  public void testing(){
+    m_Transport.setWantedState(TransportStates.TransportIn);
+  }
+
   public void intakeOut(){
     if(RobotContainer.driveController.povRight().getAsBoolean()||RobotContainer.opController.leftTrigger().getAsBoolean()){
     m_Intake.setWantedPosition(IntakeStates.IntakeOut);
@@ -258,9 +266,30 @@ public class Macros extends SubsystemBase {
   }
 
   public void runContinous(){
+    if(m_ShooterHood.atSetpoint()){
+      m_shooter.setWantedState(ShooterStates.SHOOT);
+    }
+    if(m_shooter.isRevved()&&m_ShooterHood.atSetpoint()){
+    //m_ShooterHood.setWantedState(ShooterHoodStates.Shoot);
+    m_Transport.setWantedState(TransportStates.TransportIn);
+     }
+     //else{
+    //   m_Transport.setWantedState(TransportStates.Idle);
+    // }
+    if(m_Intake.getState()==IntakeStates.Idle){
+   m_Intake.setWantedPosition(IntakeStates.IntakeDown);
+   }
+    if(!(m_Intake.getState()==IntakeStates.Agitate)&&m_Intake.nearSetpoint()){
+      m_Intake.setWantedPosition(IntakeStates.Agitate);
+    }
+    else if(m_Intake.getState()==IntakeStates.Agitate&&m_Intake.nearSetpoint()){
+      m_Intake.setWantedPosition(IntakeStates.IntakeDown);
+    }
+
+    m_ShooterHood.setWantedState(ShooterHoodStates.Shoot);
     // m_ShooterHood.setWantedState(ShooterHoodStates.Shoot);
     //  m_shooter.setWantedState(ShooterStates.SHOOT);
-    m_Transport.setWantedState(TransportStates.TransportIn);
+    //m_Transport.setWantedState(TransportStates.TransportIn);
   // //   if(m_ShooterHood.atSetpoint()){
   // //     m_shooter.setWantedState(ShooterStates.SHOOT);
   // //   }

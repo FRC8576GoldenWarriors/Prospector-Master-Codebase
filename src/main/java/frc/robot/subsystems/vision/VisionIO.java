@@ -27,6 +27,7 @@ public interface VisionIO {
         public int[] tagIds = new int[0];
         public String name = "";
         public double[] cropWindow = new double[0];
+        public Rotation2d limelightRotation = new Rotation2d();
     }
 
     /** Represents the angle to a simple target, not used for pose estimation. */

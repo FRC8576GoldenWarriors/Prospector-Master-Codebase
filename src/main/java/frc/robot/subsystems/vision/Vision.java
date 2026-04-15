@@ -87,12 +87,12 @@ public class Vision extends SubsystemBase {
 
             io[i].updateInputs(inputs[i]);
             Logger.processInputs("Vision/Camera" + Integer.toString(i) + " " + inputs[i].name, inputs[i]);
-            if(DriverStation.isDisabled()){
-                LimelightHelpers.SetThrottle(inputs[i].name,200);
-                //io[i].startRewind();
-            }else{
-                LimelightHelpers.SetThrottle(inputs[i].name, 0);
-            }
+            // if(DriverStation.isDisabled()){
+            //     LimelightHelpers.SetThrottle(inputs[i].name,200);
+            //     //io[i].startRewind();
+            // }else{
+            //     LimelightHelpers.SetThrottle(inputs[i].name, 0);
+            // }
         }
 
         // Initialize logging values

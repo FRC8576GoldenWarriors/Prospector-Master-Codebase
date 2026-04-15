@@ -3,6 +3,7 @@ package frc.robot.subsystems.Shooter;
 import edu.wpi.first.units.measure.*;
 
 import static edu.wpi.first.units.Units.*;
+import static frc.robot.subsystems.Shooter.ShooterConstants.anglePrespityFudge;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,14 +49,19 @@ public class ShooterUtil {
         // //Spity 2 pretuning
         // speedMap.put(2.0, 26.73+6.5);
         // speedMap.put(4.408, 40.12+6.5);
-
-        addRPSPoint(1.7, 26.3, ShooterConstants.shooterRPSPrespityFudge);
+        addRPSPoint(1.47, 27, ShooterConstants.shooterRPSPrespityFudge);
+        //addRPSPoint(1.7, 26.3, ShooterConstants.shooterRPSPrespityFudge);
         addRPSPoint(2.5, 28.85, ShooterConstants.shooterRPSPrespityFudge);
         addRPSPoint(3.17, 31.19, ShooterConstants.shooterRPSPrespityFudge);
         addRPSPoint(3.92, 36.47, ShooterConstants.shooterRPSPrespityFudge);
         addRPSPoint(4.408, 40.12, ShooterConstants.shooterRPSPrespityFudge);
         addRPSPoint(4.89, 40.12, ShooterConstants.shooterRPSPrespityFudge);
-
+        addRPSPoint(2.165, 31.75, ShooterConstants.shooterRPSPrespityFudge);
+        addRPSPoint(2.44, 32.35, ShooterConstants.shooterRPSPrespityFudge);
+        addRPSPoint(1.61, 27.51, ShooterConstants.shooterRPSPrespityFudge);
+        addRPSPoint(4.34, 34.138, ShooterConstants.shooterRPSPrespityFudge);
+        addRPSPoint(1.9055, 29.27, ShooterConstants.shooterRPSPrespityFudge);
+        addRPSPoint(2.059, 26.94, ShooterConstants.shooterRPSPrespityFudge);
         // speedMap.put(5.155,40.12+6.5);
         // speedMap.put(1.76, 31.12);
         // speedMap.put(2.25, 34.5);
@@ -94,12 +100,19 @@ public class ShooterUtil {
         // angleMap.put(4.408, 0.147+0.01);
 
         // angleMap.put(5.155, 0.267+0.01);
-        addAnglePoint(1.7, 0.05, ShooterConstants.anglePrespityFudge);
+        addAnglePoint(1.49, 0.053, anglePrespityFudge);
+        //addAnglePoint(1.7, 0.05, ShooterConstants.anglePrespityFudge);
         addAnglePoint(2.5, 0.1, ShooterConstants.anglePrespityFudge);
         addAnglePoint(3.17, 0.14, ShooterConstants.anglePrespityFudge);
         addAnglePoint(3.92, 0.149, ShooterConstants.anglePrespityFudge);
         //addAnglePoint(4.408, 40.12, ShooterConstants.shooterRPSPrespityFudge);
         addAnglePoint(4.89, 0.149, ShooterConstants.anglePrespityFudge);
+        addAnglePoint(2.165, 0.0844, ShooterConstants.anglePrespityFudge);
+        addAnglePoint(2.44, 0.097, anglePrespityFudge);
+        addAnglePoint(1.61, 0.059, anglePrespityFudge);
+        addAnglePoint(4.34, 0.149, anglePrespityFudge);
+        addAnglePoint(1.9055, 0.073, anglePrespityFudge);
+        addAnglePoint(2.095, 0.08, anglePrespityFudge);
         // angleMap.put(1.76,0.0113);
         // angleMap.put(2.25, 0.07);
         // //Iffy points

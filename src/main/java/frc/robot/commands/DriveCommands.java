@@ -463,7 +463,7 @@ public class DriveCommands {
 //     }
 
     public static boolean angleAligned(){
-        return MathUtil.isNear(angleController.getGoal().position, RobotContainer.drive.getPose().getRotation().getRadians(), Units.degreesToRadians(3));//6));//angleController.atGoal();
+        return MathUtil.isNear(angleController.getGoal().position, RobotContainer.drive.getPose().getRotation().getRadians(), Units.degreesToRadians(0.5));//3));//6));//angleController.atGoal();
     }
     public static PathPlannerPath driveOverBump(Supplier<Pose2d> currentPose) {
     Pose2d robotPose = currentPose.get();
