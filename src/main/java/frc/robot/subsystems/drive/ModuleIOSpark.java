@@ -111,26 +111,11 @@ public ModuleIOSpark(int module) {
                     case 3 -> backRightCancoderId;
                     default -> 0;
                 });
-        boolean invertedDriveValue = false;
         absoluteTurnEncoderAngleSignal = absoluteTurnEncoder.getAbsolutePosition();
         absoluteTurnEncoder.optimizeBusUtilization(Hertz.of(0));
         BaseStatusSignal.setUpdateFrequencyForAll(
         updateFrequency,
         absoluteTurnEncoderAngleSignal);
-        switch(module){
-                                case 0:
-                                invertedDriveValue = false;
-                                break;
-                                 case 1:
-                                 invertedDriveValue = false;
-                                 break;
-                                case 2:
-                                invertedDriveValue = true;
-                                break;
-                                case 3:
-                                invertedDriveValue = true;
-                                break;
-                        }
 
         // Configure drive motor
         var driveConfig = new SparkFlexConfig();
@@ -138,7 +123,14 @@ public ModuleIOSpark(int module) {
                 .idleMode(IdleMode.kBrake)
                 .smartCurrentLimit(driveMotorCurrentLimit)
                 .voltageCompensation(12.0)
-                .inverted(invertedDriveValue);
+                .inverted(
+                        switch(module){
+                                case 0 -> false;
+                                case 1-> false;
+                                case 2 -> true;
+                                case 3 ->true;
+                                default ->false;
+                        });
         driveConfig
                 .encoder
                 .positionConversionFactor(driveEncoderPositionFactor)
