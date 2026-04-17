@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 6.042846975088969,
-        "y": 2.534092526690391
+        "x": 6.043,
+        "y": 2.534
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.042846975088969,
-        "y": 2.534092526690391
+        "x": 5.043,
+        "y": 2.534
       },
       "isLocked": false,
       "linkedName": "OverBump3"

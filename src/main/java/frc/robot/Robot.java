@@ -222,7 +222,8 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void teleopExit() {
-        RobotContainer.vision.triggerRewindCapture();
+        if(DriverStation.isFMSAttached())
+            RobotContainer.vision.triggerRewindCapture();
     }
 
     /** This function is called once when test mode is enabled. */

@@ -60,7 +60,7 @@ public class Intake extends SubsystemBase {
   private Alert pivotMotorAlert = new Alert("The Pivot Motor is disconnected", AlertType.kError);
   private Alert rollerMotorAlert = new Alert("The Roller Motor is disconnected", AlertType.kError);
   private Alert leftEncoderAlert = new Alert("The Left Encoder is disconnected", AlertType.kError);
-  private Alert rightEncoderAlert = new Alert("The Right Encoder is disconnected", AlertType.kError);
+ // private Alert rightEncoderAlert = new Alert("The Right Encoder is disconnected", AlertType.kError);
 
   public Intake(IntakeIO io) {
     PID = new ProfiledPIDController(IntakeConstants.Software.kP, IntakeConstants.Software.kI, IntakeConstants.Software.kD, IntakeConstants.Software.profile);
@@ -174,7 +174,7 @@ public class Intake extends SubsystemBase {
       pivotMotorAlert.set(!inputs.pivotConnected);
       rollerMotorAlert.set(!inputs.rollerConnected);
       leftEncoderAlert.set(!inputs.leftEncoderConnected);
-      rightEncoderAlert.set(!inputs.rightEncoderConnected);
+      //rightEncoderAlert.set(!inputs.rightEncoderConnected);
       Logger.recordOutput("Intake/Wanted State", wantedState);
       Logger.recordOutput("Intake/PID", PIDVoltage);
       Logger.recordOutput("Intake/FF", FFVoltage);

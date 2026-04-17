@@ -57,7 +57,7 @@ import com.pathplanner.lib.path.Waypoint;
 
 public class DriveCommands {
     private static final double DEADBAND = 0.1;
-    private static final double ANGLE_KP = 5.0;
+    private static final double ANGLE_KP = 10;//5.0;
     private static final double ANGLE_KD = 0.4;
     private static final double TRANSLATION_KP = 7.5;
     private static final double TRANSLATION_KI = 0.0;
@@ -259,6 +259,7 @@ public class DriveCommands {
             Drive drive, DoubleSupplier xSupplier, DoubleSupplier ySupplier, Supplier<Pose2d> drivePose) {
 
         // Create PID controller
+
         angleController.setTolerance(Units.degreesToRadians(15));
         angleController.enableContinuousInput(-Math.PI, Math.PI);
 
@@ -271,6 +272,12 @@ public class DriveCommands {
         // Construct command
         Command alignCommand =  Commands.run(
                         () -> {
+                                if(DriverStation.isAutonomous()&&angleController.getP()==10){
+                                        angleController.setP(5.0);
+                                }
+                                else if(DriverStation.isTeleop()&&angleController.getP()==5){
+                                        angleController.setP(ANGLE_KP);
+                                }
                                 Logger.recordOutput("Drive/Alignment Goal", angleController.getGoal().position);
                                 Logger.recordOutput("Drive/Tag centric aligned", angleAligned());
                                 if(FieldUtil.isOnAllianceSide()){
@@ -465,6 +472,11 @@ public class DriveCommands {
     public static boolean angleAligned(){
         return MathUtil.isNear(angleController.getGoal().position, RobotContainer.drive.getPose().getRotation().getRadians(), Units.degreesToRadians(0.5));//3));//6));//angleController.atGoal();
     }
+
+    public static boolean angleAlignedLEDs(){
+        return MathUtil.isNear(angleController.getGoal().position, RobotContainer.drive.getPose().getRotation().getRadians(), Units.degreesToRadians(5));//3));//6));//angleController.atGoal();
+    }
+
     public static PathPlannerPath driveOverBump(Supplier<Pose2d> currentPose) {
     Pose2d robotPose = currentPose.get();
     Translation2d botTranslation = robotPose.getTranslation();

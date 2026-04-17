@@ -61,10 +61,13 @@ public class Autos {
         autoChooser.addOption("Right Steal", autoRightLeave());
         autoChooser.addOption("Middle Leave Shoot", testAutonThingy());
         autoChooser.addOption("Left Steal", autoLeftLeave());
-        autoChooser.addOption("Left Depot Auton", autoLeftDepot());
+        autoChooser.addDefaultOption("Left Depot Auton", autoLeftDepot());
         autoChooser.addOption("Left Steal Long", autoLeftStealLong());
         autoChooser.addOption("Right Steal Long", autoRightStealLong());
         autoChooser.addOption("Right Double Dip", rightDoubleSteal());
+        autoChooser.addOption("Right Full Side Auton", autoRightFull());
+        autoChooser.addOption("Left Full Side Auton", autoLeftFull());
+        autoChooser.addOption("Middle Depot", autoMiddleDepot());
         SmartDashboard.putData("Auto Chooser",autoChooser.getSendableChooser());
     }
 
@@ -103,7 +106,61 @@ public class Autos {
             return Commands.none();
         }
      }
+    public Command autoMiddleDepot(){
+        try {
+            return
+            getAutoBuilderPathPlannerCommand("MiddleDepot", flipped, false, new PathConstraints(2, 3.4, 3*Math.PI, 4*Math.PI))
+            .alongWith(macros.setWantedState(RobotStates.IntakeOn))
+            .andThen(getAutoBuilderPathPlannerCommand("OutFromDepot", flipped, false, new PathConstraints(4.0, 5.2, 3*Math.PI, 4*Math.PI)))
+            //.alongWith(macros.setWantedState(RobotStates.IntakeOff)))
+            .andThen(DriveCommands.joystickDriveTagCentric(drive,()->0,()->0,()->drive.getPose())
+             .until(()->DriveCommands.angleAligned()))
+             .andThen(macros.setWantedState(RobotStates.RunContinous)
+             .alongWith(DriveCommands.driveX(drive, () -> new ChassisSpeeds())));
+            //.andThen(getAutoBuilderPathPlannerCommand("OverBump", flipped, false, null))
+            //  .andThen(macros.setWantedState(RobotStates.Rest))//.alongWith(new WaitCommand(1)))
+            //  .andThen(getAutoBuilderPathPlannerCommand("LeftToDepot", flipped, false, new PathConstraints(2, 5.2, 3*Math.PI, 4*Math.PI))
+            //  .alongWith(macros.setWantedState(RobotStates.IntakeOn)))
+            //  .andThen(getAutoBuilderPathPlannerCommand("LeftOutOfDepot", flipped, false, new PathConstraints(4.0, 5.2, 3*Math.PI, 4*Math.PI)))
+            //  .andThen(DriveCommands.joystickDriveTagCentric(drive,()->0,()->0,()->drive.getPose())
+            //  .until(()->DriveCommands.angleAligned()))
+            //  .andThen(macros.setWantedState(RobotStates.RunContinous));//.alongWith(new WaitCommand(6)));
 
+        } catch (Exception exception) {
+            DriverStation.reportError(exception.getLocalizedMessage(), exception.getStackTrace());
+            return Commands.none();
+        }
+    }
+    public Command autoRightFull(){
+        try{
+        return getAutoBuilderPathPlannerCommand("OverBump", flipped, false, null)
+                .alongWith(macros.setWantedState(RobotStates.IntakeOn))
+                .andThen(getAutoBuilderPathPlannerCommand("IntakeBallsFull", flipped, false, null))
+                .andThen(getAutoBuilderPathPlannerCommand("BackToBumpFull", flipped, false, null))
+                .andThen(getAutoBuilderPathPlannerCommand("BackOverBump", flipped, true, null))
+                .andThen(DriveCommands.joystickDriveTagCentric(drive,()->0,()->0,()->drive.getPose())
+                .until(()->DriveCommands.angleController.atGoal()))
+                .andThen(macros.setWantedState(RobotStates.RunContinous));
+        }catch(Exception exception){
+            DriverStation.reportError(exception.getLocalizedMessage(), exception.getStackTrace());
+            return Commands.none();
+        }
+    }
+    public Command autoLeftFull(){
+        try{
+        return getAutoBuilderPathPlannerCommand("OverBump", flipped, true, null)
+                .alongWith(macros.setWantedState(RobotStates.IntakeOn))
+                .andThen(getAutoBuilderPathPlannerCommand("IntakeBallsFull", flipped, true, null))
+                .andThen(getAutoBuilderPathPlannerCommand("BackToBumpFull", flipped, true, null))
+                .andThen(getAutoBuilderPathPlannerCommand("BackOverBump", flipped, false, null))
+                .andThen(DriveCommands.joystickDriveTagCentric(drive,()->0,()->0,()->drive.getPose())
+                .until(()->DriveCommands.angleController.atGoal()))
+                .andThen(macros.setWantedState(RobotStates.RunContinous));
+        }catch(Exception exception){
+            DriverStation.reportError(exception.getLocalizedMessage(), exception.getStackTrace());
+            return Commands.none();
+        }
+    }
     public Command autoLeftDepot(){
         try {
             return
@@ -135,20 +192,21 @@ public class Autos {
     public Command autoLeftLeave(){
         try {
             return
-                getAutoBuilderPathPlannerCommand("OverBump", flipped, true, null)
+                getAutoBuilderPathPlannerCommand("OverBump", flipped, true, new PathConstraints(4.2, 5.2, 3*Math.PI, 4*Math.PI))
             .alongWith(macros.setWantedState(RobotStates.IntakeOn))
-            .andThen(getAutoBuilderPathPlannerCommand("FRIntakeBalls", flipped, true, null))
-            .andThen(getAutoBuilderPathPlannerCommand("BackToBump", flipped, true, null))//new PathConstraints(4.0, 5.2, 3*Math.PI, 4*Math.PI)))
-            .andThen(getAutoBuilderPathPlannerCommand("BackOverBump", flipped, true, new PathConstraints(3, 4.5, 3*Math.PI, 4*Math.PI))
-            .alongWith(macros.setWantedState(RobotStates.IntakeOff)))
+            .andThen(getAutoBuilderPathPlannerCommand("IntakeBalls", flipped, true, new PathConstraints(4.0, 5.2, 3*Math.PI, 4*Math.PI)))
+            .andThen(getAutoBuilderPathPlannerCommand("FRIntakeBalls", flipped, true, new PathConstraints(4.0, 5.2, 3*Math.PI, 4*Math.PI)))
+            .andThen(getAutoBuilderPathPlannerCommand("BackToBump", flipped, true, new PathConstraints(4.0, 5.2, 3*Math.PI, 4*Math.PI)))//new PathConstraints(4.0, 5.2, 3*Math.PI, 4*Math.PI)))
+            .andThen(getAutoBuilderPathPlannerCommand("BackOverBump", flipped, true, new PathConstraints(4.2, 5.2, 3*Math.PI, 4*Math.PI)))
+            //.alongWith(macros.setWantedState(RobotStates.IntakeOff)))
             .andThen(DriveCommands.joystickDriveTagCentric(drive,()->0,()->0,()->drive.getPose())
              .until(()->DriveCommands.angleAligned()))
-             .andThen(macros.setWantedState(RobotStates.RunContinous).alongWith(new WaitCommand(6)))
+             .andThen(macros.setWantedState(RobotStates.RunContinous).alongWith(new WaitCommand(6))
+             .alongWith(DriveCommands.driveX(drive, () -> new ChassisSpeeds(), Seconds.of(6))))
             //.andThen(getAutoBuilderPathPlannerCommand("OverBump", flipped, false, null))
              .andThen(macros.setWantedState(RobotStates.Rest).alongWith(new WaitCommand(1)))
-             .andThen(getAutoBuilderPathPlannerCommand("OverBump", flipped, true, null))
-             .andThen(getAutoBuilderPathPlannerCommand("IntakeHub", flipped, true, null)
-             .alongWith(macros.setWantedState(RobotStates.IntakeOn)));
+             .andThen(getAutoBuilderPathPlannerCommand("OverBump", flipped, true, null).alongWith(macros.setWantedState(RobotStates.IntakeOn)))
+             .andThen(getAutoBuilderPathPlannerCommand("IntakeHub", flipped, true, null));
 
         } catch (Exception exception) {
             DriverStation.reportError(exception.getLocalizedMessage(), exception.getStackTrace());
@@ -197,20 +255,22 @@ public class Autos {
             //  .andThen(getAutoBuilderPathPlannerCommand("OverBump", flipped, false, null))
             //  .andThen(getAutoBuilderPathPlannerCommand("IntakeHub", flipped, false, null));
             return
-                getAutoBuilderPathPlannerCommand("OverBump", flipped, false, null)
+                getAutoBuilderPathPlannerCommand("OverBump", flipped, false, new PathConstraints(4.2, 5.2, 3*Math.PI, 4*Math.PI))
             .alongWith(macros.setWantedState(RobotStates.IntakeOn))
-            .andThen(getAutoBuilderPathPlannerCommand("FRIntakeBalls", flipped, false, null))
-            .andThen(getAutoBuilderPathPlannerCommand("BackToBump", flipped, false, null))//new PathConstraints(4.0, 5.2, 3*Math.PI, 4*Math.PI)))
-            .andThen(getAutoBuilderPathPlannerCommand("BackOverBump", flipped, false, new PathConstraints(2, 3, 3*Math.PI, 4*Math.PI))
-            .alongWith(macros.setWantedState(RobotStates.IntakeOff)))
+            .andThen(getAutoBuilderPathPlannerCommand("IntakeBalls", flipped, false, new PathConstraints(4.0, 5.2, 3*Math.PI, 4*Math.PI)))
+            .andThen(getAutoBuilderPathPlannerCommand("FRIntakeBalls", flipped, false, new PathConstraints(4.0, 5.2, 3*Math.PI, 4*Math.PI)))
+            .andThen(getAutoBuilderPathPlannerCommand("BackToBump", flipped, false, new PathConstraints(4.0, 5.2, 3*Math.PI, 4*Math.PI)))//new PathConstraints(4.0, 5.2, 3*Math.PI, 4*Math.PI)))
+            .andThen(getAutoBuilderPathPlannerCommand("BackOverBump", flipped, false, new PathConstraints(4.2, 5.2, 3*Math.PI, 4*Math.PI)))
+            //.alongWith(macros.setWantedState(RobotStates.IntakeOff)))
             .andThen(DriveCommands.joystickDriveTagCentric(drive,()->0,()->0,()->drive.getPose())
              .until(()->DriveCommands.angleAligned()))
-             .andThen(macros.setWantedState(RobotStates.RunContinous).alongWith(new WaitCommand(6)))
+             .andThen(macros.setWantedState(RobotStates.RunContinous).alongWith(new WaitCommand(6))
+             .alongWith(DriveCommands.driveX(drive, () -> new ChassisSpeeds(), Seconds.of(6))))
             //.andThen(getAutoBuilderPathPlannerCommand("OverBump", flipped, false, null))
              .andThen(macros.setWantedState(RobotStates.Rest).alongWith(new WaitCommand(1)))
-             .andThen(getAutoBuilderPathPlannerCommand("OverBump", flipped, false, null))
-             .andThen(getAutoBuilderPathPlannerCommand("IntakeHub", flipped, false, null)
-             .alongWith(macros.setWantedState(RobotStates.IntakeOn)));
+             .andThen(getAutoBuilderPathPlannerCommand("OverBump", flipped, false, null).alongWith(macros.setWantedState(RobotStates.IntakeOn)))
+             .andThen(getAutoBuilderPathPlannerCommand("IntakeHub", flipped, false, null));
+
              // .alongWith(macros.setWantedState(RobotStates.IntakeOn));
         } catch (Exception exception) {
             DriverStation.reportError(exception.getLocalizedMessage(), exception.getStackTrace());
@@ -265,7 +325,7 @@ public class Autos {
         return runPath("OverBump", !flipped).alongWith(macros.setWantedState(RobotStates.IntakeOn)).andThen(runPath("IntakeBalls", !flipped,new PathConstraints(4.0, 5.2, 3*Math.PI, 4*Math.PI))).andThen(runPath("FRIntakeBalls", !flipped,new PathConstraints(4.0, 5.2, 3*Math.PI, 4*Math.PI))).andThen(runPath("BackToBump", !flipped,new PathConstraints(4.0, 5.2, 3*Math.PI, 4*Math.PI))).andThen(runPath("BackOverBump", !flipped).alongWith(macros.setWantedState(RobotStates.IntakeOff))).andThen(DriveCommands.joystickDriveTagCentric(drive,()->0,()->0,()->drive.getPose()).until(()->DriveCommands.angleController.atGoal())).andThen(macros.setWantedState(RobotStates.RunContinous));//.raceWith(new WaitCommand(8)).andThen(runPath("OverBump", flipped));//.andThen(runPath("OverBump", flipped));//runPath("RightLeave", flipped,AutonConstants.startingRightPose).andThen(DriveCommands.joystickDriveTagCentric(drive,()->0,()->0,()->drive.getPose()).until(()->DriveCommands.angleController.atGoal())).andThen(macros.setWantedState(RobotStates.AutonShoot));//runPath("OverBump",false,AutonConstants.startingRightPose).alongWith(macros.setWantedState(RobotStates.IntakeOn));//.andThen(runPath("IntakeBalls",false)).andThen(runPath("BackToBump",false)).andThen(runPath("BackOverBump",false)).andThen(DriveCommands.joystickDriveTagCentric(drive,()->0,()->0,()->drive.getPose()).until(()->DriveCommands.angleController.atGoal()).andThen(macros.setWantedState(RobotStates.AutonShoot)));
     }
     public Command testAutonThingy(){
-        return runPath("Rand",false,AutonConstants.startingMiddlePose).withDeadline(new WaitCommand(3)).andThen(new InstantCommand(()->macros.setWantedStatePrivate(RobotStates.AutonShoot),macros));//.andThen(macros.setWantedState(RobotStates.Idle));
+        return runPath("Rand",false,AutonConstants.startingMiddlePose).withDeadline(new WaitCommand(3)).andThen(new InstantCommand(()->macros.setWantedStatePrivate(RobotStates.RunContinous),macros));//.andThen(macros.setWantedState(RobotStates.Idle));
         // PathPlannerPath path =(PathPlannerPath.fromPathFile("Rand")).flipPath();//.flipPath();//(DriverStation.getAlliance().get().equals(Alliance.Red))? PathPlannerPath.fromPathFile("Rand").flipPath():PathPlannerPath.fromPathFile("Rand");//getFlippedPath(PathPlannerPath.fromPathFile("Random"));
         // //path.preventFlipping = true;
         // // if(DriverStation.getAlliance().get().equals(Alliance.Red)){
@@ -275,6 +335,13 @@ public class Autos {
         // return new SequentialCommandGroup(
         //    new InstantCommand(()->drive.resetOdometry(new Pose2d(path.getStartingHolonomicPose().get().getTranslation(),path.getStartingHolonomicPose().get().getRotation()))),
         //   drive.driveToPose(new Pose2d(path.getAllPathPoints().get(path.getAllPathPoints().size()-1).position,(path.getAllPathPoints().get(path.getAllPathPoints().size()-1).rotationTarget.rotation().plus(Rotation2d.k180deg)))),//AutoBuilder.followPath(path));
+    }
+    public Command teleDrive(){
+        return drive.driveToPose((flipped)?FlippingUtil.flipFieldPose(new Pose2d(0.405,3.750,Rotation2d.kCW_90deg)):new Pose2d(0.405,3.750,Rotation2d.kCW_90deg)).alongWith(macros.setWantedState(RobotStates.IntakeOn))
+        .andThen(drive.driveToPose((flipped)?FlippingUtil.flipFieldPose(new Pose2d(0.427,2.028,Rotation2d.kCW_90deg)):new Pose2d(0.427,2.028,Rotation2d.kCW_90deg)))
+        .andThen(drive.driveToPose((flipped)?FlippingUtil.flipFieldPose(new Pose2d(2.266,2.147,Rotation2d.kZero)):new Pose2d(2.266,2.147,Rotation2d.kZero)))
+        .andThen(DriveCommands.joystickDriveTagCentric(drive, ()->0, ()->0, drive::getPose))
+        .until(()->DriveCommands.angleAlignedLEDs());
     }
 
     public Command getAutoBuilderPathPlannerCommand(String name, boolean flipped, boolean mirror, PathConstraints constraints) throws Exception {

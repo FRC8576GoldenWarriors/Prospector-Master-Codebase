@@ -80,7 +80,7 @@ public class Vision extends SubsystemBase {
         if(DriverStation.isDisabled()) {
             setLimelightImuMode(IMUMode.SeedInternalIMU);
         } else {
-            setLimelightImuMode(IMUMode.UseInternalWithExternal);
+            setLimelightImuMode(IMUMode.UseExternalIMU);
         }
 
         for (int i = 0; i < io.length; i++) {

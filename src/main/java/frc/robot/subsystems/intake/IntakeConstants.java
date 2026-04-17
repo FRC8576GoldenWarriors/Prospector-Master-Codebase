@@ -37,10 +37,10 @@ public class IntakeConstants {
         public static double intakeUp = 0.34;//0.38;//0.33; //0.36;
 
 
-        public static double intakeDown = 0.0027;//0.09;//0.012;
+        public static double intakeDown = 0.013;//0.0027;//0.09;//0.012;
         public static double agitatePosition =  .22;//.18;//0.25;//0.35;//.145;//.35;//0.25;//0.33;//0.22;
 
-        public static double rollerSpeed = 0.35;//0.5;//1;//0.7;
+        public static double rollerSpeed = 0.45;//0.5;//1;//0.7;
         public static double intakeSoftStop = 0.4;
 
 

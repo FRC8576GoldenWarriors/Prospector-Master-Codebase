@@ -52,11 +52,11 @@ public class DriveConstants {
 
     // Zeroed rotation values for each module, see setup instructions
     public static final Rotation2d frontLeftZeroRotation =
-            Rotation2d.fromRotations(-0.337891);//-0.338867);//0.158936);//0.031982);//0.151367 );//(0.331787); // -0.143311); // new Rotation2d(0.0);
-    public static final Rotation2d frontRightZeroRotation = Rotation2d.fromRotations(0.424072);//-0.130615);//-0.129639);//0.370850);//0.367432);//0.367188 );//(-0.313965); // 0.204834);
+            Rotation2d.fromRotations(-0.337891);//-0.337891);//-0.338867);//0.158936);//0.031982);//0.151367 );//(0.331787); // -0.143311); // new Rotation2d(0.0);
+    public static final Rotation2d frontRightZeroRotation = Rotation2d.fromRotations(0.418457);//0.424072);//-0.130615);//-0.129639);//0.370850);//0.367432);//0.367188 );//(-0.313965); // 0.204834);
     public static final Rotation2d backLeftZeroRotation =
-            Rotation2d.fromRotations(0.471680);//-0.046875);//-0.049072);//0.459961);//-0.192871);//(0.478760); // 0.464355); // 0.453857);
-    public static final Rotation2d backRightZeroRotation = Rotation2d.fromRotations(-0.206299);//0.306641);//0.308350);//0.449219 );//(0.176025); // 0.171875);
+            Rotation2d.fromRotations(0.471680);//0.471680);//-0.046875);//-0.049072);//0.459961);//-0.192871);//(0.478760); // 0.464355); // 0.453857);
+    public static final Rotation2d backRightZeroRotation = Rotation2d.fromRotations(-0.199951);//-0.199951);//-0.206299);//0.306641);//0.308350);//0.449219 );//(0.176025); // 0.171875);
     public static final double gyroTrimDegreesPerRotation = -4.45;
 
     // Device CAN IDs
@@ -79,7 +79,7 @@ public class DriveConstants {
 
     // Drive motor configuration
     public static final int driveMotorCurrentLimit = 40;
-    public static final double wheelRadiusMeters = 0.049;//0.059;//0.051; // In Meters     //Units.inchesToMeters(2);
+    public static final double wheelRadiusMeters = 0.048;//0.049;//0.059;//0.051; // In Meters     //Units.inchesToMeters(2);
     public static final double driveMotorReduction =
             6.75; //     (45.0 * 22.0) / (14.0 * 15.0); // MAXSwerve with 14 pinion teeth and 22 spur teeth
     public static final DCMotor driveGearbox = DCMotor.getNeoVortex(1);

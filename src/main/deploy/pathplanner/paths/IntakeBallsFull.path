@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 0.52338078291815,
-        "y": 5.9124792408066424
+        "x": 6.871304863582444,
+        "y": 1.5012099644128112
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.52338078291815,
-        "y": 5.9124792408066424
+        "x": 6.064365361803085,
+        "y": 2.3081494661921713
       },
       "isLocked": false,
-      "linkedName": "Depot"
+      "linkedName": "OverBump2"
     },
     {
       "anchor": {
-        "x": 2.2556109134045084,
-        "y": 5.9124792408066424
+        "x": 6.871304863582444,
+        "y": 6.428920521945433
       },
       "prevControl": {
-        "x": 1.2556109134045084,
-        "y": 5.9124792408066424
+        "x": 6.182716488730724,
+        "y": 5.5574258600237245
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "FullEnd1"
     }
   ],
   "rotationTargets": [],
@@ -41,14 +41,14 @@
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 0,
-    "rotation": 180.0
+    "velocity": 0.0,
+    "rotation": 90.0
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": 90.0
   },
   "useDefaultConstraints": true
 }

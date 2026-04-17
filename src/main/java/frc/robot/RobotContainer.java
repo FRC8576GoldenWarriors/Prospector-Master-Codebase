@@ -179,14 +179,15 @@ public class RobotContainer {
         drive.setDefaultCommand(DriveCommands.joystickAdvancedDrive(
                drive, () -> -driveController.getLeftY(), () -> -driveController.getLeftX(), () -> -driveController.getRightX()));
 
-        driveController.leftTrigger().whileTrue(DriveCommands.joystickDriveTagCentric(drive, () -> -driveController.getLeftY(), () -> -driveController.getLeftX(), () -> drive.getPose()));//.alongWith(macros.setWantedState(RobotStates.Shoot)));
+        driveController.leftTrigger().or(driveController.leftTrigger().and(()->driveController.rightTrigger().getAsBoolean())).whileTrue(DriveCommands.joystickDriveTagCentric(drive, () -> -driveController.getLeftY(), () -> -driveController.getLeftX(), () -> drive.getPose()).alongWith(macros.setWantedState(RobotStates.Shoot)));//.alongWith(macros.setWantedState(RobotStates.Shoot)));
         // driveController.leftTrigger().onTrue(DriveCommands.joystickDriveTagCentric(drive,()->0,()->0,()->drive.getPose())
         //      .until(()->DriveCommands.angleAligned()));
-        driveController.rightTrigger().onTrue(macros.setWantedState(RobotStates.Shoot));
+        driveController.rightTrigger().whileTrue(macros.setWantedState(RobotStates.Shoot).alongWith(DriveCommands.joystickDriveTagCentric(drive, () -> -driveController.getLeftY(), () -> -driveController.getLeftX(), () -> drive.getPose())));
+        driveController.rightTrigger().and(()->driveController.povLeft().getAsBoolean()).whileTrue(macros.setWantedState(RobotStates.Shoot));
         driveController.rightBumper().onTrue(macros.setWantedState(RobotStates.IntakeOn));
         driveController.leftBumper().onTrue(macros.setWantedState(RobotStates.IntakeOff));
         driveController.x().whileTrue(DriveCommands.joystickDriveAt45(drive, () -> -driveController.getLeftY(), () -> -driveController.getLeftX()));
-
+        driveController.y().whileTrue(autos.teleDrive());
 
         driveController.b().onTrue(macros.setWantedState(RobotStates.Rest));
         driveController.povRight().onTrue(macros.setWantedState(RobotStates.IntakeOut));

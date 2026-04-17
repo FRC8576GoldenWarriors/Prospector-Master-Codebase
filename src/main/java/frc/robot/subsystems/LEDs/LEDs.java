@@ -111,9 +111,9 @@ public class LEDs extends SubsystemBase {
   public void updateInputs() {
     if(DriverStation.isDisabled()) {
       state = LEDStates.Disabled;
-    } else if (!DriveCommands.angleAligned() && RobotContainer.driveController.leftTrigger().getAsBoolean()) {
+    } else if (!DriveCommands.angleAlignedLEDs() && RobotContainer.driveController.leftTrigger().getAsBoolean()) {
       state = LEDStates.OutOfRange;
-    } else if (DriveCommands.angleAligned()) {
+    } else if (DriveCommands.angleAlignedLEDs()) {
       state = LEDStates.ReadyToShoot;
     } else if (RobotContainer.intake.getState() == IntakeStates.Intake) {
       state = LEDStates.GroundIntake;

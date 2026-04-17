@@ -15,6 +15,9 @@ package frc.robot.subsystems.vision;
 
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.units.measure.Temperature;
+
+import static edu.wpi.first.units.Units.Celsius;
 
 import org.littletonrobotics.junction.AutoLog;
 
@@ -27,6 +30,7 @@ public interface VisionIO {
         public int[] tagIds = new int[0];
         public String name = "";
         public double[] cropWindow = new double[0];
+        public Temperature limelightTemperature = Celsius.of(0);
         public Rotation2d limelightRotation = new Rotation2d();
     }
 

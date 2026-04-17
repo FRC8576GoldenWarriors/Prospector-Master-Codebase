@@ -82,7 +82,7 @@ public class VisionIOLimelight implements VisionIO {
         megatag2Subscriber = table.getDoubleArrayTopic("botpose_orb_wpiblue").subscribe(new double[] {});
         tagCornersSubscriber = table.getDoubleArrayTopic("tcornxy").subscribe(new double[] {});
         imuModePublisher = table.getDoubleTopic("imumode_set").publish();
-        LimelightHelpers.SetIMUAssistAlpha(name, 0.01);
+        LimelightHelpers.SetIMUAssistAlpha(name, 0.1);
         //LimelightHelpers.SetIMUAssistAlpha(name, 0.1);
         this.name = name;
     }
@@ -103,6 +103,11 @@ public class VisionIOLimelight implements VisionIO {
 
         IMUData imuData = LimelightHelpers.getIMUData(name);
         inputs.limelightRotation = new Rotation2d(Degrees.of(imuData.robotYaw));
+
+        // LimelightResults limelightResults = LimelightHelpers.getLatestResults(name);
+        // if(limelightResults != null && limelightResults.hardware != null) {
+        //     inputs.limelightTemperature = Celsius.of(limelightResults.hardware.temperature);
+        // }
 
 
         // Read new pose observations from NetworkTables
