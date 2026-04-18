@@ -72,7 +72,7 @@ public class Intake extends SubsystemBase {
   public void periodic() {
     io.updateInputs(inputs);
     Logger.processInputs("Intake", inputs);
-    currentPosition = inputs.leftEncoderRotations.in(Rotations);
+    currentPosition = inputs.leftEncoderRadians.in(Rotations);
     kPDouble = kP.getAsDouble();
     kGDouble = kG.getAsDouble();
     if(kPDouble!=pastkP){
@@ -190,10 +190,10 @@ public void resetPID() {
 }
 @AutoLogOutput (key = "Intake/Near Setpoint")
 public boolean nearSetpoint(){
-  return MathUtil.isNear(PID.getGoal().position, inputs.leftEncoderRotations.in(Rotations), 0.01)||debounce.calculate(inputs.pivotSupplyCurrent.in(Amps)>=9);
+  return MathUtil.isNear(PID.getGoal().position, inputs.leftEncoderRadians.in(Rotations), 0.01)||debounce.calculate(inputs.pivotSupplyCurrent.in(Amps)>=9);
 }
 public boolean nearSetpointAgitate(){
-  return MathUtil.isNear(PID.getGoal().position, inputs.leftEncoderRotations.in(Rotations), 0.1);//||(inputs.pivotSupplyCurrent.in(Amps)>10);
+  return MathUtil.isNear(PID.getGoal().position, inputs.leftEncoderRadians.in(Rotations), 0.1);//||(inputs.pivotSupplyCurrent.in(Amps)>10);
 }
 public IntakeStates getState(){
   return wantedState;

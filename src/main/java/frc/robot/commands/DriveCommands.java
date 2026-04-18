@@ -70,9 +70,12 @@ public class DriveCommands {
     private static final double WHEEL_RADIUS_MAX_VELOCITY = 0.25; // Rad/Sec
     private static final double WHEEL_RADIUS_RAMP_RATE = 0.05; // Rad/Sec^2
     private static final List<Integer> angles = List.of(45, 135, -45, -135);
+    private static final List<Integer> nintyangles = List.of(90,-90);
 
     public static final ProfiledPIDController angleController = new ProfiledPIDController(
                 ANGLE_KP, 0.0, ANGLE_KD, new TrapezoidProfile.Constraints(ANGLE_MAX_VELOCITY, ANGLE_MAX_ACCELERATION));
+        public static final ProfiledPIDController angleStableController = new ProfiledPIDController(
+                5, 0.0, ANGLE_KD, new TrapezoidProfile.Constraints(ANGLE_MAX_VELOCITY, ANGLE_MAX_ACCELERATION));
     public static final PIDController translationController = new PIDController(TRANSLATION_KP, TRANSLATION_KI, TRANSLATION_KD);
 
     private DriveCommands() {}
@@ -204,7 +207,7 @@ public class DriveCommands {
         // Create PID controller
         // ProfiledPIDController angleController = new ProfiledPIDController(
         //         ANGLE_KP, 0.0, ANGLE_KD, new TrapezoidProfile.Constraints(ANGLE_MAX_VELOCITY, ANGLE_MAX_ACCELERATION));
-        angleController.enableContinuousInput(-Math.PI, Math.PI);
+        angleStableController.enableContinuousInput(-Math.PI, Math.PI);
 
         final Rotation2d[] lockedRotation = { new Rotation2d() };
 
@@ -218,8 +221,8 @@ public class DriveCommands {
                 lockedRotation[0] =  Rotation2d.fromDegrees(snappedAngle);
 
                 // Reset PID controller when command starts
-                angleController.reset(drive.getRotation().getRadians());
-                angleController.setGoal(Units.degreesToRadians(snappedAngle));
+                angleStableController.reset(drive.getRotation().getRadians());
+                angleStableController.setGoal(Units.degreesToRadians(snappedAngle));
                 }),
                 // Construct command
                 Commands.run(
@@ -229,7 +232,7 @@ public class DriveCommands {
                                 getLinearVelocityFromJoysticks(xSupplier.getAsDouble(), ySupplier.getAsDouble());
 
                         // Calculate angular speed
-                        double omega = angleController.calculate(
+                        double omega = angleStableController.calculate(
                                 drive.getRotation().getRadians(),
                                 lockedRotation[0].getRadians());
 
@@ -252,8 +255,65 @@ public class DriveCommands {
                         drive)
         )
                 // Reset PID controller when command starts
-                .beforeStarting(() -> angleController.reset(drive.getRotation().getRadians()));
+                .beforeStarting(() -> angleStableController.reset(drive.getRotation().getRadians()));
     }
+    public static Command joystickDriveAt90(
+           Drive drive, DoubleSupplier xSupplier, DoubleSupplier ySupplier) {
+
+        // Create PID controller
+        // ProfiledPIDController angleController = new ProfiledPIDController(
+        //         ANGLE_KP, 0.0, ANGLE_KD, new TrapezoidProfile.Constraints(ANGLE_MAX_VELOCITY, ANGLE_MAX_ACCELERATION));
+        angleStableController.enableContinuousInput(-Math.PI, Math.PI);
+
+        final Rotation2d[] lockedRotation = { new Rotation2d() };
+
+        return Commands.sequence(
+                Commands.runOnce(() -> {
+                // Snap to the nearest 45-degree angle using gyro heading
+                double currentAngle = drive.getRotation().getDegrees();
+                double snappedAngle = nintyangles.stream().min(Comparator.comparingDouble(n -> Math.abs(n - currentAngle)))
+                .orElse(90);
+
+                lockedRotation[0] =  Rotation2d.fromDegrees(snappedAngle);
+
+                // Reset PID controller when command starts
+                angleStableController.reset(drive.getRotation().getRadians());
+                angleStableController.setGoal(Units.degreesToRadians(snappedAngle));
+                }),
+                // Construct command
+                Commands.run(
+                        () -> {
+                        // Get linear velocity
+                        Translation2d linearVelocity =
+                                getLinearVelocityFromJoysticks(xSupplier.getAsDouble(), ySupplier.getAsDouble());
+
+                        // Calculate angular speed
+                        double omega = angleStableController.calculate(
+                                drive.getRotation().getRadians(),
+                                lockedRotation[0].getRadians());
+
+                        // Convert to field relative speeds & send command
+                        ChassisSpeeds speeds = new ChassisSpeeds(
+                                linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
+                                linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
+                                omega);
+
+                        boolean isFlipped = DriverStation.getAlliance().isPresent()
+                                && DriverStation.getAlliance().get() == Alliance.Red;
+
+                        speeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+                                speeds,
+                                isFlipped
+                                        ? drive.getRotation().plus(new Rotation2d(Math.PI))
+                                        : drive.getRotation());
+                        drive.runAdvancedVelocity(speeds);
+                        },
+                        drive)
+        )
+                // Reset PID controller when command starts
+                .beforeStarting(() -> angleStableController.reset(drive.getRotation().getRadians()));
+    }
+
 
        public static Command joystickDriveTagCentric(
             Drive drive, DoubleSupplier xSupplier, DoubleSupplier ySupplier, Supplier<Pose2d> drivePose) {

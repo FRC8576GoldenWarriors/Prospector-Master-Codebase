@@ -142,7 +142,7 @@ public class IntakeKrakenIO implements IntakeIO{
      inputs.rollerRPS = rollerMotorAngularVelocitySignal.getValue();
 
      inputs.leftEncoderConnected = leftEncoder.isConnected();
-     inputs.leftEncoderRotations = Rotations.of(leftEncoder.get());
+     inputs.leftEncoderRadians = Rotations.of(leftEncoder.get());
 
      inputs.rightEncoderConnected = rightEncoder.isConnected();
      inputs.rightEncoderRotations = Rotations.of(rightEncoder.get());

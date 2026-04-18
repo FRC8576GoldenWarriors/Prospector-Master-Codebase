@@ -1,6 +1,7 @@
 package frc.robot.subsystems.intake;
 
 import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
@@ -34,7 +35,7 @@ public interface IntakeIO {
     public boolean leftEncoderConnected = false;
     public boolean rightEncoderConnected = false;
 
-    public Angle leftEncoderRotations = Rotations.of(0);
+    public Angle leftEncoderRadians = Radians.of(0);
 
     public Angle rightEncoderRotations = Rotations.of(0);
 
