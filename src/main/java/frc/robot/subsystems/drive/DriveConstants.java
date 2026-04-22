@@ -25,6 +25,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Frequency;
 
 import org.ironmaple.simulation.drivesims.COTS;
@@ -169,6 +170,8 @@ public class DriveConstants {
     public static final double baseYVisionSTDEV = 0.1;
     public static final double baseThetaVisionSTDEV = 999999;
 
+    public static final Angle pitchGyroZero = Degrees.of(0.527334);
+    public static final Angle rollGyroZero = Degrees.of(0);
     //public static final AprilTagFieldLayout layout = AprilTagFieldLayout.loadField(AprilTagFields.)
 
     // Module 1 Drive kA = 0.016577;

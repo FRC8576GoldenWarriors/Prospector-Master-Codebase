@@ -6,6 +6,7 @@ import static edu.wpi.first.units.Units.Seconds;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -35,12 +36,18 @@ import frc.robot.Macros.RobotStates;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.util.FieldUtil;
+import frc.robot.util.FieldUtil.fieldPosition;
 
 public class Autos {
     private Drive drive;
     private Macros macros;
     private boolean flipped;
     private final LoggedDashboardChooser<Command> autoChooser;
+    @AutoLogOutput
+    public static Pose2d startingPose = new Pose2d();
+    @AutoLogOutput
+    public static boolean inNeutralZone = false;
     public Autos(Drive drive, Macros macros, boolean flipped){
         this.drive = drive;
         this.macros = macros;
@@ -344,6 +351,30 @@ public class Autos {
         .until(()->DriveCommands.angleAlignedLEDs());
     }
 
+    public Command driveOverBump(boolean onRightSide, boolean onAllianceSide){
+        try{
+            return getAutoBuilderPathPlannerCommand("OverBump", onAllianceSide, !onRightSide, new PathConstraints(4.2, 5.0, 3*Math.PI, 4*Math.PI));
+
+    }catch(Exception exception){
+        DriverStation.reportError(exception.getLocalizedMessage(), exception.getStackTrace());
+        return Commands.none();
+    }
+    }
+
+    public Command driveBackOverBump(boolean onRightSide, boolean onAllianceSide){
+       // inNeutralZone = FieldUtil.getFieldPosition(startingPose)==fieldPosition.NeutralZone;
+
+        try{
+
+           return getAutoBuilderPathPlannerCommand("BackOverBump", onAllianceSide, !onRightSide, new PathConstraints(4.2, 5.0, 3*Math.PI, 4*Math.PI));
+
+        }
+        catch (Exception e) {
+            DriverStation.reportError(e.getLocalizedMessage(), e.getStackTrace());
+            return Commands.none();
+        }
+    }
+
     public Command getAutoBuilderPathPlannerCommand(String name, boolean flipped, boolean mirror, PathConstraints constraints) throws Exception {
         return AutoBuilder.followPath(this.getAutoBuilderPathPlannerPath(name, flipped, mirror, constraints));
     }
@@ -580,5 +611,8 @@ public class Autos {
         }
 
         return PathPlannerPath.fromPathPoints(newPathPoints,originalPath.getGlobalConstraints(), originalPath.getGoalEndState().flip());
+    }
+    public void setNeutralZone(){
+        inNeutralZone = FieldUtil.getFieldPosition(startingPose)==fieldPosition.NeutralZone;
     }
 }

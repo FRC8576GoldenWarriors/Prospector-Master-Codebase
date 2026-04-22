@@ -89,20 +89,20 @@ public class GyroIOPigeon2 implements GyroIO {
         pigeon.setYaw(headingDegrees);
     }
 
-    public StatusSignal<LinearAcceleration> getXAccelerationStatusSignal() {
-        return accelerationX;
+    public LinearAcceleration getXAccelerationStatusSignal() {
+        return accelerationX.getValue();
     }
 
-    public StatusSignal<LinearAcceleration> getYAccelerationStatusSignal() {
-        return accelerationY;
+    public LinearAcceleration getYAccelerationStatusSignal() {
+        return accelerationY.getValue();
     }
 
-    public StatusSignal<Angle> getPitchStatusSignal() {
-        return pitch;
+    public Angle getPitchStatusSignal() {
+        return pitch.getValue();
     }
 
-    public StatusSignal<Angle> getRollStatusSignal() {
-        return roll;
+    public Angle getRollStatusSignal() {
+        return roll.getValue();
     }
 
     @Override

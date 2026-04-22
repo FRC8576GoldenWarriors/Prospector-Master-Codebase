@@ -24,6 +24,7 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.DriveFeedforwards;
+import com.pathplanner.lib.util.FlippingUtil;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import com.pathplanner.lib.util.swerve.SwerveSetpoint;
 import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
@@ -111,7 +112,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
             kinematics,
             rawGyroRotation,
             lastModulePositions,
-            (DriverStation.getAlliance().get() == Alliance.Blue) ? Pose2d.kZero : new Pose2d(Translation2d.kZero, Rotation2d.k180deg),
+            (DriverStation.getAlliance().get() == Alliance.Blue) ? new Pose2d(new Translation2d(3,3),Rotation2d.kZero) : FlippingUtil.flipFieldPose(new Pose2d(new Translation2d(3,3), Rotation2d.kZero)),
             VecBuilder.fill(DriveConstants.baseXDriveSTDEV, DriveConstants.baseYDriveSTDEV, DriveConstants.baseThetaDriveSTDEV),
             VecBuilder.fill(DriveConstants.baseXVisionSTDEV, DriveConstants.baseYVisionSTDEV, DriveConstants.baseThetaVisionSTDEV));
 
@@ -139,8 +140,8 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
         modules[2] = new Module(blModuleIO, 2);
         modules[3] = new Module(brModuleIO, 3);
 
-        bumpDetector = new BumpDetector(gyroIO.getPitchStatusSignal(), gyroIO.getRollStatusSignal(), Hertz.of(100));
-        collisionDetector = new CollisionDetector(gyroIO.getXAccelerationStatusSignal(), gyroIO.getYAccelerationStatusSignal(), Hertz.of(100));
+        bumpDetector = new BumpDetector(gyroIO::getPitchStatusSignal, gyroIO::getRollStatusSignal, Hertz.of(100));
+        collisionDetector = new CollisionDetector(gyroIO::getXAccelerationStatusSignal, gyroIO::getYAccelerationStatusSignal, Hertz.of(100));
 
         try{
             pathConfig = RobotConfig.fromGUISettings();

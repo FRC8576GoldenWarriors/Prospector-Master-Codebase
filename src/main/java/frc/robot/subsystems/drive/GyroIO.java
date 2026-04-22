@@ -20,7 +20,6 @@ import edu.wpi.first.units.measure.LinearAcceleration;
 
 import org.littletonrobotics.junction.AutoLog;
 
-import com.ctre.phoenix6.StatusSignal;
 
 public interface GyroIO {
     @AutoLog
@@ -42,19 +41,19 @@ public interface GyroIO {
 
     public default void updateInputs(GyroIOInputs inputs) {}
 
-    public default StatusSignal<LinearAcceleration> getXAccelerationStatusSignal() {
+    public default LinearAcceleration getXAccelerationStatusSignal() {
         return null;
     }
 
-    public default StatusSignal<LinearAcceleration> getYAccelerationStatusSignal() {
+    public default LinearAcceleration getYAccelerationStatusSignal() {
         return null;
     }
 
-    public default StatusSignal<Angle> getPitchStatusSignal() {
+    public default Angle getPitchStatusSignal() {
         return null;
     }
 
-    public default StatusSignal<Angle> getRollStatusSignal() {
+    public default Angle getRollStatusSignal() {
         return null;
     }
 

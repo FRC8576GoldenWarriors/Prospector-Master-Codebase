@@ -8,11 +8,11 @@ import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 
 import java.util.Map.Entry;
+import java.util.function.Supplier;
 
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
-import com.ctre.phoenix6.StatusSignal;
 
 import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.filter.Debouncer;
@@ -26,8 +26,8 @@ import edu.wpi.first.wpilibj.Timer;
 
 public class CollisionDetector {
 
-  private final StatusSignal<LinearAcceleration> xAccelerationSignal;
-  private final StatusSignal<LinearAcceleration> yAccelerationSignal;
+  private final Supplier<LinearAcceleration> xAccelerationSupplier;
+  private final Supplier<LinearAcceleration> yAccelerationSupplier;
 
   private final TimeInterpolatableBuffer<Double> xAccelerationInterpolatableBuffer;
   private final TimeInterpolatableBuffer<Double> yAccelerationInterpolatableBuffer;
@@ -54,9 +54,9 @@ public class CollisionDetector {
   private final LoggedNetworkNumber xJoltThreshold = new LoggedNetworkNumber("tunableXJoltThreshold", 400);
   private final LoggedNetworkNumber yJoltThreshold = new LoggedNetworkNumber("tunableYJoltThreshold", 400);
 
-  public CollisionDetector(StatusSignal<LinearAcceleration> xAccelerationSignal, StatusSignal<LinearAcceleration> yAccelerationSignal, Frequency updateFrequency) {
-    this.xAccelerationSignal = xAccelerationSignal;
-    this.yAccelerationSignal = yAccelerationSignal;
+  public CollisionDetector(Supplier<LinearAcceleration> xAccelerationSupplier, Supplier<LinearAcceleration> yAccelerationSupplier, Frequency updateFrequency) {
+    this.xAccelerationSupplier = xAccelerationSupplier;
+    this.yAccelerationSupplier = yAccelerationSupplier;
 
     this.xAccelerationInterpolatableBuffer = TimeInterpolatableBuffer.createDoubleBuffer(accelerationBufferHistorySeconds.in(Seconds));
     this.yAccelerationInterpolatableBuffer = TimeInterpolatableBuffer.createDoubleBuffer(accelerationBufferHistorySeconds.in(Seconds));
@@ -74,8 +74,8 @@ public class CollisionDetector {
   public void updateInputs() {
     double currentTime = Timer.getFPGATimestamp();
 
-    xAccelerationInterpolatableBuffer.addSample(currentTime, xAccelerationSignal.getValue().in(MetersPerSecondPerSecond));
-    yAccelerationInterpolatableBuffer.addSample(currentTime, yAccelerationSignal.getValue().in(MetersPerSecondPerSecond));
+    xAccelerationInterpolatableBuffer.addSample(currentTime, xAccelerationSupplier.get().in(MetersPerSecondPerSecond));
+    yAccelerationInterpolatableBuffer.addSample(currentTime, yAccelerationSupplier.get().in(MetersPerSecondPerSecond));
 
     if(xAccelerationInterpolatableBuffer.getInternalBuffer().size() > 1) {
       Entry<Double, Double> start = xAccelerationInterpolatableBuffer.getInternalBuffer().firstEntry();

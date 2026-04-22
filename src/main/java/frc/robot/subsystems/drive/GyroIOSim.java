@@ -1,8 +1,12 @@
 package frc.robot.subsystems.drive;
 
+import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.LinearAcceleration;
 import frc.robot.util.SparkUtil;
 import org.ironmaple.simulation.drivesims.GyroSimulation;
 
@@ -22,5 +26,26 @@ public class GyroIOSim implements GyroIO {
 
         inputs.odometryYawTimestamps = SparkUtil.getSimulationOdometryTimeStamps();
         inputs.odometryYawPositions = gyroSimulation.getCachedGyroReadings();
+    }
+    public LinearAcceleration getXAccelerationStatusSignal() {
+        return MetersPerSecondPerSecond.of(0);
+    }
+
+    public LinearAcceleration getYAccelerationStatusSignal() {
+        return MetersPerSecondPerSecond.of(0);
+    }
+
+    public Angle getPitchStatusSignal() {
+
+        return DriveConstants.pitchGyroZero;
+        //return Degrees.of(0);
+    }
+
+    public Angle getRollStatusSignal() {
+        return DriveConstants.rollGyroZero;
+    }
+
+    public void resetHeading(double headingDegrees) {
+        gyroSimulation.setRotation(Rotation2d.fromDegrees(headingDegrees));
     }
 }

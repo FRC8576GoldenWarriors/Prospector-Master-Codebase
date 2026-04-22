@@ -8,6 +8,7 @@ import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -35,11 +36,31 @@ public class FieldUtil{
             return fieldPosition.NeutralZone;
         }
     }
+    public static fieldPosition getFieldPosition(Pose2d currentPose){
+        if(currentPose.getX()<FieldUtilConstants.blueAllianceXThreshold.in(Meters)){
+            return fieldPosition.BlueZone;
+        }else if(currentPose.getX()>FieldUtilConstants.redAlliannceXThreshold.in(Meters)){
+            return fieldPosition.RedZone;
+        }else{
+            return fieldPosition.NeutralZone;
+        }
+    }
     @AutoLogOutput (key = "FieldUtil/On Alliance Side")
     public static boolean isOnAllianceSide(){
         fieldPosition position = getFieldPosition();
         Alliance currentAlliance = DriverStation.getAlliance().orElse(Alliance.Blue);
         return (position==fieldPosition.BlueZone&&currentAlliance==Alliance.Blue)||(position==fieldPosition.RedZone&&currentAlliance==Alliance.Red);
+    }
+    @AutoLogOutput(key="FieldUtil/In Neutral Zeon")
+    public static boolean inNeutralZone(){
+        return (getFieldPosition()==fieldPosition.NeutralZone);
+    }
+
+    public static boolean onRightSide(){
+        if(DriverStation.getAlliance().orElse(Alliance.Blue)==Alliance.Blue){
+            return poseSupplier.get().getY()<Units.inchesToMeters(158.32);
+        }
+        return poseSupplier.get().getY()>Units.inchesToMeters(158.32);
     }
 
 }

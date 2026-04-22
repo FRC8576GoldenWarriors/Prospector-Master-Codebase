@@ -16,6 +16,7 @@ package frc.robot;
 import static edu.wpi.first.units.Units.*;
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -33,15 +34,19 @@ import frc.robot.Macros.RobotStates;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.LEDs.LEDs;
 import frc.robot.subsystems.Shooter.Shooter;
+import frc.robot.subsystems.Shooter.ShooterIO;
 import frc.robot.subsystems.Shooter.ShooterIOKraken;
 import frc.robot.subsystems.Shooter.ShooterUtil;
 import frc.robot.subsystems.ShooterHood.ShooterHood;
+import frc.robot.subsystems.ShooterHood.ShooterHoodIO;
 import frc.robot.subsystems.ShooterHood.ShooterHoodIOKraken;
 //import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.intake.IntakeIO;
 import frc.robot.subsystems.intake.IntakeKrakenIO;
 import frc.robot.subsystems.transport.Transport;
+import frc.robot.subsystems.transport.TransportIO;
 import frc.robot.subsystems.transport.TransportIOKraken;
 import frc.robot.subsystems.vision.*;
 import frc.robot.subsystems.vision.VisionIO.IMUMode;
@@ -139,8 +144,17 @@ public class RobotContainer {
                 new VisionIOPhotonVisionSim(
                         camera0Name, robotToCamera0.minus(Pose3d.kZero), driveSimulation::getSimulatedDriveTrainPose),
                 new VisionIOPhotonVisionSim(
-                        camera1Name, robotToCamera1.minus(Pose3d.kZero), driveSimulation::getSimulatedDriveTrainPose));
+                        camera1Name, robotToCamera1.minus(Pose3d.kZero), driveSimulation::getSimulatedDriveTrainPose),
+                new VisionIOPhotonVisionSim(
+                        camera2Name, robotToCamera2.minus(Pose3d.kZero), driveSimulation::getSimulatedDriveTrainPose),
+                new VisionIOPhotonVisionSim(
+                        camera3Name, robotToCamera3.minus(Pose3d.kZero), driveSimulation::getSimulatedDriveTrainPose));
                 //shooter = null;
+                intake = new Intake(new IntakeIO(){});
+                shooter = new Shooter(new ShooterIO(){});
+                shooterHood = new ShooterHood(new ShooterHoodIO(){});
+                transport = new Transport(new TransportIO(){});
+                macros = new Macros(shooter, shooterHood, transport, intake);
                 autos = new Autos(drive,macros,DriverStation.getAlliance().orElse(Alliance.Blue)==Alliance.Red);
                 fieldUtil = new FieldUtil(drive::getPose);
                 break;
@@ -154,10 +168,14 @@ public class RobotContainer {
                         new ModuleIO() {},
                         new ModuleIO() {},
                         (pose) -> {});
-                 vision = new Vision(drive, drive::getChassisSpeeds, new VisionIO() {}, new VisionIO() {});
-                autos = null;
-               shooter = null;
-               fieldUtil = null;
+                vision = new Vision(drive, drive::getChassisSpeeds, new VisionIO() {}, new VisionIO() {});
+                intake = new Intake(new IntakeIO(){});
+                shooter = new Shooter(new ShooterIO(){});
+                shooterHood = new ShooterHood(new ShooterHoodIO(){});
+                transport = new Transport(new TransportIO(){});
+                macros = new Macros(shooter, shooterHood, transport, intake);
+                autos = new Autos(drive,macros,DriverStation.getAlliance().orElse(Alliance.Blue)==Alliance.Red);
+                fieldUtil = null;
                 break;
         }
 
@@ -173,6 +191,8 @@ public class RobotContainer {
      * and then passing it to a {@link edu.wpi.first.wpilibj2.command.button.JoystickButton}.
      */
     private void configureButtonBindings() {
+         Trigger allianceSideBumpTrigger = new Trigger(()->driveController.x().getAsBoolean()&&!autos.inNeutralZone);
+         Trigger neutralSideBumpTrigger = new Trigger(()->driveController.x().getAsBoolean()&&autos.inNeutralZone);
         // Default command, normal field-relative drive
         // drive.setDefaultCommand(DriveCommands.joystickDrive(
         //        drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> -controller.getRightX()));
@@ -186,7 +206,12 @@ public class RobotContainer {
         driveController.rightTrigger().and(()->driveController.povLeft().getAsBoolean()).whileTrue(macros.setWantedState(RobotStates.Shoot));
         driveController.rightBumper().onTrue(macros.setWantedState(RobotStates.IntakeOn));
         driveController.leftBumper().onTrue(macros.setWantedState(RobotStates.IntakeOff));
-        driveController.x().whileTrue(DriveCommands.joystickDriveAt45(drive, () -> -driveController.getLeftY(), () -> -driveController.getLeftX()));
+        // driveController.x().onTrue(Commands.runOnce(()->autos.startingPose = drive.getPose()).andThen(new InstantCommand(()->autos.setNeutralZone())).andThen(autos.driveOverBump(FieldUtil.onRightSide(), FieldUtil.isOnAllianceSide()).alongWith(macros.setWantedState(RobotStates.IntakeOn))));
+        // driveController.povLeft().onTrue(Commands.runOnce(()->Autos.startingPose = drive.getPose()).andThen(new InstantCommand(()->autos.setNeutralZone())).andThen(autos.driveBackOverBump(FieldUtil.onRightSide(), FieldUtil.isOnAllianceSide()).alongWith(macros.setWantedState(RobotStates.IntakeOn))));
+        allianceSideBumpTrigger.onTrue(autos.driveOverBump(FieldUtil.onRightSide(), fieldUtil.isOnAllianceSide()).beforeStarting(new InstantCommand(()->autos.startingPose =drive.getPose()).andThen(new InstantCommand(()->autos.setNeutralZone()))));
+        neutralSideBumpTrigger.onTrue(autos.driveBackOverBump(FieldUtil.onRightSide(), fieldUtil.isOnAllianceSide()).beforeStarting(new InstantCommand(()->autos.startingPose =drive.getPose()).andThen(new InstantCommand(()->autos.setNeutralZone()))));
+
+       // driveController.x().whileTrue(DriveCommands.joystickDriveAt45(drive, () -> -driveController.getLeftY(), () -> -driveController.getLeftX()));
         //driveController.y().whileTrue(autos.teleDrive());
         driveController.y().whileTrue(DriveCommands.joystickDriveAt90(drive,() -> -driveController.getLeftY(), () -> -driveController.getLeftX()));
         driveController.b().onTrue(macros.setWantedState(RobotStates.Rest));
@@ -285,8 +310,15 @@ public class RobotContainer {
                             MetersPerSecond.of(1.5),
                             Degrees.of(-60)))));
         }
+        //resetHeadingTrigger.onTrue(resetGyro);
         resetHeadingTrigger.onTrue(new InstantCommand(() -> {
             //Pose2d currentPose = drive.getPose();
+            if(Robot.isSimulation()){
+                drive.resetOdometry(
+                        (DriverStation.getAlliance().orElse(Alliance.Blue)==Alliance.Blue)?driveSimulation
+                                .getSimulatedDriveTrainPose():driveSimulation.getSimulatedDriveTrainPose());
+            }
+            else{
             Pose2d resetPose = new Pose2d(
                     new Translation2d(Inches.of(651.22).in(Meters), Inches.of(317.69).in(Meters)),//new Translation2d(currentPose.getX(), currentPose.getY()),
                     (DriverStation.getAlliance().get() == Alliance.Red) ? Rotation2d.k180deg : Rotation2d.kZero);
@@ -294,6 +326,7 @@ public class RobotContainer {
             vision.setRobotOrientations(resetPose.getRotation().getDegrees(), false);
             vision.setLimelightImuMode(IMUMode.SeedInternalIMU);
             vision.setRobotOrientations(resetPose.getRotation().getDegrees(), true);
+            }
         }));
         // controller.povUp().onTrue(new InstantCommand(() -> {
         //     Pose2d resetPose = new Pose2d(
