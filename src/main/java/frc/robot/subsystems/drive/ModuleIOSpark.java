@@ -118,17 +118,18 @@ public ModuleIOSpark(int module) {
         updateFrequency,
         absoluteTurnEncoderAngleSignal);
         switch(module){
+
                                 case 0:
-                                invertedDriveValue = false;
+                                        invertedDriveValue = true;
                                 break;
-                                 case 1:
-                                 invertedDriveValue = false;
-                                 break;
+                                case 1:
+                                        invertedDriveValue = true;
+                                break;
                                 case 2:
-                                invertedDriveValue = true;
+                                        invertedDriveValue = false;
                                 break;
                                 case 3:
-                                invertedDriveValue = true;
+                                        invertedDriveValue = true;
                                 break;
                         }
 
