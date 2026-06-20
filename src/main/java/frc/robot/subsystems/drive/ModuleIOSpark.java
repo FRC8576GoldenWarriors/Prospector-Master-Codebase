@@ -30,7 +30,6 @@ import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
-import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
@@ -81,7 +80,7 @@ public ModuleIOSpark(int module) {
             case 2 -> backLeftZeroRotation;
             case 3 -> backRightZeroRotation;
             default -> new Rotation2d();};
-        driveSpark = new SparkFlex(
+        driveSpark = new SparkMax(
                 switch (module) {
                     case 0 -> frontLeftDriveCanId;
                     case 1 -> frontRightDriveCanId;
@@ -134,7 +133,7 @@ public ModuleIOSpark(int module) {
                         }
 
         // Configure drive motor
-        var driveConfig = new SparkFlexConfig();
+        var driveConfig = new SparkMaxConfig();
         driveConfig
                 .idleMode(IdleMode.kBrake)
                 .smartCurrentLimit(driveMotorCurrentLimit)

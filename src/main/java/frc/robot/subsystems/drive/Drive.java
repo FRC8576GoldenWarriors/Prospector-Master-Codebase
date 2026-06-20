@@ -16,19 +16,13 @@ package frc.robot.subsystems.drive;
 import static edu.wpi.first.units.Units.*;
 import static frc.robot.subsystems.drive.DriveConstants.*;
 
-import com.ctre.phoenix6.hardware.CANrange;
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
-import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.pathfinding.Pathfinding;
-import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.FlippingUtil;
-import com.pathplanner.lib.util.PathPlannerLogging;
-import com.pathplanner.lib.util.swerve.SwerveSetpoint;
-import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
 
+import choreo.trajectory.SwerveSample;
 import edu.wpi.first.hal.FRCNetComm.tInstances;
 import edu.wpi.first.hal.FRCNetComm.tResourceType;
 import edu.wpi.first.hal.HAL;
@@ -50,7 +44,6 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -59,12 +52,12 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 import frc.robot.Constants.Mode;
+import frc.robot.autos.AutonConstants;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.util.poseEstimation.BumpDetector;
-import frc.robot.util.poseEstimation.CollisionDetector;
 import frc.robot.util.poseEstimation.EnhancedSwervePoseEstimator;
-import frc.robot.util.LocalADStarAK;
+import frc.robot.util.AllianceUtil;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.Stack;
@@ -81,15 +74,13 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
     private final GyroIO gyroIO;
     private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
     public static BumpDetector bumpDetector;
-    private final CollisionDetector collisionDetector;
+
     private final Stack<Rotation2d> gyroStack;
     private final Module[] modules = new Module[4]; // FL, FR, BL, BR
     private final SysIdRoutine sysId;
     private final Alert gyroDisconnectedAlert =
             new Alert("Disconnected gyro, using kinematics as fallback.", AlertType.kError);
     public static RobotConfig pathConfig;
-    private CANrange range;
-    private CANrange range2;
 
     private Field2d field;
 
@@ -112,7 +103,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
             kinematics,
             rawGyroRotation,
             lastModulePositions,
-            (DriverStation.getAlliance().get() == Alliance.Blue) ? new Pose2d(new Translation2d(3,3),Rotation2d.kZero) : FlippingUtil.flipFieldPose(new Pose2d(new Translation2d(3,3), Rotation2d.kZero)),
+            (AllianceUtil.onBlueAlliance()) ? new Pose2d(new Translation2d(3,3),Rotation2d.kZero) : FlippingUtil.flipFieldPose(new Pose2d(new Translation2d(3,3), Rotation2d.kZero)),
             VecBuilder.fill(DriveConstants.baseXDriveSTDEV, DriveConstants.baseYDriveSTDEV, DriveConstants.baseThetaDriveSTDEV),
             VecBuilder.fill(DriveConstants.baseXVisionSTDEV, DriveConstants.baseYVisionSTDEV, DriveConstants.baseThetaVisionSTDEV));
 
@@ -124,8 +115,6 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
 
     private final Consumer<Pose2d> resetSimulationPoseCallBack;
 
-    private final SwerveSetpointGenerator setpointGenerator;
-    private SwerveSetpoint previousSetpoint;
     public Drive(
             GyroIO gyroIO,
             ModuleIO flModuleIO,
@@ -141,47 +130,21 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
         modules[3] = new Module(brModuleIO, 3);
 
         bumpDetector = new BumpDetector(gyroIO::getPitchStatusSignal, gyroIO::getRollStatusSignal, Hertz.of(100));
-        collisionDetector = new CollisionDetector(gyroIO::getXAccelerationStatusSignal, gyroIO::getYAccelerationStatusSignal, Hertz.of(100));
 
-        try{
-            pathConfig = RobotConfig.fromGUISettings();
-        }catch(Exception e){
-            e.printStackTrace();
-        }
         // Usage reporting for swerve template
         HAL.report(tResourceType.kResourceType_RobotDrive, tInstances.kRobotDriveSwerve_AdvantageKit);
 
         // Start odometry thread
         SparkOdometryThread.getInstance().start();
 
-        // Configure AutoBuilder for PathPlanner
-        AutoBuilder.configure(
-                this::getPose,//this::getPose,
-                this::resetOdometry,
-                this::getChassisSpeeds,
-                this::runVelocity,//this::runAutonVelocity,
-                new PPHolonomicDriveController(new PIDConstants(7.5, 0.0, 0.0), new PIDConstants(5.0, 0.0, 0.0)),
-                this.pathConfig,
-                () -> false,
-                this);
-        Pathfinding.setPathfinder(new LocalADStarAK());
-        PathPlannerLogging.setLogActivePathCallback((activePath) -> {
-            Logger.recordOutput("Odometry/Trajectory", activePath.toArray(new Pose2d[activePath.size()]));
-        });
-        PathPlannerLogging.setLogTargetPoseCallback((targetPose) -> {
-            Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose);
-        });
-
         // Configure SysId
         sysId = new SysIdRoutine(
                 new SysIdRoutine.Config(
                         null, null, null, (state) -> Logger.recordOutput("Drive/SysIdState", state.toString())),
                 new SysIdRoutine.Mechanism((voltage) -> runCharacterization(voltage.in(Volts)), null, this));
-                range = new CANrange(1);
-                range2 = new CANrange(2);
 
-        setpointGenerator = new SwerveSetpointGenerator(this.pathConfig, Units.rotationsPerMinuteToRadiansPerSecond(maxSpeedRPM));
-        previousSetpoint = new SwerveSetpoint(getChassisSpeeds(), getModuleStates(), DriveFeedforwards.zeros(4));
+        // setpointGenerator = new SwerveSetpointGenerator(this.pathConfig, Units.rotationsPerMinuteToRadiansPerSecond(maxSpeedRPM));
+        // previousSetpoint = new SwerveSetpoint(getChassisSpeeds(), getModuleStates(), DriveFeedforwards.zeros(4));
         gyroStack = new Stack<>();
         gyroStack.push((gyroInputs.yawPosition));
         field = new Field2d();
@@ -328,9 +291,49 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
         Logger.recordOutput("SwerveStates/SetpointsOptimized", setpointStates);
     }
 
-        public void runAutonVelocity(ChassisSpeeds speeds) {
+    public void runPathPlannerVelocity(ChassisSpeeds speeds) {
         // Calculate module setpoints
-        if(DriverStation.getAlliance().orElse(Alliance.Blue)==Alliance.Red){
+        Logger.recordOutput("SwerveStates/Chassis Speeds", speeds);
+        speeds = ChassisSpeeds.discretize(speeds, 0.02);
+        SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(speeds);
+        SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, maxSpeedMetersPerSec);
+
+        // Log unoptimized setpoints
+        Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
+        Logger.recordOutput("SwerveChassisSpeeds/Setpoints", speeds);
+
+        // Send setpoints to modules
+        for (int i = 0; i < 4; i++) {
+            modules[i].runSetpoint(setpointStates[i]);
+        }
+
+        // Log optimized setpoints (runSetpoint mutates each state)
+        Logger.recordOutput("SwerveStates/SetpointsOptimized", setpointStates);
+    }
+
+    public void runChoreoVelocity(SwerveSample sample) {
+        Pose2d pose = getPose();
+
+        Logger.recordOutput("Choreo/Target Pose", sample.getPose());
+        Logger.recordOutput("Choreo/Raw Target Speeds Field Relative", sample.getChassisSpeeds());
+
+        ChassisSpeeds feedback =
+            new ChassisSpeeds(
+                AutonConstants.ChoreoConstants.xTranslationController.calculate(pose.getX(), sample.x),
+                AutonConstants.ChoreoConstants.yTranslationController.calculate(pose.getY(), sample.y),
+                AutonConstants.ChoreoConstants.rotationController.calculate(pose.getRotation().getRadians(), sample.heading));
+
+        ChassisSpeeds speeds =
+            ChassisSpeeds.fromFieldRelativeSpeeds(
+                sample.getChassisSpeeds().plus(feedback), getPose().getRotation());
+        Logger.recordOutput("Choreo/Target Speeds Robot Relative", speeds);
+
+        runPathPlannerVelocity(speeds);
+    }
+
+    public void runAutonVelocity(ChassisSpeeds speeds) {
+        // Calculate module setpoints
+        if(AllianceUtil.onRedAlliance()){
             speeds = new ChassisSpeeds(-speeds.vxMetersPerSecond,-speeds.vyMetersPerSecond,speeds.omegaRadiansPerSecond);
         }
         Logger.recordOutput("SwerveStates/Chassis Speeds", speeds);
@@ -422,7 +425,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
     }
     @AutoLogOutput(key = "Drive/DistanceToHub")
     public double getDistanceFromHub(){
-        Translation2d hubPose = DriverStation.getAlliance().get().equals(Alliance.Red)?new Translation2d(VisionConstants.aprilTagLayout.getFieldLength()-Units.inchesToMeters(182.11),VisionConstants.aprilTagLayout.getFieldWidth()-Units.inchesToMeters(121.25+26.22)):new Translation2d(Units.inchesToMeters(182.11),VisionConstants.aprilTagLayout.getFieldWidth()-Units.inchesToMeters(121.25+26.22));
+        Translation2d hubPose = AllianceUtil.onRedAlliance()?new Translation2d(VisionConstants.aprilTagLayout.getFieldLength()-Units.inchesToMeters(182.11),VisionConstants.aprilTagLayout.getFieldWidth()-Units.inchesToMeters(121.25+26.22)):new Translation2d(Units.inchesToMeters(182.11),VisionConstants.aprilTagLayout.getFieldWidth()-Units.inchesToMeters(121.25+26.22));
 
         Translation2d robotPose = getPose().getTranslation();
 

@@ -21,8 +21,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -31,6 +29,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Macros.RobotStates;
+import frc.robot.autos.Autos;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.LEDs.LEDs;
 import frc.robot.subsystems.Shooter.Shooter;
@@ -50,6 +49,7 @@ import frc.robot.subsystems.transport.TransportIO;
 import frc.robot.subsystems.transport.TransportIOKraken;
 import frc.robot.subsystems.vision.*;
 import frc.robot.subsystems.vision.VisionIO.IMUMode;
+import frc.robot.util.AllianceUtil;
 import frc.robot.util.FieldUtil;
 
 import org.ironmaple.simulation.SimulatedArena;
@@ -118,7 +118,7 @@ public class RobotContainer {
                 shooterHood = new ShooterHood(new ShooterHoodIOKraken());
                 transport = new Transport(new TransportIOKraken());
                 macros = new Macros(shooter, shooterHood, transport, intake);
-                autos = new Autos(drive,macros,DriverStation.getAlliance().orElse(Alliance.Blue)==Alliance.Red);
+                autos = new Autos(drive, macros);
                 fieldUtil = new FieldUtil(drive::getPose);
                 //intake = new Intake(new IntakeKrakenIO());
                 break;
@@ -155,7 +155,7 @@ public class RobotContainer {
                 shooterHood = new ShooterHood(new ShooterHoodIO(){});
                 transport = new Transport(new TransportIO(){});
                 macros = new Macros(shooter, shooterHood, transport, intake);
-                autos = new Autos(drive,macros,DriverStation.getAlliance().orElse(Alliance.Blue)==Alliance.Red);
+                autos = new Autos(drive, macros);
                 fieldUtil = new FieldUtil(drive::getPose);
                 break;
             default:
@@ -174,7 +174,7 @@ public class RobotContainer {
                 shooterHood = new ShooterHood(new ShooterHoodIO(){});
                 transport = new Transport(new TransportIO(){});
                 macros = new Macros(shooter, shooterHood, transport, intake);
-                autos = new Autos(drive,macros,DriverStation.getAlliance().orElse(Alliance.Blue)==Alliance.Red);
+                autos = new Autos(drive, macros);
                 fieldUtil = null;
                 break;
         }
@@ -283,7 +283,7 @@ public class RobotContainer {
                         new Pose2d(drive.getPose().getTranslation(), new Rotation2d())); // zero gyro
         driveController.start().onTrue(Commands.runOnce(resetGyro, drive).ignoringDisable(true).alongWith(new InstantCommand(() -> {
                 vision.setLimelightImuMode(IMUMode.SeedInternalIMU);
-                vision.setRobotOrientations((DriverStation.getAlliance().orElse(Alliance.Blue)==Alliance.Blue)?drive.getPose().getRotation().getDegrees():drive.getPose().getRotation().getDegrees()+180, true);
+                vision.setRobotOrientations((AllianceUtil.onBlueAlliance())?drive.getPose().getRotation().getDegrees():drive.getPose().getRotation().getDegrees()+180, true);
         })));
 
         // Example Coral Placement Code
@@ -315,13 +315,13 @@ public class RobotContainer {
             //Pose2d currentPose = drive.getPose();
             if(Robot.isSimulation()){
                 drive.resetOdometry(
-                        (DriverStation.getAlliance().orElse(Alliance.Blue)==Alliance.Blue)?driveSimulation
+                        (AllianceUtil.onBlueAlliance())?driveSimulation
                                 .getSimulatedDriveTrainPose():driveSimulation.getSimulatedDriveTrainPose());
             }
             else{
             Pose2d resetPose = new Pose2d(
                     new Translation2d(Inches.of(651.22).in(Meters), Inches.of(317.69).in(Meters)),//new Translation2d(currentPose.getX(), currentPose.getY()),
-                    (DriverStation.getAlliance().get() == Alliance.Red) ? Rotation2d.k180deg : Rotation2d.kZero);
+                    (AllianceUtil.onRedAlliance()) ? Rotation2d.k180deg : Rotation2d.kZero);
             drive.resetGyro(resetPose);
             vision.setRobotOrientations(resetPose.getRotation().getDegrees(), false);
             vision.setLimelightImuMode(IMUMode.SeedInternalIMU);

@@ -122,8 +122,8 @@ public class DriveConstants {
     public static final double turnKd = 0.008;
     public static final double turnSimP = 8.0;
     public static final double turnSimD = 0;//.02;//0.04;
-    public static final double turnKs = 0;//2.44234;
-    public static final double turnKv = 0;//0.67128;
+    public static final double turnKs = 2.44234;//2.44234;
+    public static final double turnKv = 0.67128;//0.67128;
     public static final double turnPIDMinInput = 0; // Radians
     public static final double turnPIDMaxInput = 2 * Math.PI; // Radians
     public static final double angularKa = 0;
