@@ -24,6 +24,7 @@ import com.pathplanner.lib.util.FlippingUtil;
 import com.pathplanner.lib.util.PathPlannerLogging;
 
 import choreo.auto.AutoFactory;
+import choreo.auto.AutoRoutine;
 import choreo.auto.AutoTrajectory;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -35,6 +36,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -47,7 +49,7 @@ import frc.robot.Macros.RobotStates;
 import frc.robot.commands.DriveCommands;
 
 import frc.robot.subsystems.drive.Drive;
-import frc.robot.util.AllianceUtil;
+import frc.robot.util.ChoreoUtil;
 import frc.robot.util.FieldUtil;
 import frc.robot.util.FieldUtil.fieldPosition;
 import frc.robot.util.LocalADStarAK;
@@ -69,17 +71,17 @@ public class Autos {
     @AutoLogOutput
     public static boolean inNeutralZone = false;
 
-    private final Alert pathplannerRobotConfigAlert = new Alert("Unable to load PathPlanner RobotConfig from GUI.", AlertType.kWarning);
+
+    private static final Alert pathplannerRobotConfigAlert = new Alert("Unable to load PathPlanner RobotConfig from GUI.", AlertType.kWarning);
 
     // All Choreo Trajectories
-
-    private AutoTrajectory overBump;
 
     static {
         try {
             pathplannerRobotConfig = RobotConfig.fromGUISettings();
         } catch(Exception e) {
-
+            pathplannerRobotConfigAlert.set(true);
+            DriverStation.reportWarning("Unable to load PathPlanner RobotConfig from GUI.", e.getStackTrace());
         }
     }
 
@@ -88,7 +90,9 @@ public class Autos {
         this.drive = drive;
         this.macros = macros;
 
-        this.shouldFlip = AllianceUtil.getRedAllianceSupplier();
+        boolean alliance = DriverStation.getAlliance().get() == Alliance.Red;
+        Logger.recordOutput("AutoAllianceFlipper", alliance);
+        this.shouldFlip = () -> alliance;
 
         configurePathPlanner(drive);
         configureChoreo(drive);
@@ -98,21 +102,26 @@ public class Autos {
         CommandScheduler.getInstance().schedule(PathfindingCommand.warmupCommand(), autoFactory.warmupCmd());
 
         addSysIDRoutines();
-        addAutonRoutines();
+        addPathPlannerAutonRoutines();
+        //addChoreoAutonRoutines();
+
 
         //SmartDashboard.putData("Auto Chooser", autoChooser.getSendableChooser());
     }
 
+    private Command getAlignCommand() {
+        return Commands.run(() -> DriveCommands.joystickDriveTagCentric(drive, () -> 0, () -> 0, drive::getPose), drive).until(DriveCommands::angleAligned);
+    }
+
+    private Command getShooterCommand() {
+        return Commands.runEnd(() -> macros.setWantedState(RobotStates.RunContinous),() -> macros.setWantedState(RobotStates.Idle), macros).withTimeout(Seconds.of(6));
+    }
+
+    private Command getIntakeCommand() {
+        return Commands.run(() -> macros.setWantedState(RobotStates.IntakeOn), macros);
+    }
+
     private final void configurePathPlanner(Drive drivetrain) {
-
-        try {
-            //pathplannerRobotConfig = RobotConfig.fromGUISettings();
-            pathplannerRobotConfigAlert.set(false);
-        } catch(Exception e) {
-            pathplannerRobotConfigAlert.set(true);
-            DriverStation.reportWarning("Unable to load PathPlanner RobotConfig from GUI.", e.getStackTrace());
-        }
-
         AutoBuilder.configure(
                 drivetrain::getPose,
                 drivetrain::resetOdometry,
@@ -147,7 +156,6 @@ public class Autos {
                 (traj, edge) -> {
                     Logger.recordOutput("Choreo/Active Trajectory", traj.getPoses());
                 });
-
     }
 
     private final void addSysIDRoutines() {
@@ -161,43 +169,413 @@ public class Autos {
         autoChooser.addOption("Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
     }
 
-    private final void addAutonRoutines() {
+    private final void addPathPlannerAutonRoutines() {
         //autoChooser.addOption("Left Depot Auton", leftAuton());
-        autoChooser.addDefaultOption("Left Depot Auton", autoLeftDepot());
-
-        autoChooser.addOption("Right Steal", autoRightLeave());
-        autoChooser.addOption("Middle Leave Shoot", testAutonThingy());
-        autoChooser.addOption("Left Steal", autoLeftLeave());
-        autoChooser.addOption("Left Steal Long", autoLeftStealLong());
-        autoChooser.addOption("Right Steal Long", autoRightStealLong());
-        autoChooser.addOption("Right Double Dip", rightDoubleSteal());
-        autoChooser.addOption("Right Full Side Auton", autoRightFull());
-        autoChooser.addOption("Left Full Side Auton", autoLeftFull());
-        autoChooser.addOption("Middle Depot", autoMiddleDepot());
+        autoChooser.addDefaultOption("Left Depot Auton", autoLeftDepot()); //
+        autoChooser.addOption("Right Steal", autoRightLeave()); //
+        autoChooser.addOption("Middle Leave Shoot", testAutonThingy()); // Good
+        autoChooser.addOption("Left Steal", autoLeftLeave()); //
+        autoChooser.addOption("Left Steal Long", autoLeftStealLong()); //
+        autoChooser.addOption("Right Steal Long", autoRightStealLong()); //
+        autoChooser.addOption("Right Double Dip", rightDoubleSteal()); // Good
+        autoChooser.addOption("Right Full Side Auton", autoRightFull()); // Good
+        autoChooser.addOption("Left Full Side Auton", autoLeftFull()); // Good
+        autoChooser.addOption("Middle Depot", autoMiddleDepot()); //
+        autoChooser.addOption("Disruption", disruption());
+        autoChooser.addOption("Right Tear Drop", rightTearDrop());
+        autoChooser.addOption("Left Tear Drop", leftTearDrop());
     }
 
-    public Command rightLeave(){
-        return runPath("OverBump", shouldFlip.getAsBoolean(),AutonConstants.startingRightPose)
-        .alongWith(macros.setWantedState(RobotStates.IntakeOn))
-        .andThen(runPath("FRIntakeBalls", shouldFlip.getAsBoolean(),new PathConstraints(4.0, 5.2, 3*Math.PI, 4*Math.PI)))
-        .andThen(runPath("BackToBump", shouldFlip.getAsBoolean(),new PathConstraints(4.0, 5.2, 3*Math.PI, 4*Math.PI)))
-        .andThen(runPath("BackOverBump", shouldFlip.getAsBoolean()).alongWith(macros.setWantedState(RobotStates.IntakeOff)))
-        .andThen(DriveCommands.joystickDriveTagCentric(drive,()->0,()->0,()->drive.getPose()).until(()->DriveCommands.angleController.atGoal()))
-        .andThen(macros.setWantedState(RobotStates.RunContinous).withDeadline(new WaitCommand(6)));
-        //.andThen();//andThen(runPath("IntakeBalls", shouldFlip.getAsBoolean(),new PathConstraints(4.0, 5.2, 3*Math.PI, 4*Math.PI))).//.raceWith(new WaitCommand(8)).andThen(runPath("OverBump", shouldFlip.getAsBoolean()));//.andThen(runPath("OverBump", shouldFlip.getAsBoolean()));//runPath("RightLeave", shouldFlip.getAsBoolean(),AutonConstants.startingRightPose).andThen(DriveCommands.joystickDriveTagCentric(drive,()->0,()->0,()->drive.getPose()).until(()->DriveCommands.angleController.atGoal())).andThen(macros.setWantedState(RobotStates.AutonShoot));//runPath("OverBump",false,AutonConstants.startingRightPose).alongWith(macros.setWantedState(RobotStates.IntakeOn));//.andThen(runPath("IntakeBalls",false)).andThen(runPath("BackToBump",false)).andThen(runPath("BackOverBump",false)).andThen(DriveCommands.joystickDriveTagCentric(drive,()->0,()->0,()->drive.getPose()).until(()->DriveCommands.angleController.atGoal()).andThen(macros.setWantedState(RobotStates.AutonShoot)));
+    private final void addChoreoAutonRoutines() {
+        String identifier = "[Choreo] ";
+        autoChooser.addOption(identifier + "Right Single Steal", rightLeave(autoFactory).cmd());
+        autoChooser.addOption(identifier + "Left Single Steal", leftLeave(autoFactory).cmd());
+
+        autoChooser.addOption(identifier + "Right Double Steal", rightDoubleSteal(autoFactory).cmd());
+        autoChooser.addOption(identifier + "Left Double Steal", leftDoubleSteal(autoFactory).cmd());
+
+        autoChooser.addOption(identifier + "Middle Leave Shoot", middleLeaveShoot(autoFactory).cmd());
+
+        autoChooser.addOption(identifier + "Right Full Pass", rightFullPass(autoFactory).cmd());
+        autoChooser.addOption(identifier + "Left Full Pass", leftFullPass(autoFactory).cmd());
+
+        autoChooser.addOption(identifier + "Middle Depot", middleDepot(autoFactory).cmd());
     }
 
-    // public Command rightLeave(AutoFactory autoFactory) {
-    //     AutoRoutine routine = autoFactory.newRoutine("Right Leave");
-
-    //     routine.active().onTrue(
-    //       Commands.sequence(
-
-    //       )
-    //     );
-
-    //     return routine.cmd();
+    // public Command rightLeave(){
+    //     return runPath("OverBump", shouldFlip.getAsBoolean(),AutonConstants.startingRightPose)
+    //     .alongWith(macros.setWantedState(RobotStates.IntakeOn))
+    //     .andThen(runPath("FRIntakeBalls", shouldFlip.getAsBoolean(),new PathConstraints(4.0, 5.2, 3*Math.PI, 4*Math.PI)))
+    //     .andThen(runPath("BackToBump", shouldFlip.getAsBoolean(),new PathConstraints(4.0, 5.2, 3*Math.PI, 4*Math.PI)))
+    //     .andThen(runPath("BackOverBump", shouldFlip.getAsBoolean()).alongWith(macros.setWantedState(RobotStates.IntakeOff)))
+    //     .andThen(DriveCommands.joystickDriveTagCentric(drive,()->0,()->0,()->drive.getPose()).until(()->DriveCommands.angleController.atGoal()))
+    //     .andThen(macros.setWantedState(RobotStates.RunContinous).withDeadline(new WaitCommand(6)));
+    //     //.andThen();//andThen(runPath("IntakeBalls", shouldFlip.getAsBoolean(),new PathConstraints(4.0, 5.2, 3*Math.PI, 4*Math.PI))).//.raceWith(new WaitCommand(8)).andThen(runPath("OverBump", shouldFlip.getAsBoolean()));//.andThen(runPath("OverBump", shouldFlip.getAsBoolean()));//runPath("RightLeave", shouldFlip.getAsBoolean(),AutonConstants.startingRightPose).andThen(DriveCommands.joystickDriveTagCentric(drive,()->0,()->0,()->drive.getPose()).until(()->DriveCommands.angleController.atGoal())).andThen(macros.setWantedState(RobotStates.AutonShoot));//runPath("OverBump",false,AutonConstants.startingRightPose).alongWith(macros.setWantedState(RobotStates.IntakeOn));//.andThen(runPath("IntakeBalls",false)).andThen(runPath("BackToBump",false)).andThen(runPath("BackOverBump",false)).andThen(DriveCommands.joystickDriveTagCentric(drive,()->0,()->0,()->drive.getPose()).until(()->DriveCommands.angleController.atGoal()).andThen(macros.setWantedState(RobotStates.AutonShoot)));
     // }
+
+    public AutoRoutine rightLeave(AutoFactory autoFactory) {
+        String routineName = "Right Leave";
+
+        AutoRoutine routine = autoFactory.newRoutine(routineName);
+
+        AutoTrajectory overBump = ChoreoUtil.loadAndFlipMidlineAndDiagonal(routine, routineName, "OverBump");
+        AutoTrajectory leave = ChoreoUtil.loadAndFlipMidlineAndDiagonal(routine, routineName, "Leave");
+        AutoTrajectory backOverBump = ChoreoUtil.loadAndFlipMidlineAndDiagonal(routine, routineName, "BackOverBump");
+
+        routine.active().onTrue(
+          Commands.sequence(
+            overBump.resetOdometry(),
+            overBump.cmd()
+          )
+        );
+
+        overBump.active().onTrue(getIntakeCommand());
+
+        overBump.chain(leave);
+        leave.chain(backOverBump);
+
+        backOverBump.done().onTrue(
+            Commands.sequence(
+                getAlignCommand(),
+                getShooterCommand()
+            )
+        );
+
+        return routine;
+    }
+
+    public AutoRoutine leftLeave(AutoFactory autoFactory) {
+        String routineName = "Left Leave";
+
+        AutoRoutine routine = autoFactory.newRoutine(routineName);
+
+        AutoTrajectory overBump = ChoreoUtil.loadAndFlipMidlineAndDiagonal(routine, routineName, "OverBump");
+        AutoTrajectory leave = ChoreoUtil.loadAndFlipMidlineAndDiagonal(routine, routineName, "Leave");
+        AutoTrajectory backOverBump = ChoreoUtil.loadAndFlipMidlineAndDiagonal(routine, routineName, "BackOverBump");
+
+        routine.active().onTrue(
+          Commands.sequence(
+            overBump.resetOdometry(),
+            overBump.cmd()
+          )
+        );
+
+        overBump.active().onTrue(getIntakeCommand());
+
+        overBump.chain(leave);
+        leave.chain(backOverBump);
+
+        backOverBump.done().onTrue(
+            Commands.sequence(
+                getAlignCommand(),
+                getShooterCommand()
+            )
+        );
+
+        return routine;
+    }
+
+    public AutoRoutine rightDoubleSteal(AutoFactory autoFactory) {
+        String routineName = "Right Double Steal";
+
+        AutoRoutine routine = autoFactory.newRoutine(routineName);
+
+        AutoTrajectory overBump = ChoreoUtil.loadAndFlipMidlineAndDiagonal(routine, routineName, "OverBump");
+        AutoTrajectory leave = ChoreoUtil.loadAndFlipMidlineAndDiagonal(routine, routineName, "Leave");
+        AutoTrajectory backOverBump = ChoreoUtil.loadAndFlipMidlineAndDiagonal(routine, routineName, "BackOverBump");
+        AutoTrajectory hubLeave = ChoreoUtil.loadAndFlipMidlineAndDiagonal(routine, routineName, "HubLeave");
+        AutoTrajectory overBumpAgain = ChoreoUtil.loadAndFlipMidlineAndDiagonal(routine, routineName, "OverBump");
+        AutoTrajectory backOverBumpAgain = ChoreoUtil.loadAndFlipMidlineAndDiagonal(routine, routineName, "BackOverBump");
+
+        routine.active().onTrue(
+            Commands.sequence(
+                overBump.resetOdometry(),
+                overBump.cmd()
+            )
+        );
+
+        overBump.active().onTrue(getIntakeCommand());
+
+        overBump.chain(leave);
+        leave.chain(backOverBump);
+
+        backOverBump.done().onTrue(
+            Commands.sequence(
+                getAlignCommand(),
+                getShooterCommand(),
+                overBumpAgain.cmd()
+            )
+        );
+
+        overBumpAgain.chain(hubLeave);
+        hubLeave.chain(backOverBumpAgain);
+
+        backOverBumpAgain.done().onTrue(
+            Commands.sequence(
+                getAlignCommand(),
+                getShooterCommand()
+            )
+        );
+
+        return routine;
+
+    }
+
+    public AutoRoutine leftDoubleSteal(AutoFactory autoFactory) {
+        String routineName = "Left Double Steal";
+
+        AutoRoutine routine = autoFactory.newRoutine(routineName);
+
+        AutoTrajectory overBump = ChoreoUtil.loadAndFlipMidlineAndDiagonal(routine, routineName, "OverBump");
+        AutoTrajectory leave = ChoreoUtil.loadAndFlipMidlineAndDiagonal(routine, routineName, "Leave");
+        AutoTrajectory backOverBump = ChoreoUtil.loadAndFlipMidlineAndDiagonal(routine, routineName, "BackOverBump");
+        AutoTrajectory hubLeave = ChoreoUtil.loadAndFlipMidlineAndDiagonal(routine, routineName, "HubLeave");
+        AutoTrajectory overBumpAgain = ChoreoUtil.loadAndFlipMidlineAndDiagonal(routine, routineName, "OverBump");
+        AutoTrajectory backOverBumpAgain = ChoreoUtil.loadAndFlipMidlineAndDiagonal(routine, routineName, "BackOverBump");
+
+        routine.active().onTrue(
+            Commands.sequence(
+                overBump.resetOdometry(),
+                overBump.cmd()
+            )
+        );
+
+        overBump.active().onTrue(getIntakeCommand());
+
+        overBump.chain(leave);
+        leave.chain(backOverBump);
+
+        backOverBump.done().onTrue(
+            Commands.sequence(
+                getAlignCommand(),
+                getShooterCommand(),
+                overBumpAgain.cmd()
+            )
+        );
+
+        overBumpAgain.chain(hubLeave);
+        hubLeave.chain(backOverBumpAgain);
+
+        backOverBumpAgain.done().onTrue(
+            Commands.sequence(
+                getAlignCommand(),
+                getShooterCommand()
+            )
+        );
+
+        return routine;
+
+    }
+
+    public AutoRoutine middleLeaveShoot(AutoFactory autoFactory) {
+        String routineName = "Middle Leave Shoot";
+        AutoRoutine routine = autoFactory.newRoutine(routineName);
+
+        AutoTrajectory middleLeave = ChoreoUtil.loadAndFlipMidlineAndDiagonal(routine, routineName, "MiddleLeave");
+
+        routine.active().onTrue(
+            Commands.sequence(
+                middleLeave.resetOdometry(),
+                middleLeave.cmd()
+            )
+        );
+
+        middleLeave.done().onTrue(getShooterCommand());
+
+        return routine;
+
+    }
+
+    public AutoRoutine rightFullPass(AutoFactory autoFactory) {
+        String routineName = "Right Full Pass";
+        AutoRoutine routine = autoFactory.newRoutine(routineName);
+
+        AutoTrajectory overBump = ChoreoUtil.loadAndFlipMidlineAndDiagonal(routine, routineName, "OverBump");
+        AutoTrajectory fullPass = ChoreoUtil.loadAndFlipMidlineAndDiagonal(routine, routineName, "FullPass");
+        AutoTrajectory backOverBump = ChoreoUtil.flipAcrossMidline(ChoreoUtil.loadAndFlipMidlineAndDiagonal(routine, routineName, "BackOverBump"), true);
+
+        routine.active().onTrue(
+            Commands.sequence(
+                overBump.resetOdometry(),
+                overBump.cmd()
+            )
+        );
+
+        overBump.active().onTrue(
+            getIntakeCommand()
+        );
+
+        overBump.chain(fullPass);
+        fullPass.chain(backOverBump);
+
+        backOverBump.done().onTrue(
+            Commands.sequence(
+                getAlignCommand(),
+                getShooterCommand()
+            )
+        );
+
+        return routine;
+
+    }
+
+    public AutoRoutine leftFullPass(AutoFactory autoFactory) {
+        String routineName = "Left Full Pass";
+        AutoRoutine routine = autoFactory.newRoutine(routineName);
+
+        AutoTrajectory overBump = ChoreoUtil.loadAndFlipMidlineAndDiagonal(routine, routineName, "OverBump");
+        AutoTrajectory fullPass = ChoreoUtil.loadAndFlipMidlineAndDiagonal(routine, routineName, "FullPass");
+        AutoTrajectory backOverBump = ChoreoUtil.flipAcrossMidline(ChoreoUtil.loadAndFlipMidlineAndDiagonal(routine, routineName, "BackOverBump"), true);
+
+        routine.active().onTrue(
+            Commands.sequence(
+                overBump.resetOdometry(),
+                overBump.cmd()
+            )
+        );
+
+        overBump.active().onTrue(
+            getIntakeCommand()
+        );
+
+        overBump.chain(fullPass);
+        fullPass.chain(backOverBump);
+
+        backOverBump.done().onTrue(
+            Commands.sequence(
+                getAlignCommand(),
+                getShooterCommand()
+            )
+        );
+
+        return routine;
+
+    }
+
+    public AutoRoutine leftRightTest(AutoFactory autofactory) {
+        String routineName = "LRTest";
+        AutoRoutine routine = autofactory.newRoutine(routineName);
+
+        AutoTrajectory leftRightTest = ChoreoUtil.loadAndFlipMidlineAndDiagonal(routine, routineName, "LeftRightTest");
+        routine.active().onTrue(
+            Commands.sequence(
+                leftRightTest.resetOdometry(),
+                leftRightTest.cmd()
+            )
+        );
+
+        return routine;
+    }
+
+    public AutoRoutine frontBackTurnTest(AutoFactory autofactory) {
+        String routineName = "FBTTest";
+        AutoRoutine routine = autofactory.newRoutine(routineName);
+
+        AutoTrajectory frontBackTurnTest = ChoreoUtil.loadAndFlipMidlineAndDiagonal(routine, routineName, "FrontBackTurnTest");
+        routine.active().onTrue(
+            Commands.sequence(
+                frontBackTurnTest.resetOdometry(),
+                frontBackTurnTest.cmd()
+            )
+        );
+
+        return routine;
+    }
+
+    public AutoRoutine arcFollowTest(AutoFactory autofactory) {
+        String routineName = "AFTest";
+        AutoRoutine routine = autofactory.newRoutine(routineName);
+
+        AutoTrajectory arcFollowTest = ChoreoUtil.loadAndFlipMidlineAndDiagonal(routine, routineName, "ArcFollowTest");
+        routine.active().onTrue(
+            Commands.sequence(
+                arcFollowTest.resetOdometry(),
+                arcFollowTest.cmd()
+            )
+        );
+
+        return routine;
+    }
+
+    public AutoRoutine middleDepot(AutoFactory autoFactory) {
+        String routineName = "Middle Depot";
+        AutoRoutine routine = autoFactory.newRoutine(routineName);
+
+        AutoTrajectory middleDepot = ChoreoUtil.loadAndFlipMidlineAndDiagonal(routine, routineName, "MiddleDepot");
+        AutoTrajectory DepotScore = ChoreoUtil.loadAndFlipMidlineAndDiagonal(routine, routineName, "DepotScore");
+
+        routine.active().onTrue(
+            Commands.sequence(
+                middleDepot.resetOdometry(),
+                middleDepot.cmd()
+            )
+        );
+
+        middleDepot.active().onTrue(
+            getIntakeCommand()
+        );
+
+        middleDepot.chain(DepotScore);
+
+        DepotScore.done().onTrue(
+            Commands.sequence(
+                getAlignCommand(),
+                getShooterCommand()
+            )
+        );
+
+        return routine;
+    }
+
+    public Command disruption() {
+        try {
+            return getAutoBuilderPathPlannerCommand("OverBump", shouldFlip.getAsBoolean(), true, null)
+            .andThen(getAutoBuilderPathPlannerCommand("Disrupt", shouldFlip.getAsBoolean(), true, null))
+            .alongWith(macros.setWantedState(RobotStates.IntakeOn))
+            .andThen(getAutoBuilderPathPlannerCommand("BackOverBump", shouldFlip.getAsBoolean(), true, null))
+            .andThen(DriveCommands.joystickDriveTagCentric(drive,()->0,()->0,()->drive.getPose())
+            .until(()->DriveCommands.angleController.atGoal()))
+            .andThen(macros.setWantedState(RobotStates.RunContinous))
+            .alongWith(new WaitCommand(6));
+        } catch (Exception exception) {
+            DriverStation.reportError(exception.getLocalizedMessage(), exception.getStackTrace());
+            return Commands.none();
+        }
+    }
+
+    public Command rightTearDrop() {
+        try {
+            return getAutoBuilderPathPlannerCommand("OverBump", shouldFlip.getAsBoolean(), false, null)
+            .alongWith(macros.setWantedState(RobotStates.IntakeOn))
+            .andThen(getAutoBuilderChoreoCommand("Leave", shouldFlip.getAsBoolean(), false, null))
+            .andThen(getAutoBuilderPathPlannerCommand("BackOverBump", shouldFlip.getAsBoolean(), false, null))
+            .andThen(DriveCommands.joystickDriveTagCentric(drive,()->0,()->0,()->drive.getPose())
+            .until(()->DriveCommands.angleController.atGoal()))
+            .andThen(macros.setWantedState(RobotStates.RunContinous))
+            .alongWith(new WaitCommand(6));
+        } catch (Exception e) {
+             DriverStation.reportError(e.getLocalizedMessage(), e.getStackTrace());
+            return Commands.none();
+        }
+    }
+
+    public Command leftTearDrop() {
+        try {
+            return getAutoBuilderPathPlannerCommand("OverBump", shouldFlip.getAsBoolean(), true, null)
+            .alongWith(macros.setWantedState(RobotStates.IntakeOn))
+            .andThen(getAutoBuilderChoreoCommand("Leave", shouldFlip.getAsBoolean(), true, null))
+            .andThen(getAutoBuilderPathPlannerCommand("BackOverBump", shouldFlip.getAsBoolean(), true, null))
+            .andThen(DriveCommands.joystickDriveTagCentric(drive,()->0,()->0,()->drive.getPose())
+            .until(()->DriveCommands.angleController.atGoal()))
+            .andThen(macros.setWantedState(RobotStates.RunContinous))
+            .alongWith(new WaitCommand(6));
+        } catch (Exception e) {
+             DriverStation.reportError(e.getLocalizedMessage(), e.getStackTrace());
+            return Commands.none();
+        }
+    }
+
+
 
     public Command rightDoubleSteal(){
         try {
@@ -491,6 +869,27 @@ public class Autos {
 
     public PathPlannerPath getAutoBuilderPathPlannerPath(String pathName, boolean flipped, boolean mirror, PathConstraints constraints) throws Exception {
         PathPlannerPath path = PathPlannerPath.fromPathFile(pathName);
+        if(flipped) {
+            path = path.flipPath();
+           // path = path.mirrorPath();
+        }
+
+        if(mirror) {
+            path = path.mirrorPath();
+        }
+
+        if(constraints != null)
+            return new PathPlannerPath(path.getWaypoints(), constraints, path.getIdealStartingState(), path.getGoalEndState());
+        else
+            return path;
+    }
+
+    public Command getAutoBuilderChoreoCommand(String pathName, boolean flipped, boolean mirror, PathConstraints constraints) throws Exception {
+        return AutoBuilder.followPath(this.getAutoBuilderChoreoPath(pathName, flipped, mirror, constraints));
+    }
+
+    public PathPlannerPath getAutoBuilderChoreoPath(String pathName, boolean flipped, boolean mirror, PathConstraints constraints) throws Exception {
+        PathPlannerPath path = PathPlannerPath.fromChoreoTrajectory(pathName);
         if(flipped) {
             path = path.flipPath();
            // path = path.mirrorPath();

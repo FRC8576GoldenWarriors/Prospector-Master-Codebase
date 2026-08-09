@@ -20,7 +20,6 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.pathfinding.Pathfinding;
-import com.pathplanner.lib.util.FlippingUtil;
 
 import choreo.trajectory.SwerveSample;
 import edu.wpi.first.hal.FRCNetComm.tInstances;
@@ -43,6 +42,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -103,7 +103,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
             kinematics,
             rawGyroRotation,
             lastModulePositions,
-            (AllianceUtil.onBlueAlliance()) ? new Pose2d(new Translation2d(3,3),Rotation2d.kZero) : FlippingUtil.flipFieldPose(new Pose2d(new Translation2d(3,3), Rotation2d.kZero)),
+            (DriverStation.getAlliance().get() == Alliance.Blue) ? new Pose2d(new Translation2d(3,3),Rotation2d.kZero) : new Pose2d(new Translation2d(3, 3), Rotation2d.k180deg),
             VecBuilder.fill(DriveConstants.baseXDriveSTDEV, DriveConstants.baseYDriveSTDEV, DriveConstants.baseThetaDriveSTDEV),
             VecBuilder.fill(DriveConstants.baseXVisionSTDEV, DriveConstants.baseYVisionSTDEV, DriveConstants.baseThetaVisionSTDEV));
 
@@ -161,6 +161,10 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
             module.periodic();
         }
         odometryLock.unlock();
+
+        Logger.recordOutput("AllianceUtil/Alliance", AllianceUtil.getCurrentAlliance());
+        Logger.recordOutput("AllianceUtil/OnBlue?", AllianceUtil.getBlueAllianceSupplier());
+        Logger.recordOutput("AllianceUtil/OnRed?", AllianceUtil.getRedAllianceSupplier());
 
         // Stop moving when disabled
         if (DriverStation.isDisabled()) {

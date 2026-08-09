@@ -272,12 +272,12 @@ else{
 
   public void runContinous(){
     if(DriverStation.isAutonomous()){
-    if(m_ShooterHood.atSetpoint()){
-      m_shooter.setWantedState(ShooterStates.SHOOT);
-    }
-    if(m_shooter.isRevved()&&m_ShooterHood.atSetpoint()){
-    //m_ShooterHood.setWantedState(ShooterHoodStates.Shoot);
-    m_Transport.setWantedState(TransportStates.TransportIn);
+      if(m_ShooterHood.atSetpoint()){
+        m_shooter.setWantedState(ShooterStates.SHOOT);
+      }
+      if(m_shooter.isRevved()&&m_ShooterHood.atSetpoint()){
+      //m_ShooterHood.setWantedState(ShooterHoodStates.Shoot);
+      m_Transport.setWantedState(TransportStates.TransportIn);
      }
      //else{
     //   m_Transport.setWantedState(TransportStates.Idle);
@@ -293,6 +293,7 @@ else{
     }
 
     m_ShooterHood.setWantedState(ShooterHoodStates.Shoot);
+
     }else{
       wantedState = RobotStates.Idle;
     }

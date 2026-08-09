@@ -57,8 +57,8 @@ import com.pathplanner.lib.path.Waypoint;
 
 public class DriveCommands {
     private static final double DEADBAND = 0.1;
-    private static final double ANGLE_KP = 10;//5.0;
-    private static final double ANGLE_KD = 0.4;
+    private static final double ANGLE_KP = 11;//5.0;
+    private static final double ANGLE_KD = 0.2;
     private static final double TRANSLATION_KP = 7.5;
     private static final double TRANSLATION_KI = 0.0;
     private static final double TRANSLATION_KD = 0.0;
@@ -333,7 +333,7 @@ public class DriveCommands {
         // Construct command
         Command alignCommand =  Commands.run(
                         () -> {
-                                if(DriverStation.isAutonomous()&&angleController.getP()==10){
+                                if(DriverStation.isAutonomous()&&angleController.getP()==11){
                                         angleController.setP(5.0);
                                 }
                                 else if(DriverStation.isTeleop()&&angleController.getP()==5){

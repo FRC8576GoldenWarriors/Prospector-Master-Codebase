@@ -1,0 +1,84 @@
+{
+ "name":"ChoreoConfig",
+ "version":2,
+ "type":"Swerve",
+ "variables":{
+  "expressions":{},
+  "poses":{}
+ },
+ "config":{
+  "frontLeft":{
+   "x":{
+    "exp":"10.875 in",
+    "val":0.276225
+   },
+   "y":{
+    "exp":"10.875 in",
+    "val":0.276225
+   }
+  },
+  "backLeft":{
+   "x":{
+    "exp":"-10.875 in",
+    "val":-0.276225
+   },
+   "y":{
+    "exp":"10.875 in",
+    "val":0.276225
+   }
+  },
+  "mass":{
+   "exp":"63.9565 kg",
+   "val":63.9565
+  },
+  "inertia":{
+   "exp":"3.6339 kg m ^ 2",
+   "val":3.6339
+  },
+  "gearing":{
+   "exp":"6.75",
+   "val":6.75
+  },
+  "radius":{
+   "exp":"0.048 m",
+   "val":0.048
+  },
+  "vmax":{
+   "exp":"4656 RPM",
+   "val":487.57517983713586
+  },
+  "tmax":{
+   "exp":"1.14 N * m",
+   "val":1.14
+  },
+  "cof":{
+   "exp":"2.255",
+   "val":2.255
+  },
+  "bumper":{
+   "front":{
+    "exp":"16.5 in",
+    "val":0.4191
+   },
+   "side":{
+    "exp":"16.75 in",
+    "val":0.42545
+   },
+   "back":{
+    "exp":"16.75 in",
+    "val":0.42545
+   }
+  },
+  "differentialTrackWidth":{
+   "exp":"22 in",
+   "val":0.5588
+  }
+ },
+ "generationFeatures":[],
+ "codegen":{
+  "root":"../C:/Users/Yash Panjala/Documents/FRC/FRC Programming/REBUILT/Offseason Projects/Prospector-Updated/Prospector-Master-Codebase/src/main/deploy/choreo",
+  "genVars":true,
+  "genTrajData":true,
+  "useChoreoLib":true
+ }
+}

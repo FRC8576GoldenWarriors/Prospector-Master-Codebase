@@ -62,7 +62,7 @@ public class ShooterHoodIOKraken implements ShooterHoodIO {
         hoodMotor.getConfigurator().apply(hoodConfig);
 
         hoodEncoder.setInverted(ShooterHoodConstants.encoderInverted);
-        hoodMotor.setPosition(hoodEncoder.get());
+        hoodMotor.setPosition(0);
     }
 
     @Override

@@ -6,9 +6,9 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -100,7 +100,7 @@ public class ShooterHood extends SubsystemBase {
                 break;
 
             case Shoot:
-            Logger.recordOutput("ShooterHood/Calculated Angle", Units.degreesToRotations((ShooterHoodUtil.calculateHoodAngleDegrees(RobotContainer.drive.getDistanceFromHub())-22)*4));//0.2126;//getWantedPosition(1);
+            //Logger.recordOutput("ShooterHood/Calculated Angle", Units.degreesToRotations((ShooterHoodUtil.calculateHoodAngleDegrees(RobotContainer.drive.getDistanceFromHub())-22)*4));//0.2126;//getWantedPosition(1);
             wantedAnglePosition = RobotContainer.shooterUtil.getAngle(RobotContainer.drive.getDistanceFromHub()); //Units.degreesToRotations((ShooterHoodUtil.calculateHoodAngleDegrees(RobotContainer.drive.getDistanceFromHub())-22)*4);
                 PIDVoltage = PID.calculate(currentAnglePosition,wantedAnglePosition);
                 FFVoltage = FF.calculate(wantedAnglePosition, 1.0);
@@ -152,7 +152,9 @@ public class ShooterHood extends SubsystemBase {
 
   @AutoLogOutput (key = "ShooterHood/At Setpoint")
   public boolean atSetpoint(){
-    return (inputs.encoderValue_Radians.in(Rotations))>(PID.getSetpoint()-0.05)&&(inputs.encoderValue_Radians.in(Rotations))<(PID.getSetpoint()+0.05);
+    return MathUtil.isNear(PID.getSetpoint(), inputs.motor_encoder_value.in(Rotations), 0.02);
+    //return MathUtil.isNear(PID.getSetpoint(), inputs.encoderValue_Radians.in(Rotations), 0.05);
+    // return (inputs.encoderValue_Radians.in(Rotations))>(PID.getSetpoint()-0.05)&&(inputs.encoderValue_Radians.in(Rotations))<(PID.getSetpoint()+0.05);
   }
 
   public double getAngle(){

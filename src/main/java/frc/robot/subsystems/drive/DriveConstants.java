@@ -27,6 +27,8 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Frequency;
+import edu.wpi.first.units.measure.Mass;
+import edu.wpi.first.units.measure.MomentOfInertia;
 
 import org.ironmaple.simulation.drivesims.COTS;
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
@@ -80,10 +82,10 @@ public class DriveConstants {
 
     // Drive motor configuration
     public static final int driveMotorCurrentLimit = 40;
-    public static final double wheelRadiusMeters = 0.015;//0.048;//0.049;//0.059;//0.051; // In Meters     //Units.inchesToMeters(2);
+    public static final double wheelRadiusMeters = 0.047;//0.048;//0.049;//0.059;//0.051; // In Meters     //Units.inchesToMeters(2);
     public static final double driveMotorReduction =
             6.75; //     (45.0 * 22.0) / (14.0 * 15.0); // MAXSwerve with 14 pinion teeth and 22 spur teeth
-    public static final DCMotor driveGearbox = DCMotor.getNeoVortex(1);
+    public static final DCMotor driveGearbox = DCMotor.getNEO(1);
 
     // Drive encoder configuration
     public static final double driveEncoderPositionFactor =
@@ -106,7 +108,7 @@ public class DriveConstants {
     public static final boolean turnInverted = true;
     public static final int turnMotorCurrentLimit = 40;
     public static final double turnMotorReduction = 150.0 / 7; // 9424.0 / 203.0;
-    public static final DCMotor turnGearbox = DCMotor.getNeo550(1);
+    public static final DCMotor turnGearbox = DCMotor.getNEO(1);
 
     // Turn encoder configuration
     public static final boolean turnEncoderInverted = true;
@@ -115,8 +117,8 @@ public class DriveConstants {
     public static final Frequency updateFrequency = Hertz.of(50);
 
     // kA Constants
-    public static final double module_average_kA_Drive = 0.3;
-    public static final double module_average_kA_Turn = 0.574665;
+    public static final double module_average_kA_Drive = 0.198316666667;
+    public static final double module_average_kA_Turn = 0.009695925;
     // Turn PID configuration
     public static final double turnKp = 8;//6;//8;//6;//4.0; // 2.0; // 1.6; // 0.8; // 0.575; // 0.01; // 2.0;
     public static final double turnKd = 0.008;
@@ -128,9 +130,9 @@ public class DriveConstants {
     public static final double turnPIDMaxInput = 2 * Math.PI; // Radians
     public static final double angularKa = 0;
     // PathPlanner configuration
-    public static final double robotMassKg = 74.088;
-    public static final double robotMOI =
-            robotMassKg * (trackWidth / 2) * (module_average_kA_Turn / module_average_kA_Drive); // 6.883; // 6.883;
+    public static final Mass robotMassKg = Kilograms.of(63.9565);
+    public static final MomentOfInertia robotMOI =
+            KilogramSquareMeters.of(robotMassKg.in(Kilogram) * (driveBaseRadius) * (wheelRadiusMeters / driveMotorReduction) * (module_average_kA_Turn / module_average_kA_Drive)); // 6.883; // 6.883;
     public static final double wheelCOF = 1.2;
     public static final RobotConfig ppConfig = new RobotConfig(
             robotMassKg,
@@ -146,7 +148,7 @@ public class DriveConstants {
 
     public static final DriveTrainSimulationConfig mapleSimConfig = DriveTrainSimulationConfig.Default()
             .withCustomModuleTranslations(moduleTranslations)
-            .withRobotMass(Kilogram.of(robotMassKg))
+            .withRobotMass(robotMassKg)
             .withGyro(COTS.ofPigeon2())
             .withSwerveModule(new SwerveModuleSimulationConfig(
                     driveGearbox,

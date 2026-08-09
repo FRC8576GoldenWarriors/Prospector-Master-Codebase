@@ -26,7 +26,7 @@ public class AllianceUtil {
         return DriverStation.getAlliance().isPresent();
     };
 
-    @AutoLogOutput
+    @AutoLogOutput(key="AllianceUtil/Alliance")
     public static Alliance getCurrentAlliance() {
         return allianceSupplier.get();
     }
