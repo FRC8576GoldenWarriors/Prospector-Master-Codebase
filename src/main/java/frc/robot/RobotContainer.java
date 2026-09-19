@@ -204,6 +204,7 @@ public class RobotContainer {
         //      .until(()->DriveCommands.angleAligned()));
         driveController.rightTrigger().whileTrue(macros.setWantedState(RobotStates.Shoot).alongWith(DriveCommands.joystickDriveTagCentric(drive, () -> -driveController.getLeftY(), () -> -driveController.getLeftX(), () -> drive.getPose())));
         driveController.rightTrigger().and(()->driveController.povLeft().getAsBoolean()).whileTrue(macros.setWantedState(RobotStates.Shoot));
+        // driveController.rightTrigger().whileTrue(macros.setWantedState(RobotStates.LowShoot));
         driveController.rightBumper().onTrue(macros.setWantedState(RobotStates.IntakeOn));
         driveController.leftBumper().onTrue(macros.setWantedState(RobotStates.IntakeOff));
         // driveController.x().onTrue(Commands.runOnce(()->autos.startingPose = drive.getPose()).andThen(new InstantCommand(()->autos.setNeutralZone())).andThen(autos.driveOverBump(FieldUtil.onRightSide(), FieldUtil.isOnAllianceSide()).alongWith(macros.setWantedState(RobotStates.IntakeOn))));
@@ -225,7 +226,7 @@ public class RobotContainer {
         opController.y().onTrue(new InstantCommand(()->shooterUtil.fudgeSpeed(0.5)));
         opController.a().onTrue(new InstantCommand(()->shooterUtil.fudgeSpeed(-0.5)));
         opController.b().onTrue(macros.setWantedState(RobotStates.TransportIn));
-        opController.x().onTrue(macros.setWantedState(RobotStates.TransportOut));
+        opController.x().onTrue(macros.setWantedState(RobotStates.TransportOut)).onFalse(macros.setWantedState(RobotStates.TransportOff));
         opController.leftTrigger().onTrue(macros.setWantedState(RobotStates.IntakeOff));
         opController.rightTrigger().onTrue(macros.setWantedState(RobotStates.IntakeOn));
         opController.povUp().onTrue(new InstantCommand(()->shooterUtil.angleFudge(0.01)));

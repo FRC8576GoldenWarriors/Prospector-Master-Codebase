@@ -115,21 +115,14 @@ public ModuleIOSpark(int module) {
         BaseStatusSignal.setUpdateFrequencyForAll(
         updateFrequency,
         absoluteTurnEncoderAngleSignal);
-        switch(module){
+        switch(module) {
 
-                                case 0:
-                                        invertedDriveValue = true;
-                                break;
-                                case 1:
-                                        invertedDriveValue = true;
-                                break;
-                                case 2:
-                                        invertedDriveValue = false;
-                                break;
-                                case 3:
-                                        invertedDriveValue = true;
-                                break;
-                        }
+                case 0 -> invertedDriveValue = false;
+                case 1 -> invertedDriveValue = false;
+                case 2 -> invertedDriveValue = true;
+                case 3 -> invertedDriveValue = false;
+
+                }
 
         // Configure drive motor
         var driveConfig = new SparkMaxConfig();

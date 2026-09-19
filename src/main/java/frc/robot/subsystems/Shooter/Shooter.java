@@ -42,7 +42,8 @@ public class Shooter extends SubsystemBase {
     Tuning,
     VOLTAGE_CONTROL_POSITIVE,
     VOLTAGE_CONTROL_NEGATIVE,
-    SYSID
+    SYSID,
+    SMALL_SHOOT
   }
 
   private ShooterStates currentState = ShooterStates.IDLE;
@@ -116,6 +117,10 @@ public class Shooter extends SubsystemBase {
           io.setShooterVelocity(RPM.of(manualRPMTarget),
                                 RPM.of(manualRPMTarget));
           break;
+
+        case SMALL_SHOOT:
+          wantedRPS = RotationsPerSecond.of(25);
+          setShooter(wantedRPS);
 
         case VOLTAGE_CONTROL_NEGATIVE:
           manualRPMTarget -= ShooterConstants.MANUAL_STEP_RPM;

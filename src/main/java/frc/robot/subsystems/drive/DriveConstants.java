@@ -36,7 +36,7 @@ import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class DriveConstants {
-    public static final double maxSpeedMetersPerSec = 4.3; // 5.3; // 4.8;
+    public static final double maxSpeedMetersPerSec = 5.3; // 4.8;
     public static final double odometryFrequency = 250.0; // Hz
     public static final double trackWidth = Units.inchesToMeters(21.75);
     public static final double wheelBase = Units.inchesToMeters(21.75);
@@ -55,11 +55,11 @@ public class DriveConstants {
 
     // Zeroed rotation values for each module, see setup instructions
     public static final Rotation2d frontLeftZeroRotation =
-            Rotation2d.fromRotations(0.153564);//-0.337891);//-0.337891);//-0.338867);//0.158936);//0.031982);//0.151367 );//(0.331787); // -0.143311); // new Rotation2d(0.0);
-    public static final Rotation2d frontRightZeroRotation = Rotation2d.fromRotations(-0.084473);//0.418457);//0.424072);//-0.130615);//-0.129639);//0.370850);//0.367432);//0.367188 );//(-0.313965); // 0.204834);
+            Rotation2d.fromRotations(-0.352295);//-0.337891);//-0.337891);//-0.338867);//0.158936);//0.031982);//0.151367 );//(0.331787); // -0.143311); // new Rotation2d(0.0);
+    public static final Rotation2d frontRightZeroRotation = Rotation2d.fromRotations(0.418457);//0.418457);//0.424072);//-0.130615);//-0.129639);//0.370850);//0.367432);//0.367188 );//(-0.313965); // 0.204834);
     public static final Rotation2d backLeftZeroRotation =
-            Rotation2d.fromRotations(-0.040527);//0.471680);//0.471680);//-0.046875);//-0.049072);//0.459961);//-0.192871);//(0.478760); // 0.464355); // 0.453857);
-    public static final Rotation2d backRightZeroRotation = Rotation2d.fromRotations(-0.197998);//0.300781);//-0.199951);//-0.199951);//-0.206299);//0.306641);//0.308350);//0.449219 );//(0.176025); // 0.171875);
+            Rotation2d.fromRotations(0.467529);//0.471680);//0.471680);//-0.046875);//-0.049072);//0.459961);//-0.192871);//(0.478760); // 0.464355); // 0.453857);
+    public static final Rotation2d backRightZeroRotation = Rotation2d.fromRotations(0.281006);//0.300781);//-0.199951);//-0.199951);//-0.206299);//0.306641);//0.308350);//0.449219 );//(0.176025); // 0.171875);
     public static final double gyroTrimDegreesPerRotation = -4.45;
 
     // Device CAN IDs
@@ -82,7 +82,7 @@ public class DriveConstants {
 
     // Drive motor configuration
     public static final int driveMotorCurrentLimit = 40;
-    public static final double wheelRadiusMeters = 0.047;//0.048;//0.049;//0.059;//0.051; // In Meters     //Units.inchesToMeters(2);
+    public static final double wheelRadiusMeters = Inches.of(1.883).in(Meters);//0.048;//0.049;//0.059;//0.051; // In Meters     //Units.inchesToMeters(2);
     public static final double driveMotorReduction =
             6.75; //     (45.0 * 22.0) / (14.0 * 15.0); // MAXSwerve with 14 pinion teeth and 22 spur teeth
     public static final DCMotor driveGearbox = DCMotor.getNEO(1);

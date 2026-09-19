@@ -35,7 +35,8 @@ public class ShooterHood extends SubsystemBase {
         Shoot,
         Test,
         HoodVoltageControl,
-        Passing
+        Passing,
+        LOW_SHOOT
     }
 
     @AutoLogOutput (key = "ShooterHood/CurrentState")
@@ -127,6 +128,14 @@ public class ShooterHood extends SubsystemBase {
 
                 io.setVoltage(inputVoltage);
                 break;
+
+            case LOW_SHOOT:
+                wantedAnglePosition = 0.2;
+                PIDVoltage = PID.calculate(currentAnglePosition,wantedAnglePosition);
+                FFVoltage = FF.calculate(wantedAnglePosition, 1.0);
+                inputVoltage = PIDVoltage + FFVoltage;
+
+                io.setVoltage(inputVoltage);
             case Passing:
               wantedAnglePosition = 0.0;//RobotContainer.shooterUtil.getAngle(RobotContainer.drive.getDistanceFromHub()); //Units.degreesToRotations((ShooterHoodUtil.calculateHoodAngleDegrees(RobotContainer.drive.getDistanceFromHub())-22)*4);
                 PIDVoltage = PID.calculate(currentAnglePosition,wantedAnglePosition);
